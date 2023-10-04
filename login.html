@@ -9,12 +9,12 @@
         <div id="load">
             <img src="assets/images/loading.gif" alt="">
             </div>
-            <script >
+            <script >   
                 const loading_page = document.getElementById("load");
-                window.onload = function(){
+                window.onload = setTimeout(function() {
                   loading_page.style.display = 'none';
-                }
-              </script>
+                }  , 200);
+            </script>
         <h1>CUSTOWARD</h1>
         <h2>LOGIN</h2>
         <p class="login">id<input width="300" height="150"></p>
