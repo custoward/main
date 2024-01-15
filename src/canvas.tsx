@@ -15,6 +15,7 @@ const Canvas: React.FC = () => {
 			const canvas = canvasRef.current;
 			const context = canvas.getContext("2d");
 
+            setBtx(context);
 			setCtx(context);
 		}
 	}, [canvasRef]);
@@ -42,7 +43,7 @@ const Canvas: React.FC = () => {
 			// 기존 리퀘스트 애니메이션 캔슬
 			window.cancelAnimationFrame(requestAnimationId);
 		};
-	}, [ctx]);
+	}, [btx, ctx]);
 
 	return <canvas ref={canvasRef} width={Width} height={Height} />;
 };
