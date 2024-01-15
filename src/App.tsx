@@ -1,23 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
+import React, { Component, useState, useEffect } from 'react';
 import './App.css';
 import { Link, Route, Switch } from 'react-router-dom';
 
-
-function App() {
-
-  return (
-    <div className="App">
-      <header className="App-header">
-        <Route path="/"> 
-          <div>메인페이지</div>
-        </Route>
-        <Route path="/detail">
-          <div>디테일페이지</div>
-        </Route>
-      </header>
-    </div>
-  );
+class App extends Component {
+  render() {
+    return ( <h1>Hello World!</h1> );
+  }
 }
 
 export default App;
