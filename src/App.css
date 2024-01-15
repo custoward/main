@@ -1,14 +1,8 @@
-.App {
-  text-align: center;
+.title{
+    font-size: 500%;
+    text-align: center;
 }
-
-.App-header {
-  background-color: #ffffff;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: rgb(0, 0, 0);
+.canvasProp{
+    width: 100%;
+    text-align: center;
 }
