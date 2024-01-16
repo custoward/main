@@ -1,0 +1,28 @@
+.background{
+    position: relative;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+}
+
+.Contents{
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    text-align: center;
+}
+
+.Footer{
+    background-color: rgb(112, 112, 112);
+    height: 50px;
+}
+
+.Wrapper{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+.ContentWrapper{
+    flex: 1;
+}
