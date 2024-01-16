@@ -1,7 +1,10 @@
 const Homecontainer = () =>{
+    const height = {height: "500px"};
     return(
-        <div>
-            <p>home container</p>
+        <div style={height}>
+            <h2>Welcome</h2>
+            <hr className='hr'></hr>
+            <p>This is our playground</p>
         </div>
     )
 }

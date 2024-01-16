@@ -1,7 +1,21 @@
+import logo from '../../public/images/mainlogo.webp'
+import "./Header_Style.css"
+
 const Header = () => {
-    return(
+    return (
         <header>
-            <h1>CUSTOWARD</h1>
+            <div>
+                <img src={logo} />
+            </div>
+            <hr className='hr'></hr>
+
+            <div className="container">
+                <div className='list'>Workstation</div>
+                <div className='list'>Inpiration</div>
+                <div className='list'>Contact</div>
+            </div>
+
+            <hr className='hr'></hr>
         </header>
     );
 }

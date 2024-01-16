@@ -4,7 +4,7 @@ import Wrapper from './style';
 import mapBackground from '../../public/images/map_background.jpeg';
 
 const WIDTH = 500;
-const HEIGHT = 500;
+const HEIGHT = 1000;
 
 
 const Canvas = () => {

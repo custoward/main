@@ -1,0 +1,14 @@
+.Navigate {
+    text-align: center;
+    list-style-type: none;
+    font-weight: 200;
+  }
+
+.container{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}   
+.list {
+    flex-basis: 100;
+}
