@@ -1,4 +1,4 @@
-import logo from '../../public/images/mainlogo.webp'
+import logo from '../../../public/images/mainlogo.webp'
 import "./Header_Style.css"
 
 const Header = () => {

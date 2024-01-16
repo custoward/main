@@ -1,0 +1,8 @@
+.fcontainer{
+    display: flex;
+    flex-direction: column;
+}   
+.flist {
+    padding: 5px;
+    flex-basis: 100;
+}
