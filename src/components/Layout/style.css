@@ -2,6 +2,7 @@
     --font-size-lg: 2rem;
     --font-size-md: 1.5rem;
     --font-size-sm: 0.5rem;
+    --main-width:80%;
   }
   
   @media (min-width: 480px) {
@@ -9,6 +10,7 @@
       --font-size-lg: 2.75rem;
       --font-size-md: 2rem;
       --font-size-sm: 0.7rem;
+      --main-width:70%;
     }
   }
   
@@ -17,6 +19,7 @@
       --font-size-lg: 3.5rem;
       --font-size-md: 2.5rem;
       --font-size-sm: 1.1rem;
+      --main-width:50%;
     }
   }
 
@@ -41,7 +44,7 @@
     backdrop-filter: blur(10px);
     left: 50%;
     transform: translate(-50%, 0);
-    width: 50%;
+    width: var(--main-width);
     position: absolute;
     text-align: center;
     display: flex;
