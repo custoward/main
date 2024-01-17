@@ -5,7 +5,7 @@ const Header = () => {
     return (
         <header>
             <div>
-                <img src={logo} />
+                <img src={logo} style={{width:"100%"}}/>
             </div>
             <hr className='hr'></hr>
 

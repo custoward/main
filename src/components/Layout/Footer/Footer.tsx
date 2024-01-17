@@ -11,7 +11,7 @@ const Footer = () => {
                     <a href="https://www.instagram.com/custoward.official?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
                        style={{textDecoration: "none", color: "black"}}
                        target="_blank">
-                        <div style={{fontSize:"10px"}}>instagram @custoward.official</div>
+                        <div>instagram @custoward.official</div>
                     </a>
                 </div>
             </div>

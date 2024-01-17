@@ -1,8 +1,10 @@
 .fcontainer{
+    font-size: var(--font-size-sm);
     display: flex;
     flex-direction: column;
 }   
 .flist {
     padding: 5px;
     flex-basis: 100;
+    
 }

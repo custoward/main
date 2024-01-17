@@ -5,10 +5,12 @@
   }
 
 .container{
+    font-size: var(--font-size-sm);
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
-}   
+}
+
 .list {
     flex-basis: 100;
 }
