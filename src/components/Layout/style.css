@@ -1,7 +1,7 @@
 :root {
     --font-size-lg: 2rem;
     --font-size-md: 1.5rem;
-    --font-size-sm: 0.5rem;
+    --font-size-sm: 1rem;
     --main-width:80%;
   }
   
@@ -9,8 +9,8 @@
     :root {
       --font-size-lg: 2.75rem;
       --font-size-md: 2rem;
-      --font-size-sm: 0.7rem;
-      --main-width:70%;
+      --font-size-sm: 1.2rem;
+      --main-width:60%;
     }
   }
   
@@ -18,7 +18,7 @@
     :root {
       --font-size-lg: 3.5rem;
       --font-size-md: 2.5rem;
-      --font-size-sm: 1.1rem;
+      --font-size-sm: 1.5rem;
       --main-width:50%;
     }
   }
