@@ -31,7 +31,8 @@
 }
 
 .Footer {
-    background-color: rgb(0, 0, 0, .5);
+    width: 100%;
+    background-color: rgba(117, 117, 117);
     padding-top: 10px;
     padding-bottom: 10px;
     -webkit-backdrop-filter: blur(10px);
@@ -39,9 +40,9 @@
 }
 
 .Wrapper {
-    background: rgb(240, 240, 240, 0.5);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
+    background: rgb(240, 240, 240);
+    /**-webkit-backdrop-filter: blur(10px);**/
+    /**backdrop-filter: blur(10px);**/
     left: 50%;
     transform: translate(-50%, 0);
     width: var(--main-width);
@@ -58,10 +59,10 @@
 .bg {
     position: fixed;
     top: 0;
-    left: 0;
-    width: 100%;
+    left: -10%;
+    width: 140%;
     height: 100%;
-    background: url("../../public/images/background.jpeg");
+    background: url("../../public/images/background.jpg");
     background-size: cover;
     background-position: center center;
     transform: translateZ(0);
