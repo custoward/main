@@ -2,7 +2,7 @@ import "../../components/Layout/style.css"
 
 const Homecontainer = () =>{
     return(
-        <div style={{height: "500px"}}>
+        <div style={{height: "700px"}}>
             <h2 style={{fontSize: "var(--font-size-lg)"}}>Welcome to</h2>
             <h2 style={{fontSize: "var(--font-size-lg)"}}>DAVI-DAVI</h2>
             <hr className='hr'></hr>
