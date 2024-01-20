@@ -31,8 +31,9 @@
 }
 
 .Footer {
+  
     width: 100%;
-    background-color: rgba(117, 117, 117);
+    background-color: rgb(167, 119, 77);
     padding-top: 10px;
     padding-bottom: 10px;
     -webkit-backdrop-filter: blur(10px);
@@ -50,6 +51,7 @@
     text-align: center;
     display: flex;
     flex-direction: column;
+    
 }
 
 .ContentWrapper {
@@ -62,7 +64,7 @@
     left: -10%;
     width: 140%;
     height: 100%;
-    background: url("../../public/images/background.jpg");
+    background: url("../../public/images/background.jpeg");
     background-size: cover;
     background-position: center center;
     transform: translateZ(0);
