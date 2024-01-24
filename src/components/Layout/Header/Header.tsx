@@ -9,7 +9,7 @@ const Header = () => {
             <div className="container">
                 <div className='list'>DANDALION</div>
                 <div className='list'>VIRUS</div>
-                <div className='list'>Contact</div>
+                <div className='list'>CONTACT</div>
             </div>
             <hr className='hr'></hr>
         </header>
