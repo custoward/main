@@ -36,7 +36,7 @@ const Homecontainer = () => {
             </div>
             <hr className='hr'></hr>
             <div>
-                <p style={{ fontSize: "var(--font-size-md)", fontWeight:"1000"}}>This is our playground</p>
+                <p style={{ fontSize: "var(--font-size-sm)", fontWeight:"1000"}}>Welcome to our Playground!</p>
             </div>
         </div>
     )

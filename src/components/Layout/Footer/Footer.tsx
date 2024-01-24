@@ -6,12 +6,11 @@ const Footer = () => {
     return (
         <footer className="Footer">
             <div className="fcontainer">
-                <div className="flist">Design makes world better.</div>
                 <div className="flist">
-                    <a href="https://www.instagram.com/custoward.official?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
-                       style={{textDecoration: "none", color: "black"}}
+                    <a href="https://www.instagram.com/davi_davi_dandelionvirus?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                       style={{fontSize:"var(--font-size-ssm)", textDecoration: "none", color: "white"}}
                        target="_blank">
-                        <div>instagram @custoward.official</div>
+                        <div>instagram @davi-davi-dandelionvirus</div>
                     </a>
                 </div>
             </div>

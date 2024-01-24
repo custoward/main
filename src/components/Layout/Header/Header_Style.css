@@ -31,11 +31,11 @@
     padding-right: 2%;
     flex-basis: 100;
     font-weight: 500;
-    font-size:0.3rem;
+    font-size:0.4rem;
 }
 @media (min-width: 480px) {
     .instruction {
-        font-size: 0.4rem;
+        font-size: 0.5rem;
     }
 }
 @media (min-width: 1024px) {
