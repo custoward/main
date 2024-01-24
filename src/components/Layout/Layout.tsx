@@ -8,12 +8,12 @@ const Layout = (props: { children: React.ReactNode }) => {
         <div className="background">
             <div className='Wrapper'>
                 <div className='ContentWrapper'>
-                    <Header />
+                    <Header/>
                     <main>
                         {props.children}
                     </main>
+                    <Footer/>
                 </div>
-                <Footer />
             </div>
 
         </div>
