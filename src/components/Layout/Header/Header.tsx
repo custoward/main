@@ -5,6 +5,10 @@ const Header = () => {
     return (
         <header>
             <img src={logo} className="image"/>
+            <div className='Hcontainer'>
+                <div className='instruction'>Since 2021, Clickin-buckle, Custoward, and finally</div>
+                <div className='instruction'>DAVI-DAVI</div>
+            </div>
             <hr className='hr'></hr>
             <div className="container">
                 <div className='list'>DANDALION</div>

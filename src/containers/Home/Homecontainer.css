@@ -1,0 +1,28 @@
+.main{
+    padding: 4%;
+    text-align: left;
+}
+
+.maincontainer {
+    width: 100%;
+    font-size: var(--font-size-ssm);
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.mainlist {
+    flex:1 1 60%;
+    padding-left: 2%;
+    padding-right: 2%;
+    padding-bottom: 2%;
+    font-weight: 700;
+}
+
+.maincost {
+    flex:1 1 13%;
+    text-align: right;
+    padding-left: 2%;
+    padding-right: 2%;
+    padding-bottom: 2%;
+    font-weight: 500;
+}

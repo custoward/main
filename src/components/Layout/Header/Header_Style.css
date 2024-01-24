@@ -2,13 +2,14 @@
     width: 100%;
 }
 
+
 .Navigate {
     text-align: center;
     list-style-type: none;
     font-weight: 200;
-  }
+}
 
-.container{
+.container {
     width: 100%;
     font-size: var(--font-size-sm);
     display: flex;
@@ -16,17 +17,36 @@
     justify-content: space-evenly;
 }
 
-.Hcontainer{
+.Hcontainer {
     vertical-align: middle;
     width: 100%;
     font-size: var(--font-size-sm);
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: space-between;
 }
+
+.instruction {
+    padding-left: 2%;
+    padding-right: 2%;
+    flex-basis: 100;
+    font-weight: 500;
+    font-size:0.3rem;
+}
+@media (min-width: 480px) {
+    .instruction {
+        font-size: 0.4rem;
+    }
+}
+@media (min-width: 1024px) {
+    .instruction {
+        font-size: 0.6rem;
+    }
+}
+
 
 .list {
     flex-basis: 100;
     font-weight: 800;
-    color: rgb(17,17,17);
+    color: rgb(17, 17, 17);
 }
