@@ -21,16 +21,18 @@
 }
 
 .loading-title {
-  font-size: 50px;
+  font-size: 70px; /* 한자 크기 증가 */
 }
 
 .loading-description {
-  font-size: 10px;
+  font-size: 16px; /* 설명 글씨 크기 증가 */
+  margin-top: -30px; /* 한자와 설명 간의 간격 감소 */
 }
 
 .main-content {
   padding: 20px;
   text-align: center;
+  min-height: 600px; /* 최소 높이 설정 */
 }
 
 .main-title {
@@ -38,11 +40,12 @@
 }
 
 .main-title h1 {
-  font-size: 50px;
+  font-size: 80px;
+  margin-bottom: -5px;
 }
 
 .main-title p {
-  font-size: 10px;
+  font-size: 15px;
 }
 
 .main-buttons {
@@ -52,6 +55,8 @@
 .main-buttons a {
   display: block;
   margin: 10px 0;
-  color: black;
+  margin-top:10px;
+  color: rgb(255, 255, 255);
   text-decoration: none;
+  background-color: black;
 }

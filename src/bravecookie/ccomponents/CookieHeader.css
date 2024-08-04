@@ -1,0 +1,25 @@
+.header {
+  background-color: black;
+  color: white;
+  padding: 10px;
+}
+
+.header-top {
+  text-align: center;
+  font-size: 10px; /* 글자 크기 작게 조정 */
+}
+
+.header-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  cursor: pointer;
+}
+
+.menu-icon {
+  cursor: pointer;
+  font-size: 24px;
+}
