@@ -1,0 +1,19 @@
+.event-content {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .event-title {
+    font-size: 50px;
+    margin-bottom: 20px;
+  }
+  
+  .event-image {
+    height: 200px; /* 이미지 높이 설정 */
+    background-color: lightgray; /* 이미지 자리 표시자 색상 */
+    margin-bottom: 20px;
+  }
+  
+  .event-description {
+    font-size: 14px;
+  }

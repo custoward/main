@@ -1,0 +1,51 @@
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+  }
+  
+  .menu-overlay-left {
+    flex: 1;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .menu-content {
+    width: 75%;
+    max-width: 400px;
+    background-color: black;
+    color: white;
+    padding: 20px;
+  }
+  
+  .menu-header {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .menu-close {
+    cursor: pointer;
+    font-size: 24px;
+  }
+  
+  .menu-body {
+    text-align: center;
+  }
+  
+  .menu-title {
+    font-size: 48px;
+  }
+  
+  .menu-subtitle {
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  
+  .menu-links a {
+    display: block;
+    margin: 20px 0;
+    color: white;
+    text-decoration: none;
+  }

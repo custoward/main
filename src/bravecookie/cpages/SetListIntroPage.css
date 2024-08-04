@@ -1,0 +1,35 @@
+.split-screen {
+  display: flex;
+  height: 100vh;
+}
+
+.half-screen {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: flex 1s ease-in-out;
+}
+
+.day {
+  background-color: white;
+  color: black;
+}
+
+.night {
+  background-color: black;
+  color: white;
+}
+
+.intro {
+  text-align: center;
+}
+
+.large-text {
+  font-size: 50px;
+}
+
+.description {
+  font-size: 10px;
+}
