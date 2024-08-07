@@ -2,10 +2,15 @@ import React from 'react';
 import CookieHeader from '../ccomponents/CookieHeader';
 import CookieFooter from '../ccomponents/CookieFooter';
 import './SetListDayPage.css';
+import { Helmet } from 'react-helmet';
 
 const SetListDayPage: React.FC = () => {
   return (
     <>
+      <Helmet>
+        <title>용감한쿠키 2024</title>
+        <link rel="icon" type="image/png" href="../braveFavicon.ico" sizes="16x16" />
+      </Helmet>
       <CookieHeader />
       <main className="setlist-day-content">
         <h1>1부 곡 리스트</h1>
