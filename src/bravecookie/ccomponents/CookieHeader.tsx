@@ -13,7 +13,7 @@ const CookieHeader: React.FC = () => {
     <header className="header">
       <div className="header-top">2024 용감한 쿠키 여름 정기공연</div>
       <div className="header-bottom">
-        <div className="logo" onClick={() => window.location.href = '/bravecookie/main'}>로고</div>
+        <div className="logo" onClick={() => window.location.href = '/braveCookie'}>로고</div>
         <div className="menu-icon" onClick={toggleMenu}>☰</div>
       </div>
       {menuOpen && <Menu closeMenu={toggleMenu} />}

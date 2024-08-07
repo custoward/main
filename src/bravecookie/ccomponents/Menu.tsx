@@ -13,9 +13,9 @@ const Menu: React.FC<{ closeMenu: () => void }> = ({ closeMenu }) => {
           <div className="menu-title">夏</div>
           <div className="menu-subtitle">2024 용감한 쿠키 정기공연</div>
           <div className="menu-links">
-            <a href="/bravecookie/setlistintro">setlist/곡 소개</a>
-            <a href="/bravecookie/event">이벤트</a>
-            <a href="/bravecookie/session">세션소개</a>
+            <a href="/braveCookie/setlistintro">setlist/곡 소개</a>
+            <a href="/braveCookie/event">이벤트</a>
+            <a href="/braveCookie/introduction">세션소개</a>
           </div>
         </div>
       </div>

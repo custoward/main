@@ -21,8 +21,8 @@ const CookieHome: React.FC = () => {
   return (
     <>
      <Helmet>
-        <title>Brave Cookie Summer Concert 2024</title>
-        <link rel="icon" type="image/png" href="public/braveFavicon.ico" sizes="16x16" />
+        <title>용감한쿠키 2024</title>
+        <link rel="icon" type="image/png" href="../../../public/braveFavicon.ico" sizes="16x16" />
       </Helmet>
      <div className={`loading-screen ${fadeOut ? 'fade-out' : ''}`}>
         <h1 className="loading-title">夏</h1>
@@ -37,9 +37,9 @@ const CookieHome: React.FC = () => {
               <p>여름의 낮, 그리고, 밤</p>
             </div>
             <div className="main-buttons">
-              <a href="/bravecookie/setlistintro">setlist/곡 소개</a>
-              <a href="/bravecookie/event">이벤트</a>
-              <a href="/bravecookie/session">세션소개</a>
+              <a href="/braveCookie/setlistintro">setlist/곡 소개</a>
+              <a href="/braveCookie/event">이벤트</a>
+              <a href="/braveCookie/introduction">세션소개</a>
             </div>
           </main>
           <CookieFooter />
