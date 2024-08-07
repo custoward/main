@@ -18,7 +18,7 @@ const SetListIntroPage: React.FC = () => {
     <div className="split-screen">
       <Helmet>
         <title>용감한쿠키 2024</title>
-        <link rel="icon" type="image/png" href="../braveFavicon.ico" sizes="16x16" />
+        <link rel="icon" type="image/png" href="src/bravecookie/braveFavicon.ico?v=1" sizes="16x16" />
       </Helmet>
       <div className="half-screen day" onClick={handleLeftClick}>
         <div className="intro">
