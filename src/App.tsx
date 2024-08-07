@@ -17,12 +17,12 @@ class App extends Component {
         <Switch>
           <Route exact path="/" component={HomePage} />
 
-          <Route path="/bravecookie/main" exact component={CookieHomePage} />
-          <Route path="/bravecookie/setlistintro" component={SetListIntroPage} />
-          <Route path="/bravecookie/setlistday" component={SetListDayPage} />
-          <Route path="/bravecookie/setlistnight" component={SetListNightPage} />
-          <Route path="/bravecookie/event" component={EventPage} />
-          <Route path="/bravecookie/session" component={SessionPage} />
+          <Route path="/braveCookie" exact component={CookieHomePage} />
+          <Route path="/braveCookie/setlistIntro" component={SetListIntroPage} />
+          <Route path="/braveCookie/setlistDay" component={SetListDayPage} />
+          <Route path="/braveCookie/setlistNight" component={SetListNightPage} />
+          <Route path="/braveCookie/event" component={EventPage} />
+          <Route path="/braveCookie/introduction" component={SessionPage} />
 
         </Switch>
       </Router>
