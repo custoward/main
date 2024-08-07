@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet';
 import CookieHeader from '../ccomponents/CookieHeader';
 import CookieFooter from '../ccomponents/CookieFooter';
 import './CookieHome.css';
@@ -19,6 +20,10 @@ const CookieHome: React.FC = () => {
 
   return (
     <>
+     <Helmet>
+        <title>Brave Cookie Summer Concert 2024</title>
+        <link rel="icon" type="image/png" href="public/braveFavicon.ico" sizes="16x16" />
+      </Helmet>
      <div className={`loading-screen ${fadeOut ? 'fade-out' : ''}`}>
         <h1 className="loading-title">夏</h1>
         <p className="loading-description">2024 용감한 쿠키 정기공연</p>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import './SetListIntroPage.css';
+import { Helmet } from 'react-helmet';
 
 const SetListIntroPage: React.FC = () => {
   const history = useHistory();
@@ -15,6 +16,10 @@ const SetListIntroPage: React.FC = () => {
 
   return (
     <div className="split-screen">
+           <Helmet>
+        <title>용감한쿠키 2024</title>
+        <link rel="icon" type="image/png" href="../../../public/braveFavicon.ico" sizes="16x16" />
+      </Helmet>
       <div className="half-screen day" onClick={handleLeftClick}>
         <div className="intro">
           <h1 className="large-text">晝</h1>
