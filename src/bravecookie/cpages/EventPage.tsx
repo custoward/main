@@ -2,10 +2,15 @@ import React from 'react';
 import CookieHeader from '../ccomponents/CookieHeader';
 import CookieFooter from '../ccomponents/CookieFooter';
 import './EventPage.css';
+import { Helmet } from 'react-helmet';
 
 const EventPage: React.FC = () => {
   return (
     <>
+         <Helmet>
+        <title>용감한쿠키 2024</title>
+        <link rel="icon" type="image/png" href="../../../public/braveFavicon.ico" sizes="16x16" />
+      </Helmet>
       <CookieHeader />
       <main className="event-content">
         <h1 className="event-title">EVENT!</h1>
