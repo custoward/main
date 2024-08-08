@@ -1,7 +1,7 @@
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import './SetListIntroPage.css';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 
 const SetListIntroPage: React.FC = () => {
   const history = useHistory();
@@ -18,8 +18,8 @@ const SetListIntroPage: React.FC = () => {
     <div className="split-screen">
       <Helmet>
         <title>용감한쿠키 2024</title>
-        <link rel="icon" type="image/png" href="../favicon.ico?v=1" sizes="16x16" />
-      </Helmet>
+        <link rel="icon" href="/faviconTwo.ico?v=1" sizes="16x16" />
+        </Helmet>
       <div className="half-screen day" onClick={handleLeftClick}>
         <div className="intro">
           <h1 className="large-text">晝</h1>

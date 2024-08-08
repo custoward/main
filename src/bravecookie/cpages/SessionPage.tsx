@@ -2,15 +2,15 @@ import React from 'react';
 import CookieHeader from '../ccomponents/CookieHeader';
 import CookieFooter from '../ccomponents/CookieFooter';
 import './SessionPage.css';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 
 const SessionPage: React.FC = () => {
   return (
     <>
-         <Helmet>
+      <Helmet>
         <title>용감한쿠키 2024</title>
-        <link rel="icon" type="image/png" href="../favicon.ico?v=1" sizes="16x16" />
-      </Helmet>
+        <link rel="icon" href="/faviconTwo.ico?v=1" sizes="16x16" />
+        </Helmet>
       <CookieHeader />
       <main className="session-content">
         <div className="session-header">
