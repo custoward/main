@@ -23,7 +23,7 @@ const App: React.FC = () => {
 const BraveCookieRoutes: React.FC = () => {
   return (
     <Switch>
-      <Route path="/bravecookie/" exact component={CookieHomePage} />
+      <Route path="/bravecookie" exact component={CookieHomePage} />
       <Route path="/bravecookie/setlistintro" component={SetListIntroPage} />
       <Route path="/bravecookie/setlistday" component={SetListDayPage} />
       <Route path="/bravecookie/setlistnight" component={SetListNightPage} />

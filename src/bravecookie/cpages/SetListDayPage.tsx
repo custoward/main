@@ -12,6 +12,7 @@ const SetListDayPage: React.FC = () => {
         <meta property="og:title" content="용감한 쿠키 2024" />
         <meta property="og:description" content="2024 정기 공연, 여름." />
         <link rel="icon" href="/faviconTwo.ico?v=2" sizes="16x16" />
+        <meta property="og:site_name" content="davi-davi.com/bravecookie" />
       </Helmet>
       <CookieHeader />
       <main className="setlist-content-Day">
