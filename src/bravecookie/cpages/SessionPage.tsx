@@ -8,10 +8,10 @@ const SessionPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>용감한쿠키 2024</title>
-        <meta property="og:title" content="용감한쿠키 2024 여름 정기공연" />
-        <meta property="og:description" content="여름의 낮, 여름의 밤" />
-        <link rel="icon" href="/faviconTwo.ico?v=2" />
+      <title>용감한 쿠키 2024</title>
+        <meta property="og:title" content="용감한 쿠키 2024" />
+        <meta property="og:description" content="2024 정기 공연, 여름." />
+        <link rel="icon" href="/faviconTwo.ico?v=2" sizes="16x16" />
       </Helmet>
       <CookieHeader />
       <main className="session-content">
@@ -52,6 +52,7 @@ const SessionPage: React.FC = () => {
             <div className='session'>기타</div>
             <div className='name'>최성윤</div>
             <div className='name'>홍기주</div>
+            <div className='name'>김세민</div>
             <div className='session'>베이스</div>
             <div className='name'>송지아</div>
             <div className='session'>건반</div>

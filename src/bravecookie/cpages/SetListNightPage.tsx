@@ -8,10 +8,10 @@ const SetListNightPage: React.FC = () => {
   return (
     <>
       <Helmet>
-        <title>용감한쿠키 2024</title>
-        <meta property="og:title" content="용감한쿠키 2024 여름 정기공연" />
-        <meta property="og:description" content="여름의 낮, 여름의 밤" />
-        <link rel="icon" href="/faviconTwo.ico?v=2" />
+      <title>용감한 쿠키 2024</title>
+        <meta property="og:title" content="용감한 쿠키 2024" />
+        <meta property="og:description" content="2024 정기 공연, 여름." />
+        <link rel="icon" href="/faviconTwo.ico?v=2" sizes="16x16" />
       </Helmet>
       <CookieHeader />
       <main className="setlist-content-night">

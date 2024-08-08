@@ -10,40 +10,28 @@ import EventPage from './bravecookie/cpages/EventPage';
 import SessionPage from './bravecookie/cpages/SessionPage';
 import './App.css';
 
-class App extends Component {
-  render() {
-    return (
-      <Router>
+const App: React.FC = () => {
+  return (
+    <Router>
+      <Switch>
+        <Route exact path="/" component={HomePage} />
+        <Route path="/bravecookie" component={CookieHomePage} />
+      </Switch>
+    </Router>
+  );
+};
 
-        <Switch>
-          <Route exact path="/">
-            <Helmet>
-              <link rel="icon" href="/favicon.ico?" />
-              <meta property="og:title" content="Davi-Davi" />
-              <meta property="og:description" content="Davi-Davi Design Studio, Since 2019" />
-              <title>DAVI_DAVI</title>
-            </Helmet>
-            <HomePage />
-          </Route>
-          <Route path="/bravecookie">
-            <Helmet>
-              <meta property="og:title" content="용감한쿠키 2024 여름 정기공연" />
-              <meta property="og:description" content="여름의 낮, 여름의 밤" />
-              <link rel="icon" href="/faviconTwo.ico" />
-            </Helmet>
-            <Switch>
-              <Route path="/bravecookie" exact component={CookieHomePage} />
-              <Route path="/bravecookie/setlistintro" component={SetListIntroPage} />
-              <Route path="/bravecookie/setlistday" component={SetListDayPage} />
-              <Route path="/bravecookie/setlistnight" component={SetListNightPage} />
-              <Route path="/bravecookie/event" component={EventPage} />
-              <Route path="/bravecookie/introduction" component={SessionPage} />
-            </Switch>
-          </Route>
-        </Switch>
-      </Router>
-    );
-  }
-}
+const BraveCookieRoutes: React.FC = () => {
+  return (
+    <Switch>
+      <Route path="/bravecookie/main" exact component={CookieHomePage} />
+      <Route path="/bravecookie/setlistintro" component={SetListIntroPage} />
+      <Route path="/bravecookie/setlistday" component={SetListDayPage} />
+      <Route path="/bravecookie/setlistnight" component={SetListNightPage} />
+      <Route path="/bravecookie/event" component={EventPage} />
+      <Route path="/bravecookie/introduction" component={SessionPage} />
+    </Switch>
+  );
+};
 
 export default App;
