@@ -2,6 +2,7 @@ import React from 'react';
 import CookieHeader from '../ccomponents/CookieHeader';
 import CookieFooter from '../ccomponents/CookieFooter';
 import './EventPage.css';
+import event from '../source/event.png'
 import { Helmet } from 'react-helmet-async';
 
 const EventPage: React.FC = () => {
@@ -17,9 +18,11 @@ const EventPage: React.FC = () => {
       <main className="event-content">
         <h1 className="event-title">EVENT!</h1>
         <div className="event-image">
-          {/* 이벤트 이미지 삽입 */}
+          <img src={event} width="100%"/> 
         </div>
-        <p className="event-description">깜짝 이벤트.<br />2부 가운데 깜짝 이벤트가 있답니다.<br />재밌게 즐기고 선물도 받아가세요!</p>
+        <div className="event-description-title">이벤트 타임!</div>
+        <div className="event-description">공연 중간에 깜짝 이벤트를 준비했습니다</div>
+        <div className="event-description">소정의 선물이 준비되어있으니 꼭 받아가세요!</div>
       </main>
       <CookieFooter />
     </>

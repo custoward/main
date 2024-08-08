@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logo from '../source/logowhite.png'
 import './CookieHeader.css';
 import Menu from './Menu';
 
@@ -13,7 +14,9 @@ const CookieHeader: React.FC = () => {
     <header className="header">
       <div className="header-top">2024 용감한 쿠키 여름 정기공연</div>
       <div className="header-bottom">
-        <div className="logo" onClick={() => window.location.href = '/braveCookie'}>로고</div>
+        <a onClick={() => window.location.href = '/braveCookie'}>
+          <img src={logo} width='30px' />
+        </a>
         <div className="menu-icon" onClick={toggleMenu}>☰</div>
       </div>
       {menuOpen && <Menu closeMenu={toggleMenu} />}

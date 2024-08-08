@@ -37,7 +37,7 @@ class App extends Component {
               <Route path="/bravecookie/setlistday" component={SetListDayPage} />
               <Route path="/bravecookie/setlistnight" component={SetListNightPage} />
               <Route path="/bravecookie/event" component={EventPage} />
-              <Route path="/bravecookie/session" component={SessionPage} />
+              <Route path="/bravecookie/introduction" component={SessionPage} />
             </Switch>
           </Route>
         </Switch>

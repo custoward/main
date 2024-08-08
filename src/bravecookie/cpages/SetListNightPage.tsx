@@ -1,7 +1,7 @@
 import React from 'react';
 import CookieHeader from '../ccomponents/CookieHeader';
 import CookieFooter from '../ccomponents/CookieFooter';
-import './SetListNightPage.css';
+import './SetListPageNight.css';
 import { Helmet } from 'react-helmet-async';
 
 const SetListNightPage: React.FC = () => {
@@ -14,18 +14,25 @@ const SetListNightPage: React.FC = () => {
         <link rel="icon" href="/faviconTwo.ico?v=2" />
       </Helmet>
       <CookieHeader />
-      <main className="setlist-night-content">
-        <h1>2부 곡 리스트</h1>
+      <main className="setlist-content-night">
+        <div className="title-container">
+          <div className="title-left">
+            <a href="/bravecookie/setlistday" style={{ textDecoration: "none", color: "inherit" }}>{'<'} 1부</a>
+          </div>
+          <div className="title-center">
+            <a>2부, 여름의 밤</a>
+          </div>
+          <div className="title-right"></div>
+        </div>
         <ul>
-          <li>곡명 10 - 작곡가 10</li>
-          <li>곡명 11 - 작곡가 11</li>
-          <li>곡명 12 - 작곡가 12</li>
-          <li>곡명 13 - 작곡가 13</li>
-          <li>곡명 14 - 작곡가 14</li>
-          <li>곡명 15 - 작곡가 15</li>
-          <li>곡명 16 - 작곡가 16</li>
-          <li>곡명 17 - 작곡가 17</li>
-          <li>곡명 18 - 작곡가 18</li>
+          <li>실리카겔 - Realize</li>
+          <li>새소년 - 난춘</li>
+          <li>Taylor Swift - Love Story</li>
+          <li>실리카겔 - 연인</li>
+          <li>실리카겔 - Ryudejakeiru</li>
+          <li>Takahashi Yoko - 잔혹한 천사의 태제</li>
+          <li>Red Hot Chili Peppers - By The Way</li>
+          <li>실리카겔 - T + Tik Tak Tok</li>
         </ul>
       </main>
       <CookieFooter />

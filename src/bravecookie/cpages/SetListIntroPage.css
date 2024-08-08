@@ -13,13 +13,13 @@
 }
 
 .day {
-  background-color: white;
-  color: black;
+  background-color: rgb(237, 237, 237);
+  color: rgb(23, 23, 23);
 }
 
 .night {
-  background-color: black;
-  color: white;
+  background-color: rgb(23, 23, 23);
+  color: rgb(237, 237, 237);
 }
 
 .intro {
@@ -28,8 +28,10 @@
 
 .large-text {
   font-size: 50px;
+  margin-bottom: 10px;
 }
 
 .description {
-  font-size: 10px;
+  font-size: 15px;
+  font-weight: 600;
 }

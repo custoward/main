@@ -1,15 +1,18 @@
 .session-content {
-    padding: 20px;
+  background-color: rgb(23, 23, 23);
+  color: rgb(237, 237, 237);
+    padding: 15px;
     text-align: center;
     min-height: 600px; /* 최소 높이 설정 */
   }
   
   .session-header {
-    margin-bottom: 40px;
+    margin-bottom: 30px;
   }
   
   .session-header h1 {
     font-size: 24px;
+    font-weight:1000px;
     margin-bottom: 10px;
   }
   
@@ -23,9 +26,23 @@
   
   .session-body .team h2 {
     font-size: 20px;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
   }
   
-  .session-body .team p {
+  .session-body .team .info {
     font-size: 14px;
+    margin-bottom: 5px;
+  }
+
+  .session-body .team .session{
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+
+  .session-body .team .name{
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 5px;
   }

@@ -1,7 +1,7 @@
 import React from 'react';
 import CookieHeader from '../ccomponents/CookieHeader';
 import CookieFooter from '../ccomponents/CookieFooter';
-import './SetListDayPage.css';
+import './SetListPageDay.css';
 import { Helmet } from 'react-helmet-async';
 
 const SetListDayPage: React.FC = () => {
@@ -14,19 +14,28 @@ const SetListDayPage: React.FC = () => {
         <link rel="icon" href="/faviconTwo.ico?v=2" />
       </Helmet>
       <CookieHeader />
-      <main className="setlist-day-content">
-        <h1>1부 곡 리스트</h1>
+      <main className="setlist-content-Day">
+        <div className="title-container">
+          <div className="title-left"></div>
+          <div className="title-center">
+            <a>1부, 여름의 낮</a>
+          </div>
+          <div className="title-right">
+            <a href="/bravecookie/setlistnight" style={{ textDecoration: "none", color: "inherit" }}>2부 {'>'}</a>
+          </div>
+        </div>
         <ul>
-          <li>곡명 1 - 작곡가 1</li>
-          <li>곡명 2 - 작곡가 2</li>
-          <li>곡명 3 - 작곡가 3</li>
-          <li>곡명 4 - 작곡가 4</li>
-          <li>곡명 5 - 작곡가 5</li>
-          <li>곡명 6 - 작곡가 6</li>
-          <li>곡명 7 - 작곡가 7</li>
-          <li>곡명 8 - 작곡가 8</li>
-          <li>곡명 9 - 작곡가 9</li>
+          <li>너드커넥션 - Back in Time</li>
+          <li>한로로 - 입춘</li>
+          <li>The Volunteers - Summer</li>
+          <li>Oasis - Champagne Supernova</li>
+          <li>Green Day - American Idiot</li>
+          <li>터치드 - 하이하이트</li>
+          <li>나상현씨 밴드 - 각자의 밤</li>
+          <li>쏜애플 - 피난</li>
+          <li>동경사변 - 군청일화</li>
         </ul>
+        <div className='in'> Interval (10min) </div>
       </main>
       <CookieFooter />
     </>

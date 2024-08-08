@@ -36,10 +36,11 @@ const CookieHome: React.FC = () => {
           <main className="main-content">
             <div className="main-title">
               <h1>夏</h1>
-              <p>여름의 낮, 그리고, 밤</p>
+              <p>2024 용감한 쿠키 정기공연</p>
+              <div className="time">2024. 7. 17 7pm, 홍대 프리버드</div>
             </div>
             <div className="main-buttons">
-              <a href="/braveCookie/setlistintro">setlist/곡 소개</a>
+              <a href="/braveCookie/setlistintro">Setlist / 곡 소개</a>
               <a href="/braveCookie/event">이벤트</a>
               <a href="/braveCookie/introduction">세션소개</a>
             </div>

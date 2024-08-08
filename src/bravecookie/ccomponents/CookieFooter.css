@@ -1,7 +1,11 @@
 .footer {
-    background-color: black;
-    color: white;
+    background-color: rgb(23, 23, 23);
+    color: rgb(237, 237, 237);
     text-align: center;
     padding: 20px;
     font-size: 12px;
   }
+
+.footer .intro{
+  margin-bottom: 6px;
+}

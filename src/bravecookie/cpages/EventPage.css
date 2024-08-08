@@ -1,20 +1,30 @@
 .event-content {
-    padding: 20px;
-    text-align: center;
-    min-height: 600px; /* 최소 높이 설정 */
-  }
-  
-  .event-title {
-    font-size: 50px;
-    margin-bottom: 20px;
-  }
-  
-  .event-image {
-    height: 200px; /* 이미지 높이 설정 */
-    background-color: lightgray; /* 이미지 자리 표시자 색상 */
-    margin-bottom: 20px;
-  }
-  
-  .event-description {
-    font-size: 14px;
-  }
+  background-color: rgb(23, 23, 23);
+  color: rgb(237, 237, 237);
+  padding: 20px;
+  text-align: center;
+  min-height: 600px;
+  /* 최소 높이 설정 */
+}
+
+.event-title {
+  font-size: 50px;
+  margin-bottom: 20px;
+}
+
+.event-image {
+  height: 100%;
+  /* 이미지 높이 설정 */
+  /* 이미지 자리 표시자 색상 */
+  margin-bottom: 20px;
+}
+
+.event-description-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+.event-description {
+  font-size: 16px;
+  margin-bottom: 8px;
+}

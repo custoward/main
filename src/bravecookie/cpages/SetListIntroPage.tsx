@@ -25,13 +25,13 @@ const SetListIntroPage: React.FC = () => {
       <div className="half-screen day" onClick={handleLeftClick}>
         <div className="intro">
           <h1 className="large-text">晝</h1>
-          <p className="description">1부, 여름 낮</p>
+          <p className="description">1부, 여름의 낮</p>
         </div>
       </div>
       <div className="half-screen night" onClick={handleRightClick}>
         <div className="intro">
           <h1 className="large-text">夜</h1>
-          <p className="description">2부, 여름 밤</p>
+          <p className="description">2부, 여름의 밤</p>
         </div>
       </div>
     </div>

@@ -1,0 +1,54 @@
+.setlist-content-night {
+  background-color: rgb(23, 23, 23);
+  color: rgb(237, 237, 237);
+    padding: 20px;
+    text-align: center;
+    min-height: 600px; /* 최소 높이 설정 */
+  }
+  
+  .setlist-content-night .title-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  /* 왼쪽 링크를 왼쪽에 배치 */
+  .setlist-content-night .title-left {
+    flex: 1;
+    text-decoration: none; 
+    font-size: 14px;
+    text-align: left;
+  }
+  
+  /* 중앙 제목을 가운데에 배치 */
+  .setlist-content-night .title-center {
+    flex: 2;
+    font-size: 24px;
+    margin-top: 4px;
+    font-weight: 700;
+    text-align: center;
+  }
+  
+  /* 오른쪽 빈 공간을 확보 */
+  .setlist-content-night .title-right {
+    flex: 1;
+  }
+  
+  .setlist-content-night ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  .setlist-content-night li {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 28px;
+  }ㅋ
+
+  .setlist-content-night .in {
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 40px;
+    color: gray;
+  }

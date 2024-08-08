@@ -1,12 +1,12 @@
 .header {
-  background-color: black;
-  color: white;
+  background-color: rgb(23, 23, 23);
+  color: rgb(237, 237, 237);
   padding: 10px;
 }
 
 .header-top {
   text-align: center;
-  font-size: 10px; /* 글자 크기 작게 조정 */
+  font-size: 12px; /* 글자 크기 작게 조정 */
 }
 
 .header-bottom {

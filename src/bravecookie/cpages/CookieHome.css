@@ -8,8 +8,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: white;
-  color: black;
+  background-color: rgb(237, 237, 237);
+  color: rgb(23, 23, 23);
   transition: opacity 1s ease-in-out;
   z-index: 9999;
   pointer-events: none; /* Prevents clicks on the loading screen */
@@ -30,6 +30,8 @@
 }
 
 .main-content {
+  background-color: rgb(237, 237, 237);
+  color: rgb(23, 23, 23);
   padding: 20px;
   text-align: center;
   min-height: 600px; /* 최소 높이 설정 */
@@ -46,6 +48,14 @@
 
 .main-title p {
   font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.main-title .time {
+  font-size: 13px;
+  color: gray;
+  font-weight: 600;
 }
 
 .main-buttons {
@@ -54,10 +64,11 @@
 
 .main-buttons a {
   display: block;
+  padding: 10px;
   margin: 10px 0;
   margin-top:10px;
-  color: rgb(255, 255, 255);
+  color: rgb(237, 237, 237);
   text-decoration: none;
-  background-color: black;
+  background-color: rgb(23, 23, 23);
    
 }
