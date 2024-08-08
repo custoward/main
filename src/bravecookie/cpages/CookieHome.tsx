@@ -22,8 +22,10 @@ const CookieHome: React.FC = () => {
     <>
       <Helmet>
         <title>용감한쿠키 2024</title>
-        <link rel="icon" href="/faviconTwo.ico?v=2" sizes="16x16" />
-        </Helmet>
+        <meta property="og:title" content="용감한쿠키 2024 여름 정기공연" />
+        <meta property="og:description" content="여름의 낮, 여름의 밤" />
+        <link rel="icon" href="/faviconTwo.ico?v=2" />
+      </Helmet>
       <div className={`loading-screen ${fadeOut ? 'fade-out' : ''}`}>
         <h1 className="loading-title">夏</h1>
         <p className="loading-description">2024 용감한 쿠키 정기공연</p>

@@ -18,21 +18,18 @@ class App extends Component {
         <Switch>
           <Route exact path="/">
             <Helmet>
-              <link rel="icon" href="/favicon.ico" />
-              <meta
-                name="Davi-Davi"
-                content="Davi-Davi Design Team Portfolio"
-              />
+              <link rel="icon" href="/favicon.ico?v=1" />
+              <meta property="og:title" content="Davi-Davi Design Studio" />
+              <meta property="og:description" content="Since 2019" />
               <title>DAVI_DAVI</title>
             </Helmet>
             <HomePage />
           </Route>
           <Route path="/bravecookie">
             <Helmet>
-              <title>Brave Cookie</title>
               <meta property="og:title" content="용감한쿠키 2024 여름 정기공연" />
               <meta property="og:description" content="여름의 낮, 여름의 밤" />
-              <link rel="icon" href="/faviconTwo.ico" />
+              <link rel="icon" href="/faviconTwo.ico?v=2" />
             </Helmet>
             <Switch>
               <Route path="/bravecookie" exact component={CookieHomePage} />
