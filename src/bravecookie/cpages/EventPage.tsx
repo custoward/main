@@ -9,7 +9,7 @@ const EventPage: React.FC = () => {
     <>
       <Helmet>
         <title>용감한쿠키 2024</title>
-        <link rel="icon" href="/faviconTwo.ico?v=1" sizes="16x16" />
+        <link rel="icon" href="/faviconTwo.ico?v=2" sizes="16x16" />
         </Helmet>
       <CookieHeader />
       <main className="event-content">
