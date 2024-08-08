@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import HomePage from './pages/HomePage';
 import CookieHomePage from './bravecookie/cpages/CookieHome';
 import SetListIntroPage from './bravecookie/cpages/SetListIntroPage';
@@ -15,15 +16,26 @@ class App extends Component {
       <Router>
 
         <Switch>
-          <Route exact path="/" component={HomePage} />
-
-          <Route path="/braveCookie" exact component={CookieHomePage} />
-          <Route path="/braveCookie/setlistIntro" component={SetListIntroPage} />
-          <Route path="/braveCookie/setlistDay" component={SetListDayPage} />
-          <Route path="/braveCookie/setlistNight" component={SetListNightPage} />
-          <Route path="/braveCookie/event" component={EventPage} />
-          <Route path="/braveCookie/introduction" component={SessionPage} />
-
+          <Route exact path="/">
+            <Helmet>
+              <link rel="icon" href="/favicon.ico" />
+            </Helmet>
+            <HomePage />
+          </Route>
+          <Route path="/bravecookie">
+            <Helmet>
+              <title>Brave Cookie</title>
+              <link rel="icon" href="/faviconTwo.ico" />
+            </Helmet>
+            <Switch>
+              <Route path="/bravecookie" exact component={CookieHomePage} />
+              <Route path="/bravecookie/setlistintro" component={SetListIntroPage} />
+              <Route path="/bravecookie/setlistday" component={SetListDayPage} />
+              <Route path="/bravecookie/setlistnight" component={SetListNightPage} />
+              <Route path="/bravecookie/event" component={EventPage} />
+              <Route path="/bravecookie/session" component={SessionPage} />
+            </Switch>
+          </Route>
         </Switch>
       </Router>
     );
