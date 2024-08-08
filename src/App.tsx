@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import HomePage from './pages/HomePage';
 import CookieHomePage from './bravecookie/cpages/CookieHome';
 import SetListIntroPage from './bravecookie/cpages/SetListIntroPage';
@@ -15,7 +14,7 @@ const App: React.FC = () => {
     <Router>
       <Switch>
         <Route exact path="/" component={HomePage} />
-        <Route path="/bravecookie" component={CookieHomePage} />
+        <Route path="/bravecookie" component={BraveCookieRoutes} />
       </Switch>
     </Router>
   );
@@ -24,7 +23,6 @@ const App: React.FC = () => {
 const BraveCookieRoutes: React.FC = () => {
   return (
     <Switch>
-  
       <Route path="/bravecookie/main" exact component={CookieHomePage} />
       <Route path="/bravecookie/setlistintro" component={SetListIntroPage} />
       <Route path="/bravecookie/setlistday" component={SetListDayPage} />
