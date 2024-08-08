@@ -18,9 +18,9 @@ class App extends Component {
         <Switch>
           <Route exact path="/">
             <Helmet>
-              <link rel="icon" href="/favicon.ico?v=1" />
-              <meta property="og:title" content="Davi-Davi Design Studio" />
-              <meta property="og:description" content="Since 2019" />
+              <link rel="icon" href="/favicon.ico?" />
+              <meta property="og:title" content="Davi-Davi" />
+              <meta property="og:description" content="Davi-Davi Design Studio, Since 2019" />
               <title>DAVI_DAVI</title>
             </Helmet>
             <HomePage />
@@ -29,7 +29,7 @@ class App extends Component {
             <Helmet>
               <meta property="og:title" content="용감한쿠키 2024 여름 정기공연" />
               <meta property="og:description" content="여름의 낮, 여름의 밤" />
-              <link rel="icon" href="/faviconTwo.ico?v=2" />
+              <link rel="icon" href="/faviconTwo.ico" />
             </Helmet>
             <Switch>
               <Route path="/bravecookie" exact component={CookieHomePage} />
