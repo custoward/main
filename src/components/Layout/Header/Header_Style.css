@@ -50,3 +50,8 @@
     font-weight: 800;
     color: rgb(17, 17, 17);
 }
+
+a {
+
+    text-decoration-line: none;
+}

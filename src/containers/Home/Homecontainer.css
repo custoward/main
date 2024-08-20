@@ -10,6 +10,14 @@
     flex-wrap: wrap;
 }
 
+.mainhead {
+    font-weight: 1000;
+    flex:1 1 60%;
+    padding-left: 2%;
+    padding-right: 2%;
+    padding-bottom: 2%;
+}
+
 .mainlist {
     flex:1 1 60%;
     padding-left: 2%;

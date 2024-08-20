@@ -7,7 +7,7 @@ const Homecontainer = () => {
             <div className="main">
                 <hr className='hr' style={{ borderTop: "dotted"}}></hr>
                 <div className="maincontainer">
-                    <div className="mainlist">1x Dandelion</div>
+                    <div className="mainhead" >Recent Portfolio</div>
                     <div className="maincost">$</div>
                     <div className="maincost">100.00</div>
                     <div className="mainlist">1x Virus</div>
@@ -22,7 +22,7 @@ const Homecontainer = () => {
                 </div>
                 <hr className='hr' style={{ borderTop: "dotted"}}></hr>
                 <div className="maincontainer">
-                    <div className="mainlist" style={{fontWeight:"1000"}}>TOTAL AMOUNT</div>
+                    <div className="mainhead" >TOTAL AMOUNT</div>
                     <div className="maincost">$</div>
                     <div className="maincost">248.00</div>
                     <div className="mainlist">CASH</div>

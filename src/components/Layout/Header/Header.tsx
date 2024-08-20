@@ -4,16 +4,16 @@ import "./Header_Style.css"
 const Header = () => {
     return (
         <header>
-            <img src={logo} className="image"/>
+            <a href="/"><img src={logo} className="image" /></a>
             <div className='Hcontainer'>
                 <div className='instruction'>Since 2021, Clickin-buckle, Custoward, and finally</div>
                 <div className='instruction'>DAVI-DAVI</div>
             </div>
             <hr className='hr'></hr>
             <div className="container">
-                <div className='list'>DANDALION</div>
-                <div className='list'>VIRUS</div>
-                <div className='list'>CONTACT</div>
+                <a className='list' href="/Designer">About us</a>
+                <a className='list' href="/Portfolio">Portfolio</a>
+                <a className='list' href="/Contact">Contact</a>
             </div>
             <hr className='hr'></hr>
         </header>
