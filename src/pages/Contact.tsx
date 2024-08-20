@@ -12,7 +12,8 @@ const Contact: React.FC = () => {
             <div>
                 <div className="bg"></div>
                 <Layout>
-                    <div>This it contact</div>
+                    <div>Contact us</div>
+                    <div>In construction</div>
                 </Layout>
             </div>
         </>

@@ -13,6 +13,7 @@ const Product: React.FC = () => {
                 <div className="bg"></div>
                 <Layout>
                 <div>This is Product</div>
+                <div>In construction</div>
                 </Layout>
             </div>
         </>

@@ -13,6 +13,7 @@ const Graphic: React.FC = () => {
                 <div className="bg"></div>
                 <Layout>
                 <div>This is graphic</div>
+                <div>In construction</div>
                 </Layout>
             </div>
         </>

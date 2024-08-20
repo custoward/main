@@ -13,6 +13,7 @@ const Designer: React.FC = () => {
                 <div className="bg"></div>
                 <Layout>
                 <div>This is Designer</div>
+                <div>In construction</div>
                 </Layout>
             </div>
         </>

@@ -13,6 +13,7 @@ const PortfolioMain: React.FC = () => {
                 <div className="bg"></div>
                 <Layout>
                 <div>This is portfolio</div>
+                <div>In construction</div>
                 </Layout>
             </div>
         </>
