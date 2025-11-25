@@ -6,6 +6,8 @@ import Contact from './pages/Contact';
 import PortfolioMain from './pages/PortfolioMain';
 import Product from './pages/Product';
 import Graphic from './pages/Graphic';
+import BreathHiddenCity from './pages/BreathHiddenCity';
+import TypoMoss from './pages/TypoMoss';
 // import CookieHomePage from './bravecookie/cpages/CookieHome';
 // import SetListIntroPage from './bravecookie/cpages/SetListIntroPage';
 // import SetListDayPage from './bravecookie/cpages/SetListDayPage';
@@ -22,6 +24,8 @@ const App: React.FC = () => {
         <Route path="/designer" component={Designer} />
         <Route path="/contact" component={Contact} />
         <Route path="/portfolio" component={PortfolioMain} />
+  <Route path="/breath-hidden-city" component={BreathHiddenCity} />
+  <Route path="/typo-moss" component={TypoMoss} />
         <Route path="/portfolio/graphic" component={Graphic} />
         <Route path="/portfolio/product" component={Product} />
         {/* <Route path="/bravecookie" component={BraveCookieRoutes} /> */}

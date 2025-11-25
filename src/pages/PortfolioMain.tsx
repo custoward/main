@@ -1,7 +1,7 @@
-import Layout from '../components/Layout/Layout';
+import { Layout } from '../components/Layout';
 import Homecontainer from '../containers/Home/Homecontainer';
 import { Helmet } from 'react-helmet-async';
-import Canvas from '../canvas';
+import { ProjectList } from '../components/Portfolio';
 
 const PortfolioMain: React.FC = () => {
     return (
@@ -11,10 +11,8 @@ const PortfolioMain: React.FC = () => {
                 <meta property="og:description" content="Davi-Davi design studio, Since 2019" />
             </Helmet>
             <div>
-                <div className="bg"></div>
                 <Layout>
-                <div>This is portfolio</div>
-                <div>In construction</div>
+                <ProjectList />
                 </Layout>
             </div>
         </>

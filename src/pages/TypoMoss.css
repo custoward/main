@@ -1,0 +1,156 @@
+/**
+ * 타이포 이끼 — 페이지 스타일
+ * 검정 배경, 간결한 레이아웃
+ */
+
+.typo-moss-page {
+  width: 100%;
+  min-height: 100vh;
+  background: #000000; /* 검정 배경 - 페이지 전체 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.typo-moss-container {
+  max-width: 1920px;
+  width: 100%;
+  background: #000000; /* 검정 배경 */
+  border-radius: 0; /* 둥근 모서리 제거 */
+  box-shadow: none; /* 그림자 제거 */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.typo-moss-canvas {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1920 / 1080;
+  border: none;
+  border-radius: 0;
+  background: #ffffff; /* Canvas 배경 - 흰색 */
+  display: block;
+}
+
+.typo-moss-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  background: #1a1a1a; /* 어두운 회색 */
+  border-radius: 0; /* 둥근 모서리 제거 */
+}
+
+.typo-moss-controls h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.control-group label {
+  font-weight: 500;
+  color: #888;
+  min-width: 120px;
+  font-size: 12px;
+}
+
+.control-group input[type='range'] {
+  flex: 1;
+  min-width: 150px;
+  height: 4px;
+  border-radius: 2px;
+  background: #333;
+  outline: none;
+  cursor: pointer;
+}
+
+.control-group input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #1ab551;
+  cursor: pointer;
+}
+
+.control-group input[type='range']::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #1ab551;
+  cursor: pointer;
+  border: none;
+}
+
+.typo-moss-controls button {
+  align-self: flex-start;
+  padding: 8px 16px;
+  background: #333;
+  color: #1ab551;
+  border: 1px solid #1ab551;
+  border-radius: 0; /* 둥근 모서리 제거 */
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.typo-moss-controls button:hover {
+  background: #1ab551;
+  color: #000;
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 8px;
+  background: #0a0a0a;
+  border-left: 2px solid #1ab551;
+  border-radius: 0;
+  font-size: 11px;
+  font-family: 'Courier New', monospace;
+  color: #666;
+}
+
+.stats p {
+  margin: 0;
+}
+
+/* 반응형 */
+@media (max-width: 1024px) {
+  .typo-moss-canvas {
+    max-width: 100%;
+    height: auto;
+  }
+
+  .control-group {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .control-group label {
+    min-width: unset;
+  }
+
+  .control-group input[type='range'] {
+    width: 100%;
+  }
+}

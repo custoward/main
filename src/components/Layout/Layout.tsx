@@ -6,6 +6,8 @@ import "./style.css"
 const Layout = (props: { children: React.ReactNode }) => {
     return (
         <div className="background">
+            <div className='bg' />
+            <Canvas />
             <div className='Wrapper'>
                 <div className='ContentWrapper'>
                     <Header/>
