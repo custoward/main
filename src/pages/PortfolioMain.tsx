@@ -1,6 +1,7 @@
 import Layout from '../components/Layout/Layout';
 import Homecontainer from '../containers/Home/Homecontainer';
 import { Helmet } from 'react-helmet-async';
+import Canvas from '../canvas';
 
 const PortfolioMain: React.FC = () => {
     return (
