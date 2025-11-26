@@ -293,6 +293,9 @@ export class TypoMossRenderer {
       ? customProps.fixedSize as number
       : this.config.minSize + Math.random() * (maxSize - this.config.minSize);
 
+    // rotate 모드의 회전 방향 랜덤 결정
+    const rotationDirection = mode === 'rotate' ? (Math.random() < 0.5 ? 1 : -1) : 1;
+
     const instance: RenderInstance = {
       id: `inst-${this.instanceIdCounter++}`,
       elementId: element.id,
@@ -306,7 +309,10 @@ export class TypoMossRenderer {
       age: 0,
       lifespan: mode === 'layered' ? 999999 : Math.round(modeConfig.duration / (elementConfig?.animationSpeed || 1)), // layered는 매우 긴 lifespan
       seed: Math.random(),
-      customProps,
+      customProps: {
+        ...customProps,
+        rotationDirection, // 회전 방향 저장
+      },
     };
 
     return instance;
@@ -320,9 +326,12 @@ export class TypoMossRenderer {
     const elapsedSeconds = (Date.now() - this.startTime) / 1000;
     const speedMultiplier = elapsedSeconds < 10 ? 5 : 1;
     
+    // 밀도에 따른 동적 최대 개수 계산 (0.1 → 80개, 0.6 → 200개, 1.0 → 280개)
+    const dynamicMaxInstances = Math.floor(80 + (this.config.density || 1) * 200);
+    
     // 1) 새로운 요소 스폰 (빈도 기반)
     for (let i = 0; i < speedMultiplier; i++) {
-      if (this.instances.size < this.config.maxInstances && this.elements.length > 0) {
+      if (this.instances.size < dynamicMaxInstances && this.elements.length > 0) {
         const randomElement = this.elements[Math.floor(Math.random() * this.elements.length)];
         const elementConfig = this.elementConfigs.get(randomElement.id);
         const frequency = elementConfig?.frequency || 0.1;
@@ -344,17 +353,19 @@ export class TypoMossRenderer {
       instance.age++;
     });
 
-    // 3) layered 뭉치 단위로 랜덤하게 제거 (밀도에 비례하여 더 많이 제거)
-    const layeredRemovalChance = 0.004 * (this.config.density || 1); // 밀도에 비례하여 제거 확률 증가 (0.002 → 0.004로 2배)
-    if (Math.random() < layeredRemovalChance) {
+    // 3) 최대 인스턴스 수 초과 시 layered 뭉치 제거
+    if (this.instances.size > dynamicMaxInstances) {
       const layeredInstances = Array.from(this.instances.values())
         .filter(inst => inst.animationMode === 'layered');
       
       if (layeredInstances.length > 0) {
-        // 랜덤한 뭉치 선택
-        const randomInstance = layeredInstances[Math.floor(Math.random() * layeredInstances.length)];
-        const clusterToRemove = randomInstance.customProps?.clusterId as number;
-        const elementToRemove = randomInstance.elementId;
+        // 가장 오래된 뭉치 찾기
+        const oldestInstance = layeredInstances.reduce((oldest, current) => {
+          return current.age > oldest.age ? current : oldest;
+        });
+        
+        const clusterToRemove = oldestInstance.customProps?.clusterId as number;
+        const elementToRemove = oldestInstance.elementId;
         
         // 같은 clusterId와 elementId를 가진 모든 인스턴스 제거
         const idsToDelete: string[] = [];
@@ -542,10 +553,13 @@ export class TypoMossRenderer {
     instanceCount: number;
     maxInstances: number;
   } {
+    // 밀도에 따른 동적 최대 개수 계산
+    const dynamicMaxInstances = Math.floor(80 + (this.config.density || 1) * 200);
+    
     return {
       frameCount: this.frameCount,
       instanceCount: this.instances.size,
-      maxInstances: this.config.maxInstances,
+      maxInstances: dynamicMaxInstances,
     };
   }
 }

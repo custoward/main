@@ -86,8 +86,9 @@ export function animateRotate(
     opacity = 1.0;
   }
   
-  // 계속 회전
-  const rotation = progress * Math.PI * 2 * rotationSpeed;
+  // 계속 회전 (방향 적용)
+  const rotationDirection = (instance.customProps?.rotationDirection as number) || 1;
+  const rotation = progress * Math.PI * 2 * rotationSpeed * rotationDirection;
 
   return {
     scale,
