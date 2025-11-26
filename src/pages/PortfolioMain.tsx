@@ -1,5 +1,4 @@
 import { Layout } from '../components/Layout';
-import Homecontainer from '../containers/Home/Homecontainer';
 import { Helmet } from 'react-helmet-async';
 import { ProjectList } from '../components/Portfolio';
 

@@ -103,6 +103,7 @@ const TypoMoss: React.FC = () => {
     };
 
     initializeRenderer();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 설정을 localStorage에 저장

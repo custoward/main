@@ -4,10 +4,6 @@ import Wrapper from './style';
 // Use centralized assets barrel
 import { background as MAP_BACKGROUND } from '../../assets/';
 
-const WIDTH = 500;
-const HEIGHT = 1000;
-
-
 const Canvas = () => {
   const canvasRef = useCanvas((canvas) => {
     // make the canvas fill the viewport but sit behind content

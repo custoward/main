@@ -4,7 +4,7 @@ import "./Header_Style.css"
 const Header = () => {
     return (
         <header>
-            <a href="/"><img src={logo} className="image" /></a>
+            <a href="/"><img src={logo} className="image" alt="DAVI-DAVI Logo" /></a>
             <div className='Hcontainer'>
                 <div className='instruction'>Since 2021, Clickin-buckle, Custoward, and finally</div>
                 <div className='instruction'>DAVI-DAVI</div>

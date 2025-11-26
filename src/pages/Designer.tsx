@@ -1,5 +1,4 @@
 import Layout from '../components/Layout/Layout';
-import Homecontainer from '../containers/Home/Homecontainer';
 import { Helmet } from 'react-helmet-async';
 
 const Designer: React.FC = () => {

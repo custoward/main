@@ -6,6 +6,7 @@ const useCanvas = (setCanvas: (canvas: HTMLCanvasElement) => void) => {
   useEffect(() => {
     const canvas = canvasRef.current;
     canvas && setCanvas(canvas);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return canvasRef;
