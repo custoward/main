@@ -331,9 +331,9 @@ export class TypoMossRenderer {
    * 프레임 업데이트: 새 요소 스폰, 기존 요소 업데이트
    */
   private update(): void {
-    // 초반 가속 모드 (처음 10초 동안 5배 빠르게)
+    // 초반 가속 모드 (처음 10초 동안 2배 빠르게)
     const elapsedSeconds = (Date.now() - this.startTime) / 1000;
-    const speedMultiplier = elapsedSeconds < 10 ? 5 : 1;
+    const speedMultiplier = elapsedSeconds < 10 ? 2 : 1;
     
     // 밀도에 따른 동적 최대 개수 계산 (0.1 → 80개, 0.6 → 200개, 1.0 → 280개)
     const dynamicMaxInstances = Math.floor(80 + (this.config.density || 1) * 200);
@@ -362,8 +362,8 @@ export class TypoMossRenderer {
       instance.age++;
     });
 
-    // 3) 최대 인스턴스 수의 85%를 넘으면 layered 뭉치 제거 (적당히 천천히 제거)
-    const removalThreshold = dynamicMaxInstances * 0.85; // 85%만 채워도 제거 시작
+    // 3) 최대 인스턴스 수의 90%를 넘으면 layered 뭉치 제거 (천천히 제거)
+    const removalThreshold = dynamicMaxInstances * 0.9; // 90%만 채워도 제거 시작
     if (this.instances.size > removalThreshold) {
       const layeredInstances = Array.from(this.instances.values())
         .filter(inst => inst.animationMode === 'layered');
