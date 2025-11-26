@@ -65,6 +65,19 @@ function getAnimationModeFromName(filename: string): AnimationMode {
 }
 
 /**
+ * 파일명 기반으로 초기 빈도(frequency) 결정
+ */
+function getFrequencyFromName(filename: string): number {
+  if (filename.includes('sticker')) {
+    return 0.8; // sticker는 높은 빈도
+  } else if (filename.includes('circle')) {
+    return 0.12; // circle은 낮은 빈도
+  } else {
+    return 0.1; // 기본: 낮은 빈도
+  }
+}
+
+/**
  * SVG 파일을 Image로 변환 (캐싱)
  */
 export async function loadSVGAsImage(svgPath: string): Promise<HTMLImageElement> {

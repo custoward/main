@@ -58,11 +58,20 @@ export class TypoMossRenderer {
       if (config) {
         this.elementConfigs.set(el.id, config);
       } else {
-        // 기본 설정 자동 생성
+        // 기본 설정 자동 생성 (파일명 기반)
         console.log(`  - 기본 설정 생성: ${el.id}`);
+        
+        // 파일명에서 자동으로 빈도 결정
+        let frequency = 0.1; // 기본값
+        if (el.name.includes('sticker')) {
+          frequency = 0.8; // sticker는 높은 빈도
+        } else if (el.name.includes('circle')) {
+          frequency = 0.12; // circle은 중간 빈도
+        }
+        
         const defaultConfig: ElementConfig = {
           elementId: el.id,
-          frequency: el.animationMode === 'layered' ? 0.8 : 0.1,
+          frequency: frequency,
           maxSize: 100,
           animationMode: el.animationMode,
           animationSpeed: 1.0,
