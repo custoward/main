@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbit&display=swap" rel="stylesheet">
+  <script>
+    (function (d) {
+      var config = {
+        kitId: 'dan0bcp',
+        scriptTimeout: 3000,
+        async: true
+      },
+        h = d.documentElement, t = setTimeout(function () { h.className = h.className.replace(/\bwf-loading\b/g, "") + " wf-inactive"; }, config.scriptTimeout), tk = d.createElement("script"), f = false, s = d.getElementsByTagName("script")[0], a; h.className += " wf-loading"; tk.src = 'https://use.typekit.net/' + config.kitId + '.js'; tk.async = true; tk.onload = tk.onreadystatechange = function () { a = this.readyState; if (f || a && a != "complete" && a != "loaded") return; f = true; clearTimeout(t); try { Typekit.load(config) } catch (e) { } }; s.parentNode.insertBefore(tk, s)
+    })(document);
+  </script>
+
+  <title>숨은 도시</title>
+</head>
+
+<body>
+  <div id="root">
+    <!-- 좌상단 타이틀 -->
+    <div id="title-wrap">
+      <div id="title-ko"></div>
+      <div id="title-en"></div>
+    </div>
+
+    <!-- 우상단 토글 -->
+    <button id="modeToggle" class="toggle-btn">
+      <div class="toggle-texts">
+        <div class="toggle-main" id="toggle-main-label">숨은</div>
+        <div class="toggle-sub" id="toggle-sub-label">Breath</div>
+      </div>
+      <div class="toggle-circle" id="toggle-circle"></div>
+    </button>
+
+    <!-- 중앙 그리드 -->
+    <div id="grid"></div>
+
+    <!-- 하단 문구 -->
+    <div id="foot"></div>
+
+    <!-- 비네트 레이어 -->
+    <div id="vignette"></div>
+  </div>
+
+  <!-- 커스텀 커서 -->
+  <div id="custom-cursor"></div>
+
+  <!-- 효과 js -->
+  <script src="script.js"></script>
+  <script src="fx.js"></script>
+
+  <!-- Help FAB -->
+  <button id="helpFab" class="modal-fab" aria-label="도움말 열기">🏙️</button>
+
+  <!-- Modal -->
+  <div id="modalOverlay" class="modal-overlay" hidden>
+    <div id="infoModal" class="modal" role="dialog" aria-modal="true">
+      <button id="modalClose" class="modal-close" aria-label="닫기">×</button>
+
+      <div class="modal-header">
+        <div class="modal-left">
+          <div class="course-tag course-left">2025-2 타이포그래피디자인2</div>
+          <h2 class="modal-title">숨은 도시</h2>
+          <div class="sub-en">Breathe Hidden City</div>
+          <div class="sub-id">의류학과 2019-11220 김민성</div>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-lead">“제각각의 숨이 모여 도시가 된다”</p>
+
+        <p>이 작업은 한 사람의 숨부터 시작해,<br>
+          다양한 호흡이 모여 도시가 되는 모습을<br>
+          타이포그래피로 해석해 시각화한 실험입니다.</p>
+
+        <p>이름인 '숨은 도시'는 호흡의 의미와 숨어있는 의미를 동시에 담았습니다.<br>
+          숨들로 구성된 타이포 그리드에 숨어있는 도시를 찾아보세요.<br>
+          글자의 두께와 크기, 색상 반전, 폰트, 움직임 등으로<br>
+          살아있는 도시의 모습을 숨겨두었습니다.</p>
+
+        <hr style="margin:24px 0; border:none; border-top:1px solid #ccc;">
+
+        <p style="font-weight:600;">체험 방법</p>
+        <p>창을 드래그해서 사이즈를 조절 화면 크기에 맞게 숨겨진 숨들이 등장합니다.<br>
+          총 4단계로, 사이즈에 따라 이야기가 변합니다.<br>
+          우측 상단의 토글버튼으로 각 단계에서 숨겨진 요소들을 드러내보세요.</p>
+
+      </div>
+    </div>
+
+  </div>
+</body>
+
+</html>

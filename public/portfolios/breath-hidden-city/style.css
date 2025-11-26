@@ -1,0 +1,524 @@
+html,
+body,
+* {
+  cursor: none !important;
+}
+
+body {
+  cursor: none !important;
+  background: #000;
+  color: #fff;
+  margin: 0;
+  overflow: hidden;
+  font-family: 'dragon-heavy', sans-serif;
+}
+
+.toggle-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  color: inherit;
+  font-family: inherit;
+  text-align: right;
+  cursor: none;
+  z-index: 10;
+}
+
+.toggle-btn * {
+  cursor: none !important;
+}
+
+.toggle-texts {
+  font-family: 'pretendard', sans-serif;
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  text-align: right;
+}
+
+.toggle-main {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  opacity: 0.9;
+  margin-bottom: 2px;
+}
+
+.toggle-sub {
+  font-size: 12px;
+  font-weight: 400;
+  color: #ccc;
+  opacity: 0.7;
+  letter-spacing: 0.02em;
+}
+
+.toggle-circle {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+  transition: box-shadow .25s ease, background .25s ease, border-color .25s ease;
+  flex-shrink: 0;
+}
+
+.toggle-btn.active .toggle-circle {
+  background: #fff;
+  border-color: #fff;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.7),
+    0 0 16px rgba(255, 255, 255, 0.4);
+}
+
+/* 좌상단 타이틀 */
+#title-wrap {
+  font-family: 'pretendard', sans-serif;
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  line-height: 1.2;
+  z-index: 10;
+}
+
+#title-ko {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+#title-en {
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* 하단 문구 */
+#foot {
+  font-family: 'pretendard', sans-serif;
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  line-height: 1.3;
+  z-index: 10;
+}
+
+/* 그리드 */
+#grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  user-select: none;
+  pointer-events: none;
+  color: rgba(255, 255, 255, 0.4);
+  /* Orbit/숨 폰트 컬러 */
+  font-family: "yoon-a-yoonche", sans-serif;
+  font-weight: 400;
+  margin-bottom: 10px;
+    margin-top: 20px;
+  /* 바닥 여백 */
+  z-index: 1;
+}
+
+.grid-cell {
+  user-select: none;
+  pointer-events: none;
+  line-height: 1;
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+}
+
+/* 숨 한 사람(HUMAN)일 때 중앙 셀 호흡 애니 */
+@keyframes breathePulse {
+  0% {
+    transform: scale(1);
+    color: rgba(255, 255, 255, 0.4);
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+  }
+
+  40% {
+    transform: scale(1.18);
+    color: rgba(255, 255, 255, 1);
+    text-shadow:
+      0 0 6px rgba(255, 255, 255, 0.7),
+      0 0 18px rgba(255, 255, 255, 0.5);
+  }
+
+  70% {
+    transform: scale(1.03);
+    color: rgba(255, 255, 255, 0.55);
+    text-shadow:
+      0 0 4px rgba(255, 255, 255, 0.25),
+      0 0 8px rgba(255, 255, 255, 0.15);
+  }
+
+  0% {
+    transform: scale(1);
+    color: rgba(255, 255, 255, 0.4);
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+  }
+}
+
+.breathing-active {
+  animation: breathePulse 4s ease-in-out infinite;
+  will-change: transform, color, text-shadow;
+}
+
+/* 모임 파동 */
+@keyframes groupPing {
+  0% {
+    transform: scale(1);
+    color: rgba(255, 255, 255, 0.4);
+    text-shadow: none;
+  }
+
+  30% {
+    transform: scale(1.08);
+    color: rgba(255, 255, 255, 1);
+    text-shadow: 0 0 6px rgba(255, 255, 255, 0.6);
+  }
+
+  100% {
+    transform: scale(1);
+    color: rgba(255, 255, 255, 0.6);
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.25);
+  }
+}
+
+.group-active {
+  animation: groupPing 0.5s ease-out 1;
+}
+
+
+/* 지나가는 순간: 기본 숨 라인용 */
+@keyframes townFlash {
+  0% {
+    transform: scale(1);
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow:
+      0 0 8px rgba(255, 255, 255, 0.8),
+      0 0 16px rgba(255, 255, 255, 0.4);
+  }
+
+  100% {
+    transform: scale(1.05);
+    color: rgba(255, 255, 255, 0.6);
+    text-shadow:
+      0 0 4px rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* 차량(의성어) 전용 더 강한 플래시 */
+@keyframes townFlashVehicle {
+  0% {
+    transform: scale(1);
+    color: rgba(255, 255, 255, 1);
+    text-shadow:
+      0 0 10px rgba(255, 255, 255, 1),
+      0 0 24px rgba(255, 255, 255, 0.8);
+  }
+
+  100% {
+    transform: scale(1.08);
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow:
+      0 0 8px rgba(255, 255, 255, 0.8),
+      0 0 32px rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* 지나가는 순간: 숨 라인 */
+.town-active {
+  animation: townFlash 0.2s linear 1;
+  color: rgba(255, 255, 255, 1);
+  text-shadow:
+    0 0 8px rgba(255, 255, 255, 0.8),
+    0 0 16px rgba(255, 255, 255, 0.4);
+  transform: scale(1.05);
+}
+
+/* 지나가는 순간: 차량 라인 (더 강하게) */
+.town-active-vehicle {
+  animation: townFlashVehicle 0.25s linear 1;
+  color: rgba(255, 255, 255, 1);
+  text-shadow:
+    0 0 12px rgba(255, 255, 255, 1),
+    0 0 32px rgba(255, 255, 255, 0.7);
+  transform: scale(1.08);
+}
+
+/* trail 1단계: 방금 지나간 뜨거운 꼬리 (밝음) */
+.town-trail {
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.9),
+    0 0 24px rgba(255, 255, 255, 0.5);
+  transform: scale(1);
+  transition:
+    color 1s ease,
+    text-shadow 1s ease;
+}
+
+/* trail 2단계: 식어가는 꼬리 (희미) */
+.town-trail-fade {
+  color: rgba(255, 255, 255, 0.3);
+  text-shadow:
+    0 0 4px rgba(255, 255, 255, 0.3),
+    0 0 8px rgba(255, 255, 255, 0.15);
+  transform: scale(1);
+}
+
+/* 비네트 */
+#vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* 커스텀 커서 */
+#custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+
+  /* "불 꺼진" 비주얼 */
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  background-color: rgba(150, 150, 150, 0.12);
+  box-shadow: none;
+
+  transition: background-color .25s ease,
+    border-color .25s ease,
+    box-shadow .25s ease,
+    transform .15s ease;
+}
+
+/* "불 켜진" 상태. 토글 위에 올라갔을 때만 켜짐 */
+#custom-cursor.active {
+  border-color: rgba(255, 255, 255, 1);
+  background-color: rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 0 12px rgba(255, 255, 255, 0.8),
+    0 0 24px rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* 도시: 차량 흐름에 해당하는 글자 (부릉/따르릉/빵빵 등) */
+.city-vehicle {
+  color: rgba(255, 255, 255, 0.95);
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.9),
+    0 0 24px rgba(255, 255, 255, 0.6);
+  transform: scale(1.05);
+  
+}
+
+/* 레이어 우선순위 확실히 */
+.modal-fab {
+  z-index: 4500;
+  pointer-events: auto;
+}
+
+.modal-overlay {
+  font-family: 'pretendard', sans-serif;
+  z-index: 5000;
+}
+
+#custom-cursor {
+  z-index: 6000;
+  pointer-events: none;
+}
+
+/* 커서는 이벤트 막지 않게 */
+/* FAB */
+.modal-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 12px;
+  background: #1c1c1c;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  line-height: 1;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, .35);
+  cursor: pointer;
+  z-index: 1200;
+}
+
+/* Overlay & modal */
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1300;
+  animation: fadeIn .18s ease-out;
+}
+
+.modal {
+  width: min(720px, 80vw);
+  /* ≤720px, and at least 10% margin on left/right */
+  max-height: 80vh;
+  /* at least 10% margin on top/bottom */
+  overflow: auto;
+  /* scroll inside modal when content overflows */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+  /* Unified responsive base for all modal text */
+  font-size: clamp(11px, 1.2vw, 14px);
+  background: #fff;
+  color: #111;
+  border-radius: 20px;
+  padding: 28px 28px 24px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, .45);
+  transform: scale(.96);
+  animation: popIn .18s ease-out forwards;
+}
+
+.modal-close {
+  position: absolute;
+  right: 14px;
+  top: 10px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: #333;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+.modal-section {
+  margin: 10px 0 14px;
+}
+
+.modal-heading {
+  font-size: 18px;
+  margin: 0 0 6px;
+  color: #222;
+}
+
+.work-title {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 2px 0 4px;
+}
+
+.meta {
+  opacity: .7;
+  margin: 0 0 10px;
+}
+
+.guide {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.7;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0
+  }
+
+  to {
+    opacity: 1
+  }
+}
+
+@keyframes popIn {
+  to {
+    transform: scale(1)
+  }
+}
+
+.city-vehicle,
+.town-active-vehicle {
+  font-family: var(--vehicle-default-font, Pretendard, sans-serif);
+}
+
+/* ---- Modal layout refinement ---- */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.modal-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.modal-title {
+  margin: 0;
+  font-weight: 700;
+  line-height: 1.2  ;
+  font-size: 2.0em;
+  margin-top:8px
+}
+
+.modal-left .sub-en {
+  font-size: 1.1em;
+  line-height: 1.7;
+  opacity: 0.95;
+}
+
+.modal-left .sub-id {
+  font-size: 0.85em;
+  line-height: 1.3;
+  color: #555;
+}
+
+.modal-left .course-tag.course-left {
+  font-size: 0.85em;
+  color: #555;
+  white-space: nowrap;
+  align-self: flex-start;
+}
+
+.modal-body {
+  margin-top: 18px;
+  line-height: 1.65;
+  font-size: 1.0em;
+}
+
+.modal-body>p:first-child {
+  font-weight: 600;
+  font-size: 1.15em;
+  margin-bottom: 14px;
+}

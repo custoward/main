@@ -3,7 +3,7 @@
  */
 
 // 애니메이션 모드 (생기는 방식)
-export type AnimationMode = 'layered' | 'pulse' | 'flicker';
+export type AnimationMode = 'layered' | 'rotate' | 'pulse' | 'instant';
 
 // 벡터 요소 (SVG 또는 경로 정의)
 export interface VectorElement {
@@ -13,6 +13,15 @@ export interface VectorElement {
   color?: string; // 기본 색상 (Green 테마)
   weight?: number; // 선 두께 또는 강도
   customData?: Record<string, unknown>; // 확장성
+}
+
+// 개별 SVG 요소 설정 (각 이미지마다 독립적으로 조절 가능)
+export interface ElementConfig {
+  elementId: string; // VectorElement.id
+  frequency: number; // 생성 빈도 (0 ~ 1)
+  maxSize: number; // 최대 크기
+  animationMode: AnimationMode; // 애니메이션 형식
+  animationSpeed: number; // 애니메이션 속도 배율 (1 = 기본 속도)
 }
 
 // 캔버스에 렌더링될 객체 인스턴스

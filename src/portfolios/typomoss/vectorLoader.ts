@@ -6,22 +6,47 @@
 
 import { VectorElement, AnimationMode } from './types';
 
-// SVG 파일 경로들 (public/portfolio_image/typomoss/)
-const SVG_FOLDER = '/portfolio_image/typomoss/';
-const SVG_FILES = [
-  'vector_sticker_1.svg',
-  'vector_sticker_2.svg',
-  'vector_sticker_3.svg',
-  'vector_circle_1.svg',
-  'vector_circle_2.svg',
-  'vector_4.svg',
-  'vector_5.svg',
-  'vector_6.svg',
-  'vector_7.svg',
-  'vector_8.svg',
-  'vector_9.svg',
-  'vector_10.svg',
-];
+// public에서 제공되는 SVG 경로들 (포트폴리오별로 분리)
+export const SVG_FOLDER = '/portfolios/typomoss/';
+
+// SVG 파일 목록을 동적으로 가져오기
+async function getSVGFileList(): Promise<string[]> {
+  try {
+    // public 폴더의 SVG 파일들을 하드코딩하지만, 쉽게 추가 가능하도록 구조화
+    const files = [
+      'vector_sticker_1.svg',
+      'vector_sticker_2.svg',
+      'vector_sticker_3.svg',
+      'vector_circle_1.svg',
+      'vector_circle_2.svg',
+      'vector_4.svg',
+      'vector_5.svg',
+      'vector_6.svg',
+      'vector_7.svg',
+      'vector_8.svg',
+      'vector_9.svg',
+      'vector_10.svg',
+    ];
+    
+    // 실제로 로드 가능한 파일만 필터링
+    const validFiles: string[] = [];
+    for (const file of files) {
+      try {
+        const response = await fetch(SVG_FOLDER + file);
+        if (response.ok) {
+          validFiles.push(file);
+        }
+      } catch (e) {
+        console.warn(`[VectorLoader] 파일 확인 실패: ${file}`);
+      }
+    }
+    
+    return validFiles;
+  } catch (e) {
+    console.error('[VectorLoader] SVG 목록 가져오기 실패:', e);
+    return [];
+  }
+}
 
 // 로드된 SVG 이미지 캐시
 const SVG_IMAGE_CACHE: Map<string, HTMLImageElement> = new Map();
@@ -33,9 +58,9 @@ function getAnimationModeFromName(filename: string): AnimationMode {
   if (filename.includes('sticker')) {
     return 'layered'; // sticker: 점층적 스택
   } else if (filename.includes('circle')) {
-    return 'pulse'; // circle: 회전 (pulse 사용)
+    return 'rotate'; // circle: 회전
   } else {
-    return 'flicker'; // 기본: 깜빡임
+    return 'instant'; // 기본: 즉시 나타남
   }
 }
 
@@ -43,7 +68,6 @@ function getAnimationModeFromName(filename: string): AnimationMode {
  * SVG 파일을 Image로 변환 (캐싱)
  */
 export async function loadSVGAsImage(svgPath: string): Promise<HTMLImageElement> {
-  // 캐시에서 먼저 확인
   if (SVG_IMAGE_CACHE.has(svgPath)) {
     console.log(`[SVG Cache] 캐시에서 로드: ${svgPath}`);
     return SVG_IMAGE_CACHE.get(svgPath)!;
@@ -75,6 +99,7 @@ export async function loadSVGAsImage(svgPath: string): Promise<HTMLImageElement>
  * SVG 파일을 VectorElement로 변환
  */
 export async function loadVectorElements(): Promise<VectorElement[]> {
+  const SVG_FILES = await getSVGFileList();
   console.log(`[VectorLoader] 시작: ${SVG_FILES.length}개 파일 로드`);
   const elements: VectorElement[] = [];
 
