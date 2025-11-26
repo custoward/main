@@ -124,10 +124,13 @@ export async function loadVectorElements(): Promise<VectorElement[]> {
       // 비동기로 이미지 미리 로드
       await loadSVGAsImage(svgPath);
 
+      const animationMode = getAnimationModeFromName(filename);
+      console.log(`[VectorLoader] 파일명: ${filename} → 애니메이션 모드: ${animationMode}`);
+
       const element: VectorElement = {
         id: `svg-${filename.replace('.svg', '')}`,
         name: filename.replace('.svg', ''),
-        animationMode: getAnimationModeFromName(filename),
+        animationMode: animationMode,
         color: '#1AB551', // 기본 그린 색상
         weight: 2,
         customData: {
@@ -135,13 +138,14 @@ export async function loadVectorElements(): Promise<VectorElement[]> {
         },
       };
       elements.push(element);
-      console.log(`[VectorLoader] 완료: ${filename}`);
+      console.log(`[VectorLoader] 완료: ${filename} (id: ${element.id}, name: ${element.name}, mode: ${element.animationMode})`);
     } catch (e) {
       console.error(`[VectorLoader] 에러: ${filename}`, e);
     }
   }
 
   console.log(`[VectorLoader] 완료: 총 ${elements.length}개 요소 로드`);
+  console.log('[VectorLoader] 로드된 요소 목록:', elements.map(e => ({ name: e.name, mode: e.animationMode })));
   return elements;
 }
 

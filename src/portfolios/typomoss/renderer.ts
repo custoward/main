@@ -59,14 +59,18 @@ export class TypoMossRenderer {
         this.elementConfigs.set(el.id, config);
       } else {
         // 기본 설정 자동 생성 (파일명 기반)
-        console.log(`  - 기본 설정 생성: ${el.id}`);
+        console.log(`  - 기본 설정 생성: ${el.id}, name: ${el.name}, mode: ${el.animationMode}`);
         
         // 파일명에서 자동으로 빈도 결정
         let frequency = 0.1; // 기본값
         if (el.name.includes('sticker')) {
           frequency = 0.8; // sticker는 높은 빈도
+          console.log(`    → sticker 감지: frequency = 0.8`);
         } else if (el.name.includes('circle')) {
           frequency = 0.12; // circle은 중간 빈도
+          console.log(`    → circle 감지: frequency = 0.12`);
+        } else {
+          console.log(`    → 기본값: frequency = 0.1`);
         }
         
         const defaultConfig: ElementConfig = {
@@ -76,6 +80,7 @@ export class TypoMossRenderer {
           animationMode: el.animationMode,
           animationSpeed: 1.0,
         };
+        console.log(`    → 최종 설정:`, defaultConfig);
         this.elementConfigs.set(el.id, defaultConfig);
       }
     });
@@ -353,8 +358,9 @@ export class TypoMossRenderer {
       instance.age++;
     });
 
-    // 3) 최대 인스턴스 수 초과 시 layered 뭉치 제거
-    if (this.instances.size > dynamicMaxInstances) {
+    // 3) 최대 인스턴스 수의 70%를 넘으면 layered 뭉치 제거 (더 일찍, 더 자주 제거)
+    const removalThreshold = dynamicMaxInstances * 0.7; // 70%만 채워도 제거 시작
+    if (this.instances.size > removalThreshold) {
       const layeredInstances = Array.from(this.instances.values())
         .filter(inst => inst.animationMode === 'layered');
       
