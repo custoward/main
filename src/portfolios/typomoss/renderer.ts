@@ -344,8 +344,8 @@ export class TypoMossRenderer {
       instance.age++;
     });
 
-    // 3) layered 뭉치 단위로 랜덤하게 제거 (밀도에 비례)
-    const layeredRemovalChance = 0.002 * (this.config.density || 1); // 밀도에 비례하여 제거 확률 증가
+    // 3) layered 뭉치 단위로 랜덤하게 제거 (밀도에 비례하여 더 많이 제거)
+    const layeredRemovalChance = 0.004 * (this.config.density || 1); // 밀도에 비례하여 제거 확률 증가 (0.002 → 0.004로 2배)
     if (Math.random() < layeredRemovalChance) {
       const layeredInstances = Array.from(this.instances.values())
         .filter(inst => inst.animationMode === 'layered');

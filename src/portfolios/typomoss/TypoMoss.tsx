@@ -16,7 +16,7 @@ const TypoMoss: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<TypoMossRenderer | null>(null);
   const [stats, setStats] = useState({ frameCount: 0, instanceCount: 0, maxInstances: 0 });
-  const [showSettings, setShowSettings] = useState(true);
+  const [showSettings, setShowSettings] = useState(false);
   
   // localStorage에서 설정 불러오기
   const loadSettings = () => {
