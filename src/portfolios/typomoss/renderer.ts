@@ -377,16 +377,27 @@ export class TypoMossRenderer {
         const clusterToRemove = oldestInstance.customProps?.clusterId as number;
         const elementToRemove = oldestInstance.elementId;
         
-        // 같은 clusterId와 elementId를 가진 모든 인스턴스 제거
-        const idsToDelete: string[] = [];
-        this.instances.forEach((inst, id) => {
+        // 같은 clusterId와 elementId를 가진 인스턴스들을 layerIndex 순으로 정렬
+        const clusterInstances: RenderInstance[] = [];
+        this.instances.forEach((inst) => {
           if (inst.animationMode === 'layered' && 
               inst.elementId === elementToRemove &&
               (inst.customProps?.clusterId as number) === clusterToRemove) {
-            idsToDelete.push(id);
+            clusterInstances.push(inst);
           }
         });
-        idsToDelete.forEach((id) => this.instances.delete(id));
+        
+        // layerIndex 기준 오름차순 정렬 (앞에 쌓인 것부터)
+        clusterInstances.sort((a, b) => {
+          const layerA = (a.customProps?.layerIndex as number) || 0;
+          const layerB = (b.customProps?.layerIndex as number) || 0;
+          return layerA - layerB;
+        });
+        
+        // 첫 번째(가장 아래 레이어)만 제거
+        if (clusterInstances.length > 0) {
+          this.instances.delete(clusterInstances[0].id);
+        }
       }
     }
 
