@@ -56,6 +56,7 @@ export class TypoMossRenderer {
       // 각 요소에 대한 설정 로드
       const config = ELEMENT_CONFIGS[el.id];
       if (config) {
+        console.log(`    → config.ts에서 로드한 설정 사용:`, config);
         this.elementConfigs.set(el.id, config);
       } else {
         // 기본 설정 자동 생성 (파일명 기반)
@@ -84,6 +85,9 @@ export class TypoMossRenderer {
         this.elementConfigs.set(el.id, defaultConfig);
       }
     });
+    
+    // 최종 확인 로그
+    console.log('[Renderer] 최종 elementConfigs:', Array.from(this.elementConfigs.entries()));
   }
 
   /**
@@ -358,8 +362,8 @@ export class TypoMossRenderer {
       instance.age++;
     });
 
-    // 3) 최대 인스턴스 수의 70%를 넘으면 layered 뭉치 제거 (더 일찍, 더 자주 제거)
-    const removalThreshold = dynamicMaxInstances * 0.7; // 70%만 채워도 제거 시작
+    // 3) 최대 인스턴스 수의 85%를 넘으면 layered 뭉치 제거 (적당히 천천히 제거)
+    const removalThreshold = dynamicMaxInstances * 0.85; // 85%만 채워도 제거 시작
     if (this.instances.size > removalThreshold) {
       const layeredInstances = Array.from(this.instances.values())
         .filter(inst => inst.animationMode === 'layered');
