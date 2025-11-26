@@ -24,8 +24,27 @@ const TypoMoss: React.FC = () => {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
+        
+        // localStorage의 설정과 config.ts의 설정을 병합
+        // config.ts에 있는 항목은 config.ts 우선, 없는 항목만 localStorage 사용
+        const mergedConfigs: Record<string, ElementConfig> = {};
+        
+        // 1단계: config.ts의 설정을 먼저 복사 (최우선)
+        Object.entries(ELEMENT_CONFIGS).forEach(([id, config]) => {
+          mergedConfigs[id] = { ...config };
+        });
+        
+        // 2단계: localStorage에만 있는 설정 추가
+        if (parsed.elementConfigs) {
+          Object.entries(parsed.elementConfigs).forEach(([id, config]) => {
+            if (!ELEMENT_CONFIGS[id]) {
+              mergedConfigs[id] = config as ElementConfig;
+            }
+          });
+        }
+        
         return {
-          elementConfigs: parsed.elementConfigs || ELEMENT_CONFIGS,
+          elementConfigs: mergedConfigs,
           density: parsed.density ?? 0.6,
           minElementSize: parsed.minElementSize ?? 40,
         };
