@@ -40,17 +40,17 @@ const ProjectList: React.FC = () => {
 
       <ul className="project-items">
         {SAMPLE_PROJECTS.map((p) => {
-          // 특정 프로젝트는 새 탭에서 열림
-          const openNewTab = p.id === 'proj-1' || p.id === 'proj-2';
-          const newTabRoute = p.id === 'proj-1' ? '/typo-moss' : '/breath-hidden-city';
+          // 특정 프로젝트는 페이지 이동
+          const hasRoute = p.id === 'proj-1' || p.id === 'proj-2';
+          const route = p.id === 'proj-1' ? '/typo-moss' : '/breath-hidden-city';
           
           return (
             <li
               key={p.id}
               className="project-item"
               onClick={(e) => {
-                if (openNewTab) {
-                  window.open(newTabRoute, '_blank', 'noopener');
+                if (hasRoute) {
+                  window.location.href = route;
                   return;
                 }
                 setSelected(p);

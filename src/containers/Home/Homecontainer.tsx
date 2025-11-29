@@ -47,8 +47,6 @@ const Homecontainer = () => {
                             <React.Fragment key={project.id}>
                                 <a 
                                     href={getProjectRoute(project.id)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
                                     className="mainlist mainlist-link"
                                 >
                                     {project.englishTitle || project.title}
