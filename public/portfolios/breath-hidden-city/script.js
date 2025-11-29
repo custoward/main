@@ -310,7 +310,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (window.mobileStageIndex > 3) {
         window.mobileStageIndex = -1; // 도시 다음은 다시 숨은 모드
       }
-      window.hiddenMode = false;
+      // 인간-도시 모드일 때 hiddenMode 활성화
+      window.hiddenMode = (window.mobileStageIndex >= 0);
       update(); // 단계 변경 적용
       return;
     }
