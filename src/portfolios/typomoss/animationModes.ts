@@ -147,8 +147,8 @@ export function animatePulse(
 
 /**
  * Flicker: 점멸 (3-7번 랜덤)
- * - 깜빡이며 등장
- * - 마지막에 페이드 아웃
+ * - 천천히 깜빡이며 등장
+ * - 마지막에 크기가 커지며 페이드 아웃
  */
 export function animateFlicker(
   instance: RenderInstance,
@@ -159,19 +159,60 @@ export function animateFlicker(
   rotation: number;
 } {
   const flickerCount = (instance.customProps?.flickerCount as number) || 5;
-  const flickerProgress = progress * flickerCount;
-  const isVisible = Math.floor(flickerProgress) % 2 === 0;
+  // 깜빡임 속도를 느리게 (flickerCount를 절반으로)
+  const flickerProgress = progress * (flickerCount * 0.5);
   
-  // 마지막에 페이드 아웃
-  let opacity = isVisible ? 1.0 : 0.0;
-  if (progress > 0.85) {
-    opacity *= (1 - (progress - 0.85) / 0.15);
+  let opacity = 1.0;
+  let scale = 1.0;
+  
+  // 85% 이전에는 깜빡이지 않고 그냥 보임
+  if (progress <= 0.85) {
+    opacity = 1.0;
+  } else {
+    // 마지막 15%에서만 크기가 커지며 페이드 아웃
+    const endProgress = (progress - 0.85) / 0.15;
+    opacity = 1.0 - endProgress;
+    scale = 1.0 + endProgress * 0.5; // 최대 1.5배까지 커짐
   }
   
   return {
-    scale: 1.0,
+    scale,
     opacity,
     rotation: instance.rotation,
+  };
+}
+
+/**
+ * Title: flicker와 동일하지만 회전 각도 0
+ * - 아이들 상태에서는 그냥 보임
+ * - 회전 없음 (각도 0 고정)
+ * - 마지막에 크기가 커지며 페이드 아웃
+ */
+export function animateTitle(
+  instance: RenderInstance,
+  progress: number
+): {
+  scale: number;
+  opacity: number;
+  rotation: number;
+} {
+  let opacity = 1.0;
+  let scale = 1.0;
+  
+  // 85% 이전에는 그냥 보임
+  if (progress <= 0.85) {
+    opacity = 1.0;
+  } else {
+    // 마지막 15%에서만 크기가 커지며 페이드 아웃
+    const endProgress = (progress - 0.85) / 0.15;
+    opacity = 1.0 - endProgress;
+    scale = 1.0 + endProgress * 0.5; // 최대 1.5배까지 커짐
+  }
+  
+  return {
+    scale,
+    opacity,
+    rotation: 0, // 항상 0
   };
 }
 
@@ -222,6 +263,8 @@ export function getAnimationProperties(
       return animateFlicker(instance, progress);
     case 'grow':
       return animateGrow(instance, progress);
+    case 'title':
+      return animateTitle(instance, progress);
     default:
       return { scale: 1, opacity: 1, rotation: 0 };
   }

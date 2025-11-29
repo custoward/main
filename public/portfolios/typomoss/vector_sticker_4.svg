@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_레이어_1" data-name="레이어 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 373.57 121.96">
+  <defs>
+    <style>
+      .cls-1 {
+        letter-spacing: .36em;
+      }
+
+      .cls-1, .cls-2 {
+        font-size: 16px;
+      }
+
+      .cls-3, .cls-4 {
+        font-family: SourceHanSansK-Medium-KSCpc-EUC-H, 'Source Han Sans K';
+        font-weight: 500;
+      }
+
+      .cls-5 {
+        font-size: 14px;
+        letter-spacing: .76em;
+      }
+
+      .cls-6 {
+        letter-spacing: .19em;
+      }
+
+      .cls-7 {
+        letter-spacing: .19em;
+      }
+
+      .cls-8 {
+        font-family: SourceHanSansK-Bold-KSCpc-EUC-H, 'Source Han Sans K';
+        font-size: 52.03px;
+        font-weight: 700;
+      }
+
+      .cls-9 {
+        fill: #1f8331;
+        stroke: #000;
+        stroke-miterlimit: 10;
+        stroke-width: 1.19px;
+      }
+
+      .cls-4 {
+        font-size: 23px;
+      }
+    </style>
+  </defs>
+  <rect class="cls-9" x=".7" y=".51" width="372.18" height="121.45"/>
+  <text class="cls-8" transform="translate(15.53 77.98) scale(1.19 1)"><tspan x="0" y="0">강남종합공사</tspan></text>
+  <text class="cls-4" transform="translate(15.72 111.07) scale(1.25 1)"><tspan class="cls-6" x="0" y="0">511-114</tspan><tspan x="117.99" y="0">9</tspan></text>
+  <text class="cls-4" transform="translate(193.91 111.07) scale(1.25 1)"><tspan class="cls-7" x="0" y="0">533-224</tspan><tspan x="117.54" y="0">0</tspan></text>
+  <text class="cls-3" transform="translate(15.53 22.34) scale(1.24 1)"><tspan class="cls-1" x="0" y="0">철공</tspan><tspan class="cls-5" x="40.95" y="0">·</tspan><tspan class="cls-1" x="59.62" y="0">스텐</tspan><tspan class="cls-5" x="100.57" y="0">·</tspan><tspan class="cls-1" x="119.24" y="0">유리</tspan><tspan class="cls-5" x="160.18" y="0">·</tspan><tspan class="cls-1" x="178.85" y="0">해빙</tspan><tspan class="cls-5" x="219.8" y="0">·</tspan><tspan class="cls-1" x="238.47" y="0">설</tspan><tspan class="cls-2" x="258.94" y="0">비</tspan></text>
+</svg>

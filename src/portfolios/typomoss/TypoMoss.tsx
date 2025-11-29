@@ -6,7 +6,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { TypoMossRenderer } from './renderer';
 import { loadVectorElements } from './vectorLoader';
-import { ELEMENT_CONFIGS } from './config';
+import { ELEMENT_CONFIGS, DEFAULT_PRESETS } from './config';
 import { ElementConfig } from './types';
 import './TypoMoss.css';
 
@@ -16,15 +16,30 @@ const PRESETS_KEY = 'typomoss-presets';
 interface Preset {
   name: string;
   elementConfigs: Record<string, ElementConfig>;
-  density: number;
+  maxInstances: number;
   minElementSize: number;
+  spawnSpeed: number;
+  autoResetEnabled: boolean;
+  autoResetInterval: number;
 }
+
+// 화면 크기 프리셋
+const CANVAS_SIZE_PRESETS = [
+  { label: '1920 × 1080 (가로)', width: 1920, height: 1080 },
+  { label: '1080 × 1080 (정사각형)', width: 1080, height: 1080 },
+  { label: '1080 × 1350 (세로)', width: 1080, height: 1350 },
+  { label: '1080 × 1920 (세로)', width: 1080, height: 1920 },
+];
 
 const TypoMoss: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<TypoMossRenderer | null>(null);
   const [stats, setStats] = useState({ frameCount: 0, instanceCount: 0, maxInstances: 0 });
   const [showSettings, setShowSettings] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [canvasSize, setCanvasSize] = useState({ width: 1920, height: 1080 });
+  const [selectedSizePreset, setSelectedSizePreset] = useState(0);
   
   // 프리셋 상태
   const [presets, setPresets] = useState<Preset[]>([]);
@@ -60,7 +75,7 @@ const TypoMoss: React.FC = () => {
         
         return {
           elementConfigs: mergedConfigs,
-          density: parsed.density ?? 0.6,
+          maxInstances: parsed.maxInstances ?? 80,
           minElementSize: parsed.minElementSize ?? 40,
         };
       }
@@ -69,7 +84,7 @@ const TypoMoss: React.FC = () => {
     }
     return {
       elementConfigs: ELEMENT_CONFIGS,
-      density: 0.6,
+      maxInstances: 80,
       minElementSize: 40,
     };
   };
@@ -77,8 +92,10 @@ const TypoMoss: React.FC = () => {
   const savedSettings = loadSettings();
   const [elementConfigs, setElementConfigs] = useState<Record<string, ElementConfig>>(savedSettings.elementConfigs);
   const [expandedElement, setExpandedElement] = useState<string | null>(null);
-  const [density, setDensity] = useState(savedSettings.density);
+  const [maxInstances, setMaxInstances] = useState(savedSettings.maxInstances);
   const [minElementSize, setMinElementSize] = useState(savedSettings.minElementSize);
+  const [spawnSpeed, setSpawnSpeed] = useState(1.0); // 생성 속도 배율
+  const [presetLoaded, setPresetLoaded] = useState(false); // 프리셋 로딩 완료 플래그
   
   // 녹화 상태
   const [isRecording, setIsRecording] = useState(false);
@@ -86,21 +103,153 @@ const TypoMoss: React.FC = () => {
   const recordedChunksRef = useRef<Blob[]>([]);
   const [recordingTime, setRecordingTime] = useState(0);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // 자동 리셋 상태
+  const [autoResetEnabled, setAutoResetEnabled] = useState(false);
+  const [autoResetInterval, setAutoResetInterval] = useState(60); // 초 단위
+  const [autoResetStopsRecording, setAutoResetStopsRecording] = useState(true); // 자동 리셋 시 녹화 중지
+  const autoResetTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const autoResetStartTimeRef = useRef<number>(0);
+
+  // 최초 로딩 시 도움말 표시
+  useEffect(() => {
+    const hasSeenHelp = localStorage.getItem('typomoss-help-seen');
+    if (!hasSeenHelp) {
+      setShowHelp(true);
+      localStorage.setItem('typomoss-help-seen', 'true');
+    }
+  }, []);
+
+  // 모바일 감지 및 화면 크기 설정
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      
+      if (mobile) {
+        // 모바일: 화면에 맞춤
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        setCanvasSize({ width, height });
+      } else {
+        // 데스크톱: 선택된 프리셋 사용
+        const preset = CANVAS_SIZE_PRESETS[selectedSizePreset];
+        setCanvasSize({ width: preset.width, height: preset.height });
+      }
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, [selectedSizePreset]);
 
   // 프리셋 로드
   useEffect(() => {
     try {
       const savedPresets = localStorage.getItem(PRESETS_KEY);
+      let presetsToLoad: Preset[];
+      
       if (savedPresets) {
-        setPresets(JSON.parse(savedPresets));
+        presetsToLoad = JSON.parse(savedPresets);
+      } else {
+        // localStorage에 없으면 기본 프리셋 사용
+        presetsToLoad = DEFAULT_PRESETS;
+        localStorage.setItem(PRESETS_KEY, JSON.stringify(DEFAULT_PRESETS));
+      }
+      
+      setPresets(presetsToLoad);
+      
+      // 첫 번째 프리셋을 자동으로 적용
+      if (presetsToLoad.length > 0) {
+        const firstPreset = presetsToLoad[0];
+        
+        console.log('[TypoMoss] 프리셋 로딩:', firstPreset.name);
+        console.log('[TypoMoss] 프리셋 elementConfigs:', Object.keys(firstPreset.elementConfigs).length);
+        
+        // 프리셋의 elementConfigs를 그대로 적용
+        setElementConfigs(firstPreset.elementConfigs);
+        setMaxInstances(firstPreset.maxInstances);
+        setMinElementSize(firstPreset.minElementSize);
+        setSpawnSpeed(firstPreset.spawnSpeed ?? 1.0);
+        setAutoResetEnabled(firstPreset.autoResetEnabled ?? false);
+        setAutoResetInterval(firstPreset.autoResetInterval ?? 60);
+        
+        // 프리셋 로딩 완료 표시
+        setPresetLoaded(true);
       }
     } catch (e) {
       console.error('[TypoMoss] 프리셋 불러오기 실패:', e);
+      // 오류 시 기본 프리셋 사용
+      setPresets(DEFAULT_PRESETS);
+      
+      // 첫 번째 기본 프리셋 적용
+      if (DEFAULT_PRESETS.length > 0) {
+        const firstPreset = DEFAULT_PRESETS[0];
+        
+        // 프리셋의 elementConfigs를 그대로 적용
+        setElementConfigs(firstPreset.elementConfigs);
+        setMaxInstances(firstPreset.maxInstances);
+        setMinElementSize(firstPreset.minElementSize);
+        setSpawnSpeed(firstPreset.spawnSpeed ?? 1.0);
+        setAutoResetEnabled(firstPreset.autoResetEnabled ?? false);
+        setAutoResetInterval(firstPreset.autoResetInterval ?? 60);
+        
+        // 프리셋 로딩 완료 표시
+        setPresetLoaded(true);
+      }
     }
   }, []);
+  
+  // 자동 리셋 타이머
+  useEffect(() => {
+    if (autoResetEnabled && autoResetInterval > 0) {
+      console.log(`[TypoMoss] 자동 리셋 타이머 시작: ${autoResetInterval}초 간격`);
+      autoResetStartTimeRef.current = Date.now();
+      
+      autoResetTimerRef.current = setInterval(() => {
+        const elapsed = ((Date.now() - autoResetStartTimeRef.current) / 1000).toFixed(1);
+        console.log(`[TypoMoss] 자동 리셋 실행 (시작 후 ${elapsed}초 경과, 설정값: ${autoResetInterval}초)`);
+        
+        // 녹화 자동 중지가 활성화되어 있고 녹화 중이면 중지
+        if (autoResetStopsRecording && isRecording && mediaRecorderRef.current) {
+          console.log('[TypoMoss] 자동 리셋으로 인한 녹화 중지');
+          if (mediaRecorderRef.current.state !== 'inactive') {
+            mediaRecorderRef.current.stop();
+          }
+          if (recordingIntervalRef.current) {
+            clearInterval(recordingIntervalRef.current);
+            recordingIntervalRef.current = null;
+          }
+        }
+        
+        if (rendererRef.current) {
+          rendererRef.current.reset();
+        }
+        autoResetStartTimeRef.current = Date.now(); // 리셋 후 시간 갱신
+      }, autoResetInterval * 1000);
+      
+      return () => {
+        if (autoResetTimerRef.current) {
+          clearInterval(autoResetTimerRef.current);
+          autoResetTimerRef.current = null;
+        }
+      };
+    } else {
+      if (autoResetTimerRef.current) {
+        clearInterval(autoResetTimerRef.current);
+        autoResetTimerRef.current = null;
+      }
+    }
+  }, [autoResetEnabled, autoResetInterval, autoResetStopsRecording, isRecording]);
 
   useEffect(() => {
     const initializeRenderer = async () => {
+      // 프리셋이 로딩되지 않았으면 대기
+      if (!presetLoaded) {
+        console.log('[TypoMoss] 프리셋 로딩 대기 중...');
+        return;
+      }
+      
       if (!canvasRef.current) {
         console.error('[TypoMoss] Canvas ref 없음');
         return;
@@ -115,15 +264,22 @@ const TypoMoss: React.FC = () => {
         // 렌더러 생성 (저장된 설정 적용)
         console.log('[TypoMoss] 렌더러 생성');
         const renderer = new TypoMossRenderer(canvasRef.current, {
-          density: density,
-          minSize: minElementSize,
+          maxInstances: maxInstances,
+          spawnSpeed: spawnSpeed,
+          canvasWidth: canvasSize.width,
+          canvasHeight: canvasSize.height,
         });
+        
+        // 먼저 요소 설정 (기본 설정 로드)
         renderer.setElements(elements);
         
-        // 저장된 요소별 설정 적용
+        // 그 다음 저장된 프리셋 설정으로 덮어쓰기
         Object.entries(elementConfigs).forEach(([elementId, config]) => {
           renderer.updateElementConfig(elementId, config);
         });
+        
+        // title 순서 재계산
+        renderer.recalculateTitleOrder();
         
         renderer.start();
         console.log('[TypoMoss] 렌더러 시작');
@@ -150,14 +306,14 @@ const TypoMoss: React.FC = () => {
 
     initializeRenderer();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [spawnSpeed, presetLoaded, canvasSize]);
 
   // 설정을 localStorage에 저장
-  const saveSettings = (configs: Record<string, ElementConfig>, densityValue: number, minSize: number) => {
+  const saveSettings = (configs: Record<string, ElementConfig>, maxInst: number, minSize: number) => {
     try {
       const toSave = {
         elementConfigs: configs,
-        density: densityValue,
+        maxInstances: maxInst,
         minElementSize: minSize,
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
@@ -166,20 +322,25 @@ const TypoMoss: React.FC = () => {
     }
   };
 
-  const handleUpdateDensity = (density: number) => {
-    setDensity(density);
+  const handleUpdateMaxInstances = (maxInst: number) => {
+    setMaxInstances(maxInst);
     if (rendererRef.current) {
-      rendererRef.current.updateConfig({ density });
+      rendererRef.current.updateConfig({ maxInstances: maxInst });
     }
-    saveSettings(elementConfigs, density, minElementSize);
+    saveSettings(elementConfigs, maxInst, minElementSize);
+  };
+
+  const handleUpdateSpawnSpeed = (speed: number) => {
+    setSpawnSpeed(speed);
+    if (rendererRef.current) {
+      rendererRef.current.updateConfig({ spawnSpeed: speed });
+    }
   };
 
   const handleUpdateMinElementSize = (size: number) => {
     setMinElementSize(size);
-    if (rendererRef.current) {
-      rendererRef.current.updateConfig({ minSize: size });
-    }
-    saveSettings(elementConfigs, density, size);
+    // minSize는 더 이상 사용하지 않음
+    saveSettings(elementConfigs, maxInstances, size);
   };
 
   const handleUpdateElementConfig = (elementId: string, key: string, value: any) => {
@@ -190,7 +351,7 @@ const TypoMoss: React.FC = () => {
       if (rendererRef.current) {
         rendererRef.current.updateElementConfig(elementId, updated[elementId]);
       }
-      saveSettings(updated, density, minElementSize);
+      saveSettings(updated, maxInstances, minElementSize);
     }
   };
 
@@ -223,8 +384,11 @@ const TypoMoss: React.FC = () => {
         const newPreset: Preset = {
           name: presetNameInput,
           elementConfigs: { ...elementConfigs },
-          density,
+          maxInstances,
           minElementSize,
+          spawnSpeed,
+          autoResetEnabled,
+          autoResetInterval,
         };
         updatedPresets[editingPresetIndex] = newPreset;
         alert(`프리셋 "${presetNameInput}"이(가) 업데이트되었습니다.`);
@@ -234,8 +398,11 @@ const TypoMoss: React.FC = () => {
       const newPreset: Preset = {
         name: presetNameInput,
         elementConfigs: { ...elementConfigs },
-        density,
+        maxInstances,
         minElementSize,
+        spawnSpeed,
+        autoResetEnabled,
+        autoResetInterval,
       };
       updatedPresets = [...presets, newPreset];
       alert(`프리셋 "${presetNameInput}"이(가) 저장되었습니다.`);
@@ -279,13 +446,16 @@ const TypoMoss: React.FC = () => {
     });
     
     setElementConfigs(mergedConfigs);
-    setDensity(preset.density);
+    setMaxInstances(preset.maxInstances);
     setMinElementSize(preset.minElementSize);
+    setSpawnSpeed(preset.spawnSpeed ?? 1.0);
+    setAutoResetEnabled(preset.autoResetEnabled ?? false);
+    setAutoResetInterval(preset.autoResetInterval ?? 60);
 
     if (rendererRef.current) {
       rendererRef.current.updateConfig({ 
-        density: preset.density, 
-        minSize: preset.minElementSize 
+        maxInstances: preset.maxInstances,
+        spawnSpeed: preset.spawnSpeed ?? 1.0
       });
       
       Object.entries(mergedConfigs).forEach(([elementId, config]) => {
@@ -293,7 +463,7 @@ const TypoMoss: React.FC = () => {
       });
     }
 
-    saveSettings(mergedConfigs, preset.density, preset.minElementSize);
+    saveSettings(mergedConfigs, preset.maxInstances, preset.minElementSize);
     alert(`프리셋 "${preset.name}"을(를) 불러왔습니다.`);
   };
 
@@ -323,6 +493,22 @@ const TypoMoss: React.FC = () => {
     } else {
       // 녹화 시작 전 리셋
       rendererRef.current?.reset();
+      
+      // 자동 리셋이 활성화된 경우에만 타이머 초기화
+      if (autoResetEnabled) {
+        if (autoResetTimerRef.current) {
+          clearInterval(autoResetTimerRef.current);
+        }
+        autoResetStartTimeRef.current = Date.now();
+        autoResetTimerRef.current = setInterval(() => {
+          const elapsed = ((Date.now() - autoResetStartTimeRef.current) / 1000).toFixed(1);
+          console.log(`[TypoMoss] 자동 리셋 실행 (시작 후 ${elapsed}초 경과, 설정값: ${autoResetInterval}초)`);
+          if (rendererRef.current) {
+            rendererRef.current.reset();
+          }
+          autoResetStartTimeRef.current = Date.now();
+        }, autoResetInterval * 1000);
+      }
       
       // 녹화 시작
       recordedChunksRef.current = [];
@@ -357,7 +543,18 @@ const TypoMoss: React.FC = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `typomoss-${Date.now()}.${fileExtension}`;
+        
+        // 파일명 생성: TypographyMoss_YYYYMMDD_HHMMSS
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const timestamp = `${year}${month}${day}_${hours}${minutes}${seconds}`;
+        
+        a.download = `TypographyMoss_${timestamp}.${fileExtension}`;
         a.click();
         URL.revokeObjectURL(url);
         setIsRecording(false);
@@ -385,8 +582,8 @@ const TypoMoss: React.FC = () => {
         <canvas
           ref={canvasRef}
           className="typo-moss-canvas"
-          width={1920}
-          height={1080}
+          width={canvasSize.width}
+          height={canvasSize.height}
         />
 
         {/* 설정 모달 */}
@@ -405,32 +602,90 @@ const TypoMoss: React.FC = () => {
 
               <div className="typo-moss-modal-content">
                 <div className="control-group">
-                  <label htmlFor="density-slider">화면 밀도:</label>
+                  <label htmlFor="max-instances-slider">최대 인스턴스:</label>
                   <input
-                    id="density-slider"
+                    id="max-instances-slider"
                     type="range"
-                    min="0.1"
-                    max="1"
-                    step="0.1"
-                    value={density}
-                    onChange={(e) => handleUpdateDensity(parseFloat(e.target.value))}
-                  />
-                  <span>{density.toFixed(1)}</span>
-                </div>
-
-                <div className="control-group">
-                  <label htmlFor="min-size-slider">최소 크기:</label>
-                  <input
-                    id="min-size-slider"
-                    type="range"
-                    min="10"
+                    min="20"
                     max="200"
-                    step="5"
-                    value={minElementSize}
-                    onChange={(e) => handleUpdateMinElementSize(parseInt(e.target.value, 10))}
+                    step="10"
+                    value={maxInstances}
+                    onChange={(e) => handleUpdateMaxInstances(parseInt(e.target.value))}
                   />
-                  <span>{minElementSize}px</span>
+                  <span>{maxInstances}</span>
                 </div>
+                
+                <div className="control-group">
+                  <label htmlFor="spawn-speed-slider">생성 속도:</label>
+                  <input
+                    id="spawn-speed-slider"
+                    type="range"
+                    min="0.5"
+                    max="3.0"
+                    step="0.1"
+                    value={spawnSpeed}
+                    onChange={(e) => handleUpdateSpawnSpeed(parseFloat(e.target.value))}
+                  />
+                  <span>{spawnSpeed.toFixed(1)}x</span>
+                </div>
+                
+                {/* 화면 크기 설정 (데스크톱만) */}
+                {!isMobile && (
+                  <div className="control-group">
+                    <label htmlFor="canvas-size-select">캔버스 크기:</label>
+                    <select
+                      id="canvas-size-select"
+                      value={selectedSizePreset}
+                      onChange={(e) => setSelectedSizePreset(parseInt(e.target.value))}
+                      style={{ width: '200px', marginLeft: '10px', padding: '5px' }}
+                    >
+                      {CANVAS_SIZE_PRESETS.map((preset, index) => (
+                        <option key={index} value={index}>
+                          {preset.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                
+                <div className="control-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={autoResetEnabled}
+                      onChange={(e) => setAutoResetEnabled(e.target.checked)}
+                    />
+                    {' '}자동 리셋
+                  </label>
+                </div>
+                
+                {autoResetEnabled && (
+                  <>
+                    <div className="control-group">
+                      <label htmlFor="auto-reset-interval">리셋 주기 (초):</label>
+                      <input
+                        id="auto-reset-interval"
+                        type="number"
+                        min="5"
+                        max="3600"
+                        step="5"
+                        value={autoResetInterval}
+                        onChange={(e) => setAutoResetInterval(parseInt(e.target.value) || 60)}
+                        style={{ width: '80px', marginLeft: '10px' }}
+                      />
+                    </div>
+                    <div className="control-group">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={autoResetStopsRecording}
+                          onChange={(e) => setAutoResetStopsRecording(e.target.checked)}
+                        />
+                        {' '}리셋 시 녹화 자동 중지
+                      </label>
+                    </div>
+                  </>
+                )}
 
                 <div className="modal-button-group">
                   <button onClick={handleReset}>리셋</button>
@@ -448,7 +703,7 @@ const TypoMoss: React.FC = () => {
                   <div className="presets-section">
                     <h3>저장된 프리셋</h3>
                     {presets.map((preset, index) => (
-                      <div key={index} className="preset-item">
+                      <div key={`${preset.name}-${index}`} className="preset-item">
                         <button 
                           className="preset-load-btn"
                           onClick={() => loadPreset(preset)}
@@ -527,16 +782,16 @@ const TypoMoss: React.FC = () => {
                             </div>
 
                             <div className="control-row">
-                              <label>최대 크기:</label>
+                              <label>크기:</label>
                               <input
                                 type="range"
                                 min="20"
-                                max="200"
+                                max="300"
                                 step="5"
-                                value={config.maxSize}
-                                onChange={(e) => handleUpdateElementConfig(elementId, 'maxSize', parseInt(e.target.value))}
+                                value={config.size}
+                                onChange={(e) => handleUpdateElementConfig(elementId, 'size', parseInt(e.target.value))}
                               />
-                              <span>{config.maxSize}</span>
+                              <span>{config.size}</span>
                             </div>
 
                             <div className="control-row">
@@ -551,6 +806,7 @@ const TypoMoss: React.FC = () => {
                                 <option value="flicker">Flicker (점멸)</option>
                                 <option value="grow">Grow (벽돌 쌓기)</option>
                                 <option value="random">Random (랜덤)</option>
+                                <option value="title">Title (각도0 점멸)</option>
                               </select>
                             </div>
 
@@ -666,7 +922,7 @@ const TypoMoss: React.FC = () => {
         )}
 
         {/* 설정 열기 버튼 (모달 닫혔을 때) */}
-        {!showSettings && (
+        {!showSettings && !showHelp && (
           <>
             <button 
               className="typo-moss-settings-fab"
@@ -677,7 +933,7 @@ const TypoMoss: React.FC = () => {
             <button 
               className={`typo-moss-record-button ${isRecording ? 'recording' : ''}`}
               onClick={toggleRecording}
-              title={isRecording ? '녹화 중지' : '녹화 시작 (1920x1080)'}
+              title={isRecording ? '녹화 중지' : '녹화 시작'}
             >
               {isRecording ? (
                 <>
@@ -688,7 +944,58 @@ const TypoMoss: React.FC = () => {
                 <span className="record-icon">⏺</span>
               )}
             </button>
+            <button 
+              className="typo-moss-help-fab"
+              onClick={() => setShowHelp(true)}
+              title="도움말"
+            >
+              ?
+            </button>
           </>
+        )}
+
+        {/* 도움말 모달 */}
+        {showHelp && (
+          <div className="typo-moss-help-overlay" onClick={() => setShowHelp(false)}>
+            <div className="typo-moss-help-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="typo-moss-help-header">
+                <h2>타이포 이끼</h2>
+                <button 
+                  className="typo-moss-modal-close"
+                  onClick={() => setShowHelp(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="typo-moss-help-content">
+                <p>도시의 전단 스티커에서 영감을 받아 제작한 모션 타이포그래피입니다.<br/>이끼처럼 도시의 틈에서 증식하며, 조용히 관심을 기다리는 모습을 표현했습니다.</p>
+                
+                <h3>주요 기능</h3>
+                <ul>
+                  <li><strong>⚙️ 설정</strong>: 요소별 애니메이션, 최대 인스턴스, 생성 속도 조정</li>
+                  <li><strong>⏺ 녹화</strong>: 현재 화면을 비디오로 녹화 (설정한 캔버스 크기로 저장)</li>
+                  <li><strong>캔버스 크기</strong>: 1920×1080, 1080×1080, 1080×1350, 1080×1920 중 선택</li>
+                  <li><strong>프리셋</strong>: 현재 설정을 저장하고 불러오기 (최대 3개)</li>
+                  <li><strong>자동 리셋</strong>: 설정한 주기마다 화면 자동 초기화</li>
+                </ul>
+
+                <h3>애니메이션 모드</h3>
+                <ul>
+                  <li><strong>Layered</strong>: 레이어드 구조로 쌓이는 효과</li>
+                  <li><strong>Rotate</strong>: 회전하며 움직임</li>
+                  <li><strong>Pulse</strong>: 크기가 변화함</li>
+                  <li><strong>Flicker</strong>: 투명도가 변화함</li>
+                  <li><strong>Grow</strong>: 점점 커짐</li>
+                  <li><strong>Random</strong>: 무작위 방향으로 이동</li>
+                  <li><strong>Title</strong>: 초기에 순서대로 배치되는 타이틀 요소</li>
+                </ul>
+
+                <div className="typo-moss-help-footer">
+                  <button onClick={() => setShowHelp(false)}>시작하기</button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

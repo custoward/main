@@ -3,7 +3,7 @@
  */
 
 // 애니메이션 모드 (생기는 방식)
-export type AnimationMode = 'layered' | 'rotate' | 'pulse' | 'flicker' | 'grow' | 'random';
+export type AnimationMode = 'layered' | 'rotate' | 'pulse' | 'flicker' | 'grow' | 'random' | 'title';
 
 // Random 모드의 확률 설정
 export interface RandomModeConfig {
@@ -28,10 +28,10 @@ export interface VectorElement {
 export interface ElementConfig {
   elementId: string; // VectorElement.id
   frequency: number; // 생성 빈도 (0 ~ 1)
-  maxSize: number; // 최대 크기
+  size: number; // 크기 (이 값 ±30% 범위로 랜덤)
   animationMode: AnimationMode; // 애니메이션 형식
   animationSpeed: number; // 애니메이션 속도 배율 (1 = 기본 속도)
-  randomModeConfig?: RandomModeConfig; // random 모드일 때의 확률 설정
+  randomModeConfig?: Partial<RandomModeConfig>; // random 모드일 때의 확률 설정 (부분 설정 가능)
 }
 
 // 캔버스에 렌더링될 객체 인스턴스
@@ -56,11 +56,10 @@ export interface RenderConfig {
   canvasWidth: number;
   canvasHeight: number;
   backgroundColor: string; // "#ffffff" or "#000000"
-  density: number; // 화면 밀도 (0~1, 1 = 가장 많음)
+  density?: number; // 하위 호환성을 위해 유지 (사용 안 함)
   spawnRate: number; // 프레임당 생성 확률 (0 ~ 1)
   maxInstances: number; // 동시 활성 인스턴스 최대 개수
-  minSize: number;
-  maxSize: number;
+  spawnSpeed?: number; // 생성 속도 배율 (0.5 ~ 3.0, 기본 1.0)
 }
 
 // 애니메이션 상태 (런타임)

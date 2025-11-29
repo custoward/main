@@ -17,8 +17,11 @@ async function getSVGFileList(): Promise<string[]> {
       'vector_sticker_1.svg',
       'vector_sticker_2.svg',
       'vector_sticker_3.svg',
+      'vector_sticker_4.svg',
+      'vector_sticker_5.svg',
       'vector_circle_1.svg',
       'vector_circle_2.svg',
+      'vector_circle_3.svg',
       'vector_4.svg',
       'vector_5.svg',
       'vector_6.svg',
@@ -26,6 +29,12 @@ async function getSVGFileList(): Promise<string[]> {
       'vector_8.svg',
       'vector_9.svg',
       'vector_10.svg',
+      'vector_11.svg',
+      'vector_12.svg',
+      'vector_13.svg',
+      'vector_14.svg',
+      'vector_15.svg',
+      'vector_원.svg',
     ];
     
     // 실제로 로드 가능한 파일만 필터링
