@@ -252,6 +252,138 @@
 .modal-button-group {
   display: flex;
   gap: 8px;
+  margin-top: 16px;
+}
+
+.modal-button-group button {
+  flex: 1;
+  padding: 10px 16px;
+  background: #1ab551;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.modal-button-group button:hover {
+  background: #0d5a29;
+}
+
+/* 프리셋 섹션 */
+.presets-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #333;
+}
+
+.presets-section h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 12px 0;
+}
+
+.preset-item {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.preset-load-btn {
+  flex: 1;
+  padding: 10px 16px;
+  background: #333;
+  color: #fff;
+  border: 1px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: left;
+  transition: all 0.2s;
+}
+
+.preset-load-btn:hover {
+  background: #444;
+  border-color: #1ab551;
+}
+
+.preset-rename-btn {
+  width: 40px;
+  padding: 10px;
+  background: #17a2b8;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.preset-rename-btn:hover {
+  background: #138496;
+}
+
+.preset-overwrite-btn {
+  width: 40px;
+  padding: 10px;
+  background: #ffc107;
+  color: #000;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.preset-overwrite-btn:hover {
+  background: #ffb300;
+}
+
+.preset-delete-btn {
+  width: 40px;
+  padding: 10px;
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.preset-delete-btn:hover {
+  background: #c82333;
+}
+
+/* 프리셋 저장 모달 */
+.typo-moss-preset-modal {
+  background: #1a1a1a;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.preset-name-input {
+  width: 100%;
+  padding: 12px;
+  background: #222;
+  border: 1px solid #444;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.preset-name-input:focus {
+  outline: none;
+  border-color: #1ab551;
 }
 
 .typo-moss-controls button {

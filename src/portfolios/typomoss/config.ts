@@ -30,9 +30,27 @@ export const ANIMATION_MODE_DEFAULTS = {
     duration: 900, // 15초
     bounceAmount: 0.15, // 반동 크기
   },
-  instant: {
-    duration: 1800, // 30초 (유지 시간)
+  flicker: {
+    duration: 90, // 1.5초
+    minFlickers: 3,
+    maxFlickers: 7,
   },
+  grow: {
+    duration: 999999, // 영구
+    stackSpacing: 0, // 이미지 크기에 따라 동적 계산
+  },
+  random: {
+    duration: 1200, // 평균 지속 시간
+  },
+};
+
+// Random 모드의 기본 확률 설정
+export const DEFAULT_RANDOM_MODE_CONFIG = {
+  layered: 0.2,  // 20%
+  rotate: 0.3,   // 30%
+  pulse: 0.3,    // 30%
+  flicker: 0.1,  // 10%
+  grow: 0.1,     // 10%
 };
 
 // 컬러 팔레트 (Green 테마)
@@ -84,49 +102,49 @@ export const ELEMENT_CONFIGS: Record<string, ElementConfig> = {
     elementId: 'svg-vector_4',
     frequency: 0.1,
     maxSize: 110,
-    animationMode: 'instant',
+    animationMode: 'random',
     animationSpeed: 1.0,
   },
   'svg-vector_5': {
     elementId: 'svg-vector_5',
     frequency: 0.1,
     maxSize: 110,
-    animationMode: 'instant',
+    animationMode: 'random',
     animationSpeed: 1.0,
   },
   'svg-vector_6': {
     elementId: 'svg-vector_6',
     frequency: 0.1,
     maxSize: 110,
-    animationMode: 'instant',
+    animationMode: 'random',
     animationSpeed: 1.0,
   },
   'svg-vector_7': {
     elementId: 'svg-vector_7',
     frequency: 0.1,
     maxSize: 110,
-    animationMode: 'instant',
+    animationMode: 'random',
     animationSpeed: 1.0,
   },
   'svg-vector_8': {
     elementId: 'svg-vector_8',
     frequency: 0.1,
     maxSize: 110,
-    animationMode: 'instant',
+    animationMode: 'random',
     animationSpeed: 1.0,
   },
   'svg-vector_9': {
     elementId: 'svg-vector_9',
     frequency: 0.1,
     maxSize: 110,
-    animationMode: 'instant',
+    animationMode: 'random',
     animationSpeed: 1.0,
   },
   'svg-vector_10': {
     elementId: 'svg-vector_10',
     frequency: 0.1,
     maxSize: 110,
-    animationMode: 'instant',
+    animationMode: 'random',
     animationSpeed: 1.0,
   },
 };

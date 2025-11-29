@@ -60,7 +60,7 @@ function getAnimationModeFromName(filename: string): AnimationMode {
   } else if (filename.includes('circle')) {
     return 'rotate'; // circle: 회전
   } else {
-    return 'instant'; // 기본: 즉시 나타남
+    return 'random'; // 기본: 랜덤
   }
 }
 

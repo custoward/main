@@ -1,11 +1,13 @@
 /**
  * 타이포 이끼 — 애니메이션 모드
  * 
- * 4가지 명확한 애니메이션:
+ * 5가지 애니메이션 + random:
  * 1. layered: 층층이 쌓임
  * 2. rotate: 제자리 회전
- * 3. pulse: 커지며 반동
- * 4. instant: 바로 나타남
+ * 3. pulse: 계속 커졌다 작아졌다
+ * 4. flicker: 깜빡임
+ * 5. grow: 벽돌처럼 단방향 쌓임
+ * 6. random: 위 5가지 중 랜덤 선택
  */
 
 import { AnimationMode, RenderInstance } from './types';
@@ -98,11 +100,10 @@ export function animateRotate(
 }
 
 /**
- * Pulse: 커지며 반동
+ * Pulse: 커지며 반동 (계속 반복)
  * - 0 → 1.0으로 커지며 나타남
- * - 1.15까지 튀어나감 (반동)
- * - 1.0으로 정착
- * - 사라질 때 작아짐
+ * - 지속적으로 커졌다 작아졌다 반복
+ * - 사라질 때 페이드 아웃
  */
 export function animatePulse(
   progress: number
@@ -110,36 +111,31 @@ export function animatePulse(
   scale: number;
   opacity: number;
 } {
-  const bounceAmount = ANIMATION_MODE_DEFAULTS.pulse.bounceAmount;
-  const fadeInDuration = 0.3; // 처음 30%
-  const bounceEnd = 0.5; // 반동 종료 50%
+  const fadeInDuration = 0.15; // 처음 15%만 페이드 인
   const fadeOutStart = 0.85; // 마지막 15%
+  const pulseSpeed = 3; // 펄스 속도 (3 사이클)
   
   let scale: number;
   let opacity: number;
   
-  // 등장 (0 ~ 0.3): 0 → 1.0
+  // 등장 (0 ~ 0.15): 0 → 1.0
   if (progress < fadeInDuration) {
     const fadeProgress = progress / fadeInDuration;
     scale = fadeProgress;
     opacity = fadeProgress;
   }
-  // 반동 (0.3 ~ 0.5): 1.0 → 1.15 → 1.0
-  else if (progress < bounceEnd) {
-    const bounceProgress = (progress - fadeInDuration) / (bounceEnd - fadeInDuration);
-    const bounce = Math.sin(bounceProgress * Math.PI) * bounceAmount;
-    scale = 1.0 + bounce;
-    opacity = 1.0;
-  }
-  // 사라짐 (0.85 ~ 1.0): 1.0 → 0.3
+  // 사라짐 (0.85 ~ 1.0): 페이드 아웃
   else if (progress > fadeOutStart) {
     const fadeProgress = (progress - fadeOutStart) / (1 - fadeOutStart);
-    scale = 1.0 - fadeProgress * 0.7;
+    // 계속 펄스하면서 페이드 아웃
+    const pulseAmount = Math.sin(progress * Math.PI * 2 * pulseSpeed) * 0.15;
+    scale = (1.0 + pulseAmount) * (1.0 - fadeProgress * 0.7);
     opacity = 1.0 - fadeProgress;
   }
-  // 유지 (0.5 ~ 0.85)
+  // 펄스 반복 (0.15 ~ 0.85): 0.85 ~ 1.15 반복
   else {
-    scale = 1.0;
+    const pulseAmount = Math.sin(progress * Math.PI * 2 * pulseSpeed) * 0.15;
+    scale = 1.0 + pulseAmount;
     opacity = 1.0;
   }
 
@@ -150,17 +146,52 @@ export function animatePulse(
 }
 
 /**
- * Instant: 바로 나타남
- * - 즉시 등장
- * - 유지
+ * Flicker: 점멸 (3-7번 랜덤)
+ * - 깜빡이며 등장
+ * - 마지막에 페이드 아웃
  */
-export function animateInstant(): {
+export function animateFlicker(
+  instance: RenderInstance,
+  progress: number
+): {
   scale: number;
   opacity: number;
+  rotation: number;
+} {
+  const flickerCount = (instance.customProps?.flickerCount as number) || 5;
+  const flickerProgress = progress * flickerCount;
+  const isVisible = Math.floor(flickerProgress) % 2 === 0;
+  
+  // 마지막에 페이드 아웃
+  let opacity = isVisible ? 1.0 : 0.0;
+  if (progress > 0.85) {
+    opacity *= (1 - (progress - 0.85) / 0.15);
+  }
+  
+  return {
+    scale: 1.0,
+    opacity,
+    rotation: instance.rotation,
+  };
+}
+
+/**
+ * Grow: 벽돌처럼 단방향으로 쌓임
+ * - 짧은 면 방향으로 긴 면의 거리만큼 멀어져서 쌓임
+ * - layered와 유사하지만 단방향
+ */
+export function animateGrow(
+  instance: RenderInstance,
+  progress: number
+): {
+  scale: number;
+  opacity: number;
+  rotation: number;
 } {
   return {
     scale: 1.0,
     opacity: 1.0,
+    rotation: instance.rotation,
   };
 }
 
@@ -175,15 +206,22 @@ export function getAnimationProperties(
 ): Record<string, any> {
   const progress = calculateAnimationProgress(instance.age, instance.lifespan);
 
-  switch (mode) {
+  // random 모드는 actualMode를 사용
+  const actualMode = mode === 'random' 
+    ? (instance.customProps?.actualMode as AnimationMode) || 'pulse'
+    : mode;
+
+  switch (actualMode) {
     case 'layered':
       return animateLayered(instance, progress);
     case 'rotate':
       return animateRotate(instance, progress);
     case 'pulse':
       return animatePulse(progress);
-    case 'instant':
-      return animateInstant();
+    case 'flicker':
+      return animateFlicker(instance, progress);
+    case 'grow':
+      return animateGrow(instance, progress);
     default:
       return { scale: 1, opacity: 1, rotation: 0 };
   }

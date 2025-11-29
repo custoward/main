@@ -11,12 +11,27 @@ import { ElementConfig } from './types';
 import './TypoMoss.css';
 
 const STORAGE_KEY = 'typomoss-settings';
+const PRESETS_KEY = 'typomoss-presets';
+
+interface Preset {
+  name: string;
+  elementConfigs: Record<string, ElementConfig>;
+  density: number;
+  minElementSize: number;
+}
 
 const TypoMoss: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<TypoMossRenderer | null>(null);
   const [stats, setStats] = useState({ frameCount: 0, instanceCount: 0, maxInstances: 0 });
   const [showSettings, setShowSettings] = useState(false);
+  
+  // 프리셋 상태
+  const [presets, setPresets] = useState<Preset[]>([]);
+  const [showPresetModal, setShowPresetModal] = useState(false);
+  const [presetNameInput, setPresetNameInput] = useState('');
+  const [editingPresetIndex, setEditingPresetIndex] = useState<number | null>(null);
+  const [isRenamingOnly, setIsRenamingOnly] = useState(false);
   
   // localStorage에서 설정 불러오기
   const loadSettings = () => {
@@ -71,6 +86,18 @@ const TypoMoss: React.FC = () => {
   const recordedChunksRef = useRef<Blob[]>([]);
   const [recordingTime, setRecordingTime] = useState(0);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 프리셋 로드
+  useEffect(() => {
+    try {
+      const savedPresets = localStorage.getItem(PRESETS_KEY);
+      if (savedPresets) {
+        setPresets(JSON.parse(savedPresets));
+      }
+    } catch (e) {
+      console.error('[TypoMoss] 프리셋 불러오기 실패:', e);
+    }
+  }, []);
 
   useEffect(() => {
     const initializeRenderer = async () => {
@@ -164,6 +191,119 @@ const TypoMoss: React.FC = () => {
         rendererRef.current.updateElementConfig(elementId, updated[elementId]);
       }
       saveSettings(updated, density, minElementSize);
+    }
+  };
+
+  // 프리셋 저장
+  const savePreset = () => {
+    if (!presetNameInput.trim()) {
+      alert('프리셋 이름을 입력해주세요.');
+      return;
+    }
+    
+    if (editingPresetIndex === null && presets.length >= 3) {
+      alert('최대 3개의 프리셋만 저장할 수 있습니다.');
+      return;
+    }
+
+    let updatedPresets: Preset[];
+    
+    if (editingPresetIndex !== null) {
+      updatedPresets = [...presets];
+      
+      if (isRenamingOnly) {
+        // 이름만 변경
+        updatedPresets[editingPresetIndex] = {
+          ...updatedPresets[editingPresetIndex],
+          name: presetNameInput,
+        };
+        alert(`프리셋 이름이 "${presetNameInput}"(으)로 변경되었습니다.`);
+      } else {
+        // 설정 덮어쓰기
+        const newPreset: Preset = {
+          name: presetNameInput,
+          elementConfigs: { ...elementConfigs },
+          density,
+          minElementSize,
+        };
+        updatedPresets[editingPresetIndex] = newPreset;
+        alert(`프리셋 "${presetNameInput}"이(가) 업데이트되었습니다.`);
+      }
+    } else {
+      // 새로 추가
+      const newPreset: Preset = {
+        name: presetNameInput,
+        elementConfigs: { ...elementConfigs },
+        density,
+        minElementSize,
+      };
+      updatedPresets = [...presets, newPreset];
+      alert(`프리셋 "${presetNameInput}"이(가) 저장되었습니다.`);
+    }
+    
+    setPresets(updatedPresets);
+    localStorage.setItem(PRESETS_KEY, JSON.stringify(updatedPresets));
+    
+    setPresetNameInput('');
+    setEditingPresetIndex(null);
+    setIsRenamingOnly(false);
+    setShowPresetModal(false);
+  };
+
+  // 프리셋 이름만 변경
+  const renamePreset = (index: number) => {
+    setEditingPresetIndex(index);
+    setPresetNameInput(presets[index].name);
+    setIsRenamingOnly(true);
+    setShowPresetModal(true);
+  };
+
+  // 프리셋 설정 덮어쓰기
+  const overwritePreset = (index: number) => {
+    setEditingPresetIndex(index);
+    setPresetNameInput(presets[index].name);
+    setIsRenamingOnly(false);
+    setShowPresetModal(true);
+  };
+
+  // 프리셋 로드
+  const loadPreset = (preset: Preset) => {
+    // 현재 elementConfigs와 병합 (새로 추가된 요소는 기본값 유지)
+    const mergedConfigs: Record<string, ElementConfig> = { ...elementConfigs };
+    
+    // 프리셋의 설정으로 덮어쓰기 (존재하는 것만)
+    Object.entries(preset.elementConfigs).forEach(([id, config]) => {
+      if (mergedConfigs[id]) {
+        mergedConfigs[id] = config;
+      }
+    });
+    
+    setElementConfigs(mergedConfigs);
+    setDensity(preset.density);
+    setMinElementSize(preset.minElementSize);
+
+    if (rendererRef.current) {
+      rendererRef.current.updateConfig({ 
+        density: preset.density, 
+        minSize: preset.minElementSize 
+      });
+      
+      Object.entries(mergedConfigs).forEach(([elementId, config]) => {
+        rendererRef.current!.updateElementConfig(elementId, config);
+      });
+    }
+
+    saveSettings(mergedConfigs, preset.density, preset.minElementSize);
+    alert(`프리셋 "${preset.name}"을(를) 불러왔습니다.`);
+  };
+
+  // 프리셋 삭제
+  const deletePreset = (index: number) => {
+    const presetName = presets[index].name;
+    if (window.confirm(`프리셋 "${presetName}"을(를) 삭제하시겠습니까?`)) {
+      const updatedPresets = presets.filter((_, i) => i !== index);
+      setPresets(updatedPresets);
+      localStorage.setItem(PRESETS_KEY, JSON.stringify(updatedPresets));
     }
   };
 
@@ -294,7 +434,52 @@ const TypoMoss: React.FC = () => {
 
                 <div className="modal-button-group">
                   <button onClick={handleReset}>리셋</button>
+                  <button onClick={() => {
+                    setEditingPresetIndex(null);
+                    setPresetNameInput('');
+                    setShowPresetModal(true);
+                  }}>
+                    프리셋 저장
+                  </button>
                 </div>
+
+                {/* 프리셋 목록 */}
+                {presets.length > 0 && (
+                  <div className="presets-section">
+                    <h3>저장된 프리셋</h3>
+                    {presets.map((preset, index) => (
+                      <div key={index} className="preset-item">
+                        <button 
+                          className="preset-load-btn"
+                          onClick={() => loadPreset(preset)}
+                        >
+                          {preset.name}
+                        </button>
+                        <button 
+                          className="preset-rename-btn"
+                          onClick={() => renamePreset(index)}
+                          title="이름 변경"
+                        >
+                          ✏️
+                        </button>
+                        <button 
+                          className="preset-overwrite-btn"
+                          onClick={() => overwritePreset(index)}
+                          title="설정 덮어쓰기"
+                        >
+                          💾
+                        </button>
+                        <button 
+                          className="preset-delete-btn"
+                          onClick={() => deletePreset(index)}
+                          title="삭제"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 <div className="stats-section">
                   <h3>통계</h3>
@@ -362,10 +547,42 @@ const TypoMoss: React.FC = () => {
                               >
                                 <option value="layered">Layered (층층이 쌓임)</option>
                                 <option value="rotate">Rotate (회전)</option>
-                                <option value="pulse">Pulse (반동)</option>
-                                <option value="instant">Instant (즉시)</option>
+                                <option value="pulse">Pulse (계속 커졌다 작아졌다)</option>
+                                <option value="flicker">Flicker (점멸)</option>
+                                <option value="grow">Grow (벽돌 쌓기)</option>
+                                <option value="random">Random (랜덤)</option>
                               </select>
                             </div>
+
+                            {config.animationMode === 'random' && (
+                              <div className="random-mode-config">
+                                <div style={{ fontSize: '12px', marginBottom: '8px', color: '#666' }}>
+                                  Random 모드 확률 설정:
+                                </div>
+                                {(['layered', 'rotate', 'pulse', 'flicker', 'grow'] as const).map((mode) => (
+                                  <div key={mode} className="control-row" style={{ fontSize: '11px' }}>
+                                    <label style={{ minWidth: '60px' }}>{mode}:</label>
+                                    <input
+                                      type="range"
+                                      min="0"
+                                      max="1"
+                                      step="0.01"
+                                      value={config.randomModeConfig?.[mode] || 0}
+                                      onChange={(e) => {
+                                        const newConfig = {
+                                          ...config.randomModeConfig,
+                                          [mode]: parseFloat(e.target.value),
+                                        };
+                                        handleUpdateElementConfig(elementId, 'randomModeConfig', newConfig);
+                                      }}
+                                    />
+                                    <span style={{ minWidth: '35px' }}>
+                                      {((config.randomModeConfig?.[mode] || 0) * 100).toFixed(0)}%
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
 
                             <div className="control-row">
                               <label>속도:</label>
@@ -384,6 +601,64 @@ const TypoMoss: React.FC = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 프리셋 저장/편집 모달 */}
+        {showPresetModal && (
+          <div className="typo-moss-modal-overlay">
+            <div className="typo-moss-preset-modal">
+              <div className="typo-moss-modal-header">
+                <h2>
+                  {editingPresetIndex !== null 
+                    ? (isRenamingOnly ? '프리셋 이름 변경' : '프리셋 덮어쓰기')
+                    : '프리셋 저장'}
+                </h2>
+                <button 
+                  className="typo-moss-modal-close"
+                  onClick={() => {
+                    setShowPresetModal(false);
+                    setPresetNameInput('');
+                    setEditingPresetIndex(null);
+                    setIsRenamingOnly(false);
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="typo-moss-modal-content">
+                <p>
+                  {editingPresetIndex !== null 
+                    ? (isRenamingOnly 
+                        ? '프리셋의 이름만 변경합니다.' 
+                        : '현재 설정으로 프리셋을 덮어씁니다.')
+                    : '현재 설정을 프리셋으로 저장합니다. (최대 3개)'}
+                </p>
+                <input
+                  type="text"
+                  placeholder="프리셋 이름 입력"
+                  value={presetNameInput}
+                  onChange={(e) => setPresetNameInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && savePreset()}
+                  className="preset-name-input"
+                />
+                <div className="modal-button-group">
+                  <button onClick={savePreset}>
+                    {editingPresetIndex !== null 
+                      ? (isRenamingOnly ? '이름 변경' : '덮어쓰기')
+                      : '저장'}
+                  </button>
+                  <button onClick={() => {
+                    setShowPresetModal(false);
+                    setPresetNameInput('');
+                    setEditingPresetIndex(null);
+                    setIsRenamingOnly(false);
+                  }}>
+                    취소
+                  </button>
                 </div>
               </div>
             </div>

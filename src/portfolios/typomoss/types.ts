@@ -3,7 +3,16 @@
  */
 
 // 애니메이션 모드 (생기는 방식)
-export type AnimationMode = 'layered' | 'rotate' | 'pulse' | 'instant';
+export type AnimationMode = 'layered' | 'rotate' | 'pulse' | 'flicker' | 'grow' | 'random';
+
+// Random 모드의 확률 설정
+export interface RandomModeConfig {
+  layered: number; // 0 ~ 1
+  rotate: number; // 0 ~ 1
+  pulse: number; // 0 ~ 1
+  flicker: number; // 0 ~ 1
+  grow: number; // 0 ~ 1
+}
 
 // 벡터 요소 (SVG 또는 경로 정의)
 export interface VectorElement {
@@ -22,6 +31,7 @@ export interface ElementConfig {
   maxSize: number; // 최대 크기
   animationMode: AnimationMode; // 애니메이션 형식
   animationSpeed: number; // 애니메이션 속도 배율 (1 = 기본 속도)
+  randomModeConfig?: RandomModeConfig; // random 모드일 때의 확률 설정
 }
 
 // 캔버스에 렌더링될 객체 인스턴스
