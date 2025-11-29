@@ -112,12 +112,12 @@ const TypoMoss: React.FC = () => {
   const autoResetTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoResetStartTimeRef = useRef<number>(0);
 
-  // 최초 로딩 시 도움말 표시
+  // 최초 로딩 시 도움말 표시 (로딩보다 먼저)
   useEffect(() => {
     const hasSeenHelp = localStorage.getItem('typomoss-help-seen');
     if (!hasSeenHelp) {
       setShowHelp(true);
-      localStorage.setItem('typomoss-help-seen', 'true');
+      // localStorage는 도움말 닫을 때 설정하도록 변경
     }
   }, []);
 
@@ -1004,7 +1004,10 @@ const TypoMoss: React.FC = () => {
                 </ul>
 
                 <div className="typo-moss-help-footer">
-                  <button onClick={() => setShowHelp(false)}>시작하기</button>
+                  <button onClick={() => {
+                    setShowHelp(false);
+                    localStorage.setItem('typomoss-help-seen', 'true');
+                  }}>시작하기</button>
                 </div>
               </div>
             </div>
