@@ -39,3 +39,10 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
   transform: scale(1.05);
 }
+
+/* 모바일에서 뒤로가기 버튼 숨김 */
+@media (max-width: 768px) {
+  .breath-back-button {
+    display: none;
+  }
+}

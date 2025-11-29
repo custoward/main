@@ -218,7 +218,7 @@ export const ELEMENT_CONFIGS: Record<string, ElementConfig> = {
 // 기본 프리셋
 export const DEFAULT_PRESETS = [
   {
-    "name": "작업용",
+    "name": "default",
     "elementConfigs": {
       "svg-vector_sticker_1": {
         "elementId": "svg-vector_sticker_1",
