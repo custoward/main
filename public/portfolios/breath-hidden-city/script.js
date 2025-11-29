@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.centerCellEl = null;
   window.baseCellFontPx = 12;
   window.isMobile = window.innerWidth <= 768;
-  window.mobileStageIndex = 0; // 모바일 단계 인덱스 (0~3)
+  window.mobileStageIndex = -1; // 모바일 단계 인덱스 (-1: 숨은 모드, 0~3: 단계)
 
   // per-onomatopoeia font map (user-editable)
   window.DEFAULT_VEHICLE_FONT = "Pretendard, sans-serif";
@@ -161,8 +161,15 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // 모바일: 현재 단계 표시
     if (window.isMobile) {
-      toggleMainLabel.textContent = window.currentStage.koShort || "";
-      toggleSubLabel.textContent = window.currentStage.enShort || "";
+      if (window.mobileStageIndex === -1) {
+        // 숨은 모드
+        toggleMainLabel.textContent = "숨은";
+        toggleSubLabel.textContent = "Hidden";
+      } else {
+        // 단계 표시
+        toggleMainLabel.textContent = window.currentStage.koShort || "";
+        toggleSubLabel.textContent = window.currentStage.enShort || "";
+      }
       return;
     }
     
@@ -249,8 +256,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (window.isMobile) {
       // 모바일: mobileStageIndex에 따라 단계 결정 (화면 크기 무관)
-      stage = window.STAGES[window.mobileStageIndex];
-      side = Math.floor((stage.a + stage.b) / 2); // 단계의 중간값 사용
+      if (window.mobileStageIndex === -1) {
+        // 숨은 모드: 첫 번째 단계(인간) 사용
+        stage = window.STAGES[0];
+        side = Math.floor((stage.a + stage.b) / 2);
+      } else {
+        stage = window.STAGES[window.mobileStageIndex];
+        side = Math.floor((stage.a + stage.b) / 2);
+      }
     } else {
       // 데스크톱: 기존 로직 (화면 크기에 따라)
       side = areaToSide(area);
@@ -279,6 +292,13 @@ document.addEventListener('DOMContentLoaded', () => {
     setVignette(area);
     updateToggleLabels();
 
+    // 모바일에서는 인간-도시 모드일 때 hiddenMode 활성화 (애니메이션/소리 켜기)
+    if (window.isMobile && window.mobileStageIndex >= 0) {
+      window.hiddenMode = true;
+    } else if (window.isMobile) {
+      window.hiddenMode = false;
+    }
+
     // fx 반영
     window.syncAllFX();
   }
@@ -286,8 +306,11 @@ document.addEventListener('DOMContentLoaded', () => {
   function toggleHidden() {
     // 모바일에서는 토글 버튼이 단계 증가로 동작
     if (window.isMobile) {
-      window.mobileStageIndex = (window.mobileStageIndex + 1) % 4; // 0~3 순환
-      window.hiddenMode = false; // 모바일에서는 항상 off 상태로 시작
+      window.mobileStageIndex = window.mobileStageIndex + 1;
+      if (window.mobileStageIndex > 3) {
+        window.mobileStageIndex = -1; // 도시 다음은 다시 숨은 모드
+      }
+      window.hiddenMode = false;
       update(); // 단계 변경 적용
       return;
     }
