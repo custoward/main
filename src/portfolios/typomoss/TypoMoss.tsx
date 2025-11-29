@@ -931,6 +931,13 @@ const TypoMoss: React.FC = () => {
         {!showSettings && !showHelp && (
           <>
             <button 
+              className="typo-moss-back-button"
+              onClick={() => window.location.href = '/portfolio'}
+              title="포트폴리오 목록"
+            >
+              ←
+            </button>
+            <button 
               className="typo-moss-settings-fab"
               onClick={() => setShowSettings(true)}
             >
