@@ -1,10 +1,12 @@
 .breath-page { 
-  height: 100vh; 
+  height: 100vh;
+  height: 100dvh; /* 동적 뷰포트 높이 */
   width: 100vw; 
   margin: 0; 
   padding: 0; 
   background: #000;
   position: relative;
+  overflow: hidden;
 }
 
 .breath-iframe { 

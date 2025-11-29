@@ -277,7 +277,11 @@ const TypoMoss: React.FC = () => {
         
         // 그 다음 저장된 프리셋 설정으로 덮어쓰기
         Object.entries(elementConfigs).forEach(([elementId, config]) => {
-          renderer.updateElementConfig(elementId, config);
+          // 모바일에서는 크기를 0.6배로 조정
+          const adjustedConfig = isMobile 
+            ? { ...config, size: Math.round(config.size * 0.6) }
+            : config;
+          renderer.updateElementConfig(elementId, adjustedConfig);
         });
         
         // title 순서 재계산
@@ -312,7 +316,7 @@ const TypoMoss: React.FC = () => {
 
     initializeRenderer();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [spawnSpeed, presetLoaded, canvasSize]);
+  }, [spawnSpeed, presetLoaded, canvasSize, isMobile]);
 
   // 설정을 localStorage에 저장
   const saveSettings = (configs: Record<string, ElementConfig>, maxInst: number, minSize: number) => {
