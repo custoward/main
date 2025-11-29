@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import ProjectModal from './ProjectModal';
 import './style.css';
 
-type Project = {
+export type Project = {
   id: string;
   title: string;
   englishTitle?: string;
@@ -12,7 +12,7 @@ type Project = {
   src?: string;
 };
 
-const SAMPLE_PROJECTS: Project[] = [
+export const SAMPLE_PROJECTS: Project[] = [
   {
     id: 'proj-1',
     title: '타이포 이끼',
@@ -28,14 +28,6 @@ const SAMPLE_PROJECTS: Project[] = [
     date: '25/10',
     description: '반응형 모션 타이포. 숨들이 모여 이루어지는 도시.',
     type: 'canvas'
-  },
-  {
-    id: 'proj-3',
-    title: 'Video Embed Example',
-    date: '20/08',
-    description: 'A video case study embedded via iframe.',
-    type: 'video',
-    src: ''
   }
 ];
 

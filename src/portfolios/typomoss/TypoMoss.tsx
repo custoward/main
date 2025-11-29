@@ -40,6 +40,7 @@ const TypoMoss: React.FC = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [canvasSize, setCanvasSize] = useState({ width: 1920, height: 1080 });
   const [selectedSizePreset, setSelectedSizePreset] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   
   // 프리셋 상태
   const [presets, setPresets] = useState<Preset[]>([]);
@@ -258,6 +259,7 @@ const TypoMoss: React.FC = () => {
       try {
         // 벡터 요소 로드
         console.log('[TypoMoss] 벡터 요소 로드 시작');
+        setIsLoading(true);
         const elements = await loadVectorElements();
         console.log('[TypoMoss] 벡터 요소 로드 완료:', elements.length);
 
@@ -285,6 +287,9 @@ const TypoMoss: React.FC = () => {
         console.log('[TypoMoss] 렌더러 시작');
 
         rendererRef.current = renderer;
+        
+        // 로딩 완료
+        setIsLoading(false);
 
         // 통계 업데이트 (1초마다)
         const statsInterval = setInterval(() => {
@@ -301,6 +306,7 @@ const TypoMoss: React.FC = () => {
         };
       } catch (err) {
         console.error('[TypoMoss] 초기화 에러:', err);
+        setIsLoading(false); // 에러 시에도 로딩 해제
       }
     };
 
@@ -952,6 +958,13 @@ const TypoMoss: React.FC = () => {
               ?
             </button>
           </>
+        )}
+
+        {/* 로딩 오버레이 */}
+        {isLoading && (
+          <div className="typo-moss-loading-overlay">
+            <div className="typo-moss-loading-spinner"></div>
+          </div>
         )}
 
         {/* 도움말 모달 */}
