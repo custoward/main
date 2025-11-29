@@ -21,6 +21,8 @@ document.addEventListener('DOMContentLoaded', () => {
   window.lastCols = 0;
   window.centerCellEl = null;
   window.baseCellFontPx = 12;
+  window.isMobile = window.innerWidth <= 768;
+  window.mobileStageIndex = 0; // 모바일 단계 인덱스 (0~3)
 
   // per-onomatopoeia font map (user-editable)
   window.DEFAULT_VEHICLE_FONT = "Pretendard, sans-serif";
@@ -156,6 +158,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function updateToggleLabels() {
     if (!window.currentStage) return;
+    
+    // 모바일: 현재 단계 표시
+    if (window.isMobile) {
+      toggleMainLabel.textContent = window.currentStage.koShort || "";
+      toggleSubLabel.textContent = window.currentStage.enShort || "";
+      return;
+    }
+    
+    // 데스크톱: 기존 로직 (숨은/Hidden 토글)
     if (window.hiddenMode) {
       // toggled: show current stage short labels
       toggleMainLabel.textContent = window.currentStage.koShort || "";
@@ -231,12 +242,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const hh = window.innerHeight || 600;
     const area = ww * hh;
 
-    // 리사이즈 시 숨 모드 강제 해제
-    // window.hiddenMode = false;
-    // toggleSubLabel.textContent = "Breath";
-    // toggleBtn.classList.remove("active");
+    // 모바일 감지
+    window.isMobile = ww <= 768;
 
-    const side = areaToSide(area);
+    let side, stage;
+
+    if (window.isMobile) {
+      // 모바일: mobileStageIndex에 따라 단계 결정 (화면 크기 무관)
+      stage = window.STAGES[window.mobileStageIndex];
+      side = Math.floor((stage.a + stage.b) / 2); // 단계의 중간값 사용
+    } else {
+      // 데스크톱: 기존 로직 (화면 크기에 따라)
+      side = areaToSide(area);
+      stage = pickStage(side);
+    }
+
     const rows = side;
     const cols = sideToCols(side);
 
@@ -244,7 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const cellUnit = Math.min(ww / cols, hh / rows);
     const cellFont = clamp(0.75 * cellUnit, 10, 300);
 
-    const stage = pickStage(side);
     window.currentStage = stage;
 
     // If stage changed (e.g., TOWN -> CITY), hard-stop non-matching systems
@@ -265,6 +284,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function toggleHidden() {
+    // 모바일에서는 토글 버튼이 단계 증가로 동작
+    if (window.isMobile) {
+      window.mobileStageIndex = (window.mobileStageIndex + 1) % 4; // 0~3 순환
+      window.hiddenMode = false; // 모바일에서는 항상 off 상태로 시작
+      update(); // 단계 변경 적용
+      return;
+    }
+
+    // 데스크톱: 기존 토글 로직
     window.hiddenMode = !window.hiddenMode;
 
     // 토글 켤 때 혹시 남아있을 수 있는 resize-suspend 해제
