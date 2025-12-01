@@ -98,12 +98,18 @@ const TypoMoss: React.FC = () => {
   const [spawnSpeed, setSpawnSpeed] = useState(1.0); // 생성 속도 배율
   const [presetLoaded, setPresetLoaded] = useState(false); // 프리셋 로딩 완료 플래그
   
+  // 시드 상태
+  const [seed, setSeed] = useState<number>(() => Math.floor(Math.random() * 1000000));
+  const [seedInput, setSeedInput] = useState<string>('');
+  const [seedHistory, setSeedHistory] = useState<number[]>([]);
+  
   // 녹화 상태
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const [recordingTime, setRecordingTime] = useState(0);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const currentSeedRef = useRef<number>(seed);
   
   // 자동 리셋 상태
   const [autoResetEnabled, setAutoResetEnabled] = useState(false);
@@ -111,6 +117,7 @@ const TypoMoss: React.FC = () => {
   const [autoResetStopsRecording, setAutoResetStopsRecording] = useState(true); // 자동 리셋 시 녹화 중지
   const autoResetTimerRef = useRef<NodeJS.Timeout | null>(null);
   const autoResetStartTimeRef = useRef<number>(0);
+  const recordingAutoStopRef = useRef<NodeJS.Timeout | null>(null);
 
   // 최초 로딩 시 도움말 표시 (로딩보다 먼저)
   useEffect(() => {
@@ -202,7 +209,17 @@ const TypoMoss: React.FC = () => {
   }, []);
   
   // 자동 리셋 타이머
+  // 자동 리셋 타이머 (녹화 중이 아닐 때만)
   useEffect(() => {
+    // 녹화 중일 때는 자동 리셋 타이머를 설정하지 않음
+    if (isRecording) {
+      if (autoResetTimerRef.current) {
+        clearInterval(autoResetTimerRef.current);
+        autoResetTimerRef.current = null;
+      }
+      return;
+    }
+
     if (autoResetEnabled && autoResetInterval > 0) {
       console.log(`[TypoMoss] 자동 리셋 타이머 시작: ${autoResetInterval}초 간격`);
       autoResetStartTimeRef.current = Date.now();
@@ -211,22 +228,24 @@ const TypoMoss: React.FC = () => {
         const elapsed = ((Date.now() - autoResetStartTimeRef.current) / 1000).toFixed(1);
         console.log(`[TypoMoss] 자동 리셋 실행 (시작 후 ${elapsed}초 경과, 설정값: ${autoResetInterval}초)`);
         
-        // 녹화 자동 중지가 활성화되어 있고 녹화 중이면 중지
-        if (autoResetStopsRecording && isRecording && mediaRecorderRef.current) {
-          console.log('[TypoMoss] 자동 리셋으로 인한 녹화 중지');
-          if (mediaRecorderRef.current.state !== 'inactive') {
-            mediaRecorderRef.current.stop();
-          }
-          if (recordingIntervalRef.current) {
-            clearInterval(recordingIntervalRef.current);
-            recordingIntervalRef.current = null;
-          }
-        }
+        // 새 시드 생성 및 리셋
+        const newSeed = Math.floor(Math.random() * 1000000);
+        
+        // 이전 시드를 히스토리에 추가 (최대 20개)
+        setSeedHistory(prev => {
+          const updated = [currentSeedRef.current, ...prev];
+          return updated.slice(0, 20);
+        });
+        
+        setSeed(newSeed);
+        currentSeedRef.current = newSeed;
         
         if (rendererRef.current) {
+          rendererRef.current.updateConfig({ seed: newSeed });
           rendererRef.current.reset();
         }
-        autoResetStartTimeRef.current = Date.now(); // 리셋 후 시간 갱신
+        
+        autoResetStartTimeRef.current = Date.now();
       }, autoResetInterval * 1000);
       
       return () => {
@@ -241,7 +260,7 @@ const TypoMoss: React.FC = () => {
         autoResetTimerRef.current = null;
       }
     }
-  }, [autoResetEnabled, autoResetInterval, autoResetStopsRecording, isRecording]);
+  }, [autoResetEnabled, autoResetInterval, isRecording]);
 
   useEffect(() => {
     const initializeRenderer = async () => {
@@ -270,6 +289,7 @@ const TypoMoss: React.FC = () => {
           spawnSpeed: spawnSpeed,
           canvasWidth: canvasSize.width,
           canvasHeight: canvasSize.height,
+          seed: seed,
         });
         
         // 먼저 요소 설정 (기본 설정 로드)
@@ -500,24 +520,78 @@ const TypoMoss: React.FC = () => {
         clearInterval(recordingIntervalRef.current);
         recordingIntervalRef.current = null;
       }
+      // 녹화 자동 중지 타이머 정리
+      if (recordingAutoStopRef.current) {
+        clearTimeout(recordingAutoStopRef.current);
+        recordingAutoStopRef.current = null;
+      }
     } else {
-      // 녹화 시작 전 리셋
-      rendererRef.current?.reset();
-      
-      // 자동 리셋이 활성화된 경우에만 타이머 초기화
-      if (autoResetEnabled) {
-        if (autoResetTimerRef.current) {
-          clearInterval(autoResetTimerRef.current);
+      // 녹화 시작: 먼저 입력된 시드가 있으면 그 시드를 적용하고,
+      // 없으면 새 시드를 생성(리셋)합니다. 이후 자동 리셋 타이머를 초기화합니다.
+      const seedTxt = (seedInput || '').toString().trim();
+      if (seedTxt !== '') {
+        const parsed = parseInt(seedTxt, 10);
+        const newSeed = Number.isNaN(parsed) ? Math.floor(Math.random() * 1000000) : parsed;
+
+        // 이전 시드 히스토리에 추가
+        setSeedHistory(prev => {
+          const updated = [currentSeedRef.current, ...prev];
+          return updated.slice(0, 20);
+        });
+
+        setSeed(newSeed);
+        currentSeedRef.current = newSeed;
+        setSeedInput('');
+        if (rendererRef.current) {
+          rendererRef.current.updateConfig({ seed: newSeed });
+          rendererRef.current.reset();
         }
-        autoResetStartTimeRef.current = Date.now();
-        autoResetTimerRef.current = setInterval(() => {
-          const elapsed = ((Date.now() - autoResetStartTimeRef.current) / 1000).toFixed(1);
-          console.log(`[TypoMoss] 자동 리셋 실행 (시작 후 ${elapsed}초 경과, 설정값: ${autoResetInterval}초)`);
-          if (rendererRef.current) {
-            rendererRef.current.reset();
+      } else {
+        // 입력된 시드가 없으면 기존 리셋 동작 수행
+        handleReset();
+      }
+
+      // 자동 리셋 카운트 초기화
+      autoResetStartTimeRef.current = Date.now();
+
+      // 자동 리셋이 활성화된 경우 타이머 설정 (한 번만 실행)
+      if (autoResetEnabled && autoResetInterval > 0) {
+          // 기존 타이머 정리 (녹화용 타이머)
+          if (recordingAutoStopRef.current) {
+            clearTimeout(recordingAutoStopRef.current);
+            recordingAutoStopRef.current = null;
           }
-          autoResetStartTimeRef.current = Date.now();
-        }, autoResetInterval * 1000);
+
+          // 자동 리셋 간격 후 녹화 자동 중지 (녹화용 타이머)
+          recordingAutoStopRef.current = setTimeout(() => {
+            console.log(`[TypoMoss] 녹화 자동 중지 타이머 실행`);
+            if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+              mediaRecorderRef.current.stop();
+            }
+            if (recordingIntervalRef.current) {
+              clearInterval(recordingIntervalRef.current);
+              recordingIntervalRef.current = null;
+            }
+
+            // 자동 리셋 동작: 녹화가 자동 중지된 후 새 시드를 생성하여 적용
+            try {
+              const newSeed = Math.floor(Math.random() * 1000000);
+              setSeedHistory(prev => {
+                const updated = [currentSeedRef.current, ...prev];
+                return updated.slice(0, 20);
+              });
+              setSeed(newSeed);
+              currentSeedRef.current = newSeed;
+              if (rendererRef.current) {
+                rendererRef.current.updateConfig({ seed: newSeed });
+                rendererRef.current.reset();
+              }
+            } catch (e) {
+              console.error('[TypoMoss] 자동 리셋 적용 중 오류:', e);
+            }
+
+            recordingAutoStopRef.current = null;
+          }, autoResetInterval * 1000);
       }
       
       // 녹화 시작
@@ -537,6 +611,9 @@ const TypoMoss: React.FC = () => {
         mimeType = 'video/webm;codecs=h264';
       }
 
+      // Capture the seed used for this recording so filename remains stable
+      const recordingSeed = currentSeedRef.current;
+
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: mimeType,
         videoBitsPerSecond: 8000000 // 8 Mbps
@@ -554,21 +631,23 @@ const TypoMoss: React.FC = () => {
         const a = document.createElement('a');
         a.href = url;
         
-        // 파일명 생성: TypographyMoss_YYYYMMDD_HHMMSS
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        const timestamp = `${year}${month}${day}_${hours}${minutes}${seconds}`;
-        
-        a.download = `TypographyMoss_${timestamp}.${fileExtension}`;
+        // 파일명 생성: TypographyMoss_시드값 (녹화 시작 시점의 시드 사용)
+        a.download = `TypographyMoss_${recordingSeed}.${fileExtension}`;
         a.click();
         URL.revokeObjectURL(url);
         setIsRecording(false);
         setRecordingTime(0);
+        
+        // 녹화용 타이머 정리
+        if (recordingAutoStopRef.current) {
+          clearTimeout(recordingAutoStopRef.current);
+          recordingAutoStopRef.current = null;
+        }
+        // 기존 autoResetTimerRef도 정리(안전상)
+        if (autoResetTimerRef.current) {
+          clearTimeout(autoResetTimerRef.current as any);
+          autoResetTimerRef.current = null;
+        }
       };
 
       mediaRecorder.start();
@@ -583,7 +662,58 @@ const TypoMoss: React.FC = () => {
   };
 
   const handleReset = () => {
-    rendererRef.current?.reset();
+    // 새로운 시드 생성
+    const newSeed = Math.floor(Math.random() * 1000000);
+    
+    // 이전 시드를 히스토리에 추가 (최대 20개)
+    setSeedHistory(prev => {
+      const updated = [seed, ...prev];
+      return updated.slice(0, 20);
+    });
+    
+    setSeed(newSeed);
+    currentSeedRef.current = newSeed;
+    
+    // 렌더러에 새 시드 적용 및 리셋
+    if (rendererRef.current) {
+      rendererRef.current.updateConfig({ seed: newSeed });
+      rendererRef.current.reset();
+    }
+  };
+
+  const handleSeedChange = () => {
+    const newSeed = parseInt(seedInput) || Math.floor(Math.random() * 1000000);
+    
+    // 이전 시드를 히스토리에 추가 (최대 20개)
+    setSeedHistory(prev => {
+      const updated = [seed, ...prev];
+      return updated.slice(0, 20);
+    });
+    
+    setSeed(newSeed);
+    currentSeedRef.current = newSeed;
+    setSeedInput('');
+    
+    if (rendererRef.current) {
+      rendererRef.current.updateConfig({ seed: newSeed });
+      rendererRef.current.reset();
+    }
+  };
+
+  const loadSeedFromHistory = (historySeed: number) => {
+    // 현재 시드를 히스토리에 추가
+    setSeedHistory(prev => {
+      const updated = [seed, ...prev];
+      return updated.slice(0, 20);
+    });
+    
+    setSeed(historySeed);
+    currentSeedRef.current = historySeed;
+    
+    if (rendererRef.current) {
+      rendererRef.current.updateConfig({ seed: historySeed });
+      rendererRef.current.reset();
+    }
   };
 
   return (
@@ -684,17 +814,103 @@ const TypoMoss: React.FC = () => {
                         style={{ width: '80px', marginLeft: '10px' }}
                       />
                     </div>
-                    <div className="control-group">
-                      <label>
-                        <input
-                          type="checkbox"
-                          checked={autoResetStopsRecording}
-                          onChange={(e) => setAutoResetStopsRecording(e.target.checked)}
-                        />
-                        {' '}리셋 시 녹화 자동 중지
-                      </label>
-                    </div>
                   </>
+                )}
+
+                <div className="control-group" style={{ marginTop: '20px', borderTop: '1px solid #333', paddingTop: '20px' }}>
+                  <label htmlFor="seed-input">시드 값 (현재: {seed}):</label>
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                    <input
+                      id="seed-input"
+                      type="number"
+                      placeholder="시드 입력"
+                      value={seedInput}
+                      onChange={(e) => setSeedInput(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSeedChange()}
+                      style={{ flex: 1 }}
+                    />
+                    <button onClick={handleSeedChange} style={{ minWidth: '60px' }}>
+                      적용
+                    </button>
+                  </div>
+                  <small style={{ color: '#888', marginTop: '4px', display: 'block' }}>
+                    시드를 입력하면 동일한 패턴으로 재생됩니다
+                  </small>
+                </div>
+
+                {/* 녹화 설정 (데스크톱에서만 모달 안에 표시) */}
+                {!isMobile && (
+                  <div className="control-group" style={{ marginTop: '12px', borderTop: '1px dashed #333', paddingTop: '12px' }}>
+                    <label style={{ fontWeight: 600, display: 'block', marginBottom: '8px' }}>녹화 설정</label>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <button onClick={toggleRecording} style={{ minWidth: '120px', padding: '8px 12px' }}>
+                          {isRecording ? '■ 녹화 중지' : '● 녹화 시작'}
+                        </button>
+
+                        <div style={{ color: '#aaa', fontSize: '13px', lineHeight: '1.4', maxWidth: '420px' }}>
+                          <div>녹화 길이: <strong style={{ color: '#9be098' }}>{autoResetInterval}초</strong> (자동 리셋 기준)</div>
+                          {isRecording && (
+                            <div style={{ marginTop: '4px' }}>경과: {Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}</div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div style={{ color: '#bbb', fontSize: '13px' }}>
+                        시드를 적용한 후 바로 녹화 버튼을 눌러 해당 시드를 지정 시간만큼 녹화하세요. (모달을 닫아도 아래의 시드 패널로 시드 확인·적용·리셋이 가능합니다)
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 시드 히스토리 */}
+                {seedHistory.length > 0 && (
+                  <div className="control-group" style={{ marginTop: '15px' }}>
+                    <label>시드 히스토리 (최대 20개):</label>
+                    <div style={{
+                      maxHeight: '150px',
+                      overflowY: 'auto',
+                      marginTop: '8px',
+                      border: '1px solid #333',
+                      borderRadius: '4px',
+                      padding: '8px',
+                      boxSizing: 'border-box',
+                      paddingRight: '12px'
+                    }}>
+                      {seedHistory.map((historySeed, index) => (
+                        <div
+                          key={`${historySeed}-${index}`}
+                          style={{
+                            display: 'flex',
+                            gap: '8px',
+                            alignItems: 'center',
+                            padding: '6px 8px',
+                            marginBottom: '6px',
+                            backgroundColor: '#1a1a1a',
+                            borderRadius: '3px',
+                            fontSize: '13px'
+                          }}
+                        >
+                          <span style={{ color: '#888', minWidth: '30px', textAlign: 'right' }}>#{index + 1}</span>
+                          <span style={{ flex: '1 1 auto', marginLeft: '8px', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {historySeed}
+                          </span>
+                          <button
+                            onClick={() => loadSeedFromHistory(historySeed)}
+                            style={{
+                              padding: '4px 8px',
+                              fontSize: '12px',
+                              flex: '0 0 auto',
+                              minWidth: '56px'
+                            }}
+                          >
+                            불러오기
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
 
                 <div className="modal-button-group">
@@ -947,20 +1163,21 @@ const TypoMoss: React.FC = () => {
             >
               ⚙️
             </button>
-            <button 
-              className={`typo-moss-record-button ${isRecording ? 'recording' : ''}`}
-              onClick={toggleRecording}
-              title={isRecording ? '녹화 중지' : '녹화 시작'}
-            >
-              {isRecording ? (
-                <>
-                  <span className="record-icon recording">⏹</span>
-                  <span className="record-time">{Math.floor(recordingTime / 60)}:{(recordingTime % 60).toString().padStart(2, '0')}</span>
-                </>
-              ) : (
-                <span className="record-icon">⏺</span>
-              )}
-            </button>
+            {!isMobile && (
+              <div className="typo-moss-seed-panel" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <div style={{ fontFamily: 'monospace', color: '#ddd' }}>Seed: {seed}</div>
+                <input
+                  type="number"
+                  value={seedInput}
+                  onChange={(e) => setSeedInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSeedChange()}
+                  placeholder="시드 입력"
+                  style={{ width: '110px', padding: '4px' }}
+                />
+                <button onClick={handleSeedChange} style={{ minWidth: '60px' }}>적용</button>
+                <button onClick={handleReset} style={{ minWidth: '60px' }}>리셋</button>
+              </div>
+            )}
             <button 
               className="typo-moss-help-fab"
               onClick={() => setShowHelp(true)}

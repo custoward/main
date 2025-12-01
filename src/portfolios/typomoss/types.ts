@@ -60,6 +60,7 @@ export interface RenderConfig {
   spawnRate: number; // 프레임당 생성 확률 (0 ~ 1)
   maxInstances: number; // 동시 활성 인스턴스 최대 개수
   spawnSpeed?: number; // 생성 속도 배율 (0.5 ~ 3.0, 기본 1.0)
+  seed?: number; // 랜덤 시드 (리셋마다 변경)
 }
 
 // 애니메이션 상태 (런타임)

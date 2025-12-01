@@ -30,12 +30,27 @@ export class TypoMossRenderer {
   private startTime: number = Date.now(); // 시작 시간 기록
   private titleElementsInitialized: Set<string> = new Set(); // title 요소 초기화 추적
   private titleInitOrder: string[] = []; // title 요소 순서
+  private rng: () => number; // 시드 기반 랜덤 함수
 
   constructor(canvas: HTMLCanvasElement, config?: Partial<RenderConfig>) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d')!;
     this.config = { ...DEFAULT_RENDER_CONFIG, ...config };
+    this.rng = this.createSeededRandom(this.config.seed || Date.now());
     this.setupCanvas();
+  }
+
+  /**
+   * 시드 기반 랜덤 함수 생성 (Mulberry32)
+   */
+  private createSeededRandom(seed: number): () => number {
+    let state = seed;
+    return function() {
+      state = (state + 0x6D2B79F5) | 0;
+      let t = Math.imul(state ^ (state >>> 15), 1 | state);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
   }
 
   /**
@@ -147,6 +162,10 @@ export class TypoMossRenderer {
    */
   public updateConfig(config: Partial<RenderConfig>): void {
     this.config = { ...this.config, ...config };
+    // 시드가 변경되면 랜덤 함수 재생성
+    if (config.seed !== undefined) {
+      this.rng = this.createSeededRandom(config.seed);
+    }
     this.setupCanvas();
   }
 
@@ -163,7 +182,7 @@ export class TypoMossRenderer {
       grow: config.grow ?? DEFAULT_RANDOM_MODE_CONFIG.grow,
     };
     
-    const rand = Math.random();
+    const rand = this.rng();
     let cumulative = 0;
     
     const modes: (keyof typeof fullConfig)[] = ['layered', 'rotate', 'pulse', 'flicker', 'grow'];
@@ -184,7 +203,7 @@ export class TypoMossRenderer {
     const elementConfig = this.elementConfigs.get(element.id);
     const baseSize = elementConfig?.size || 100;
     const sizeVariation = baseSize * 0.3;
-    const randomSize = baseSize + (Math.random() - 0.5) * 2 * sizeVariation;
+    const randomSize = baseSize + (this.rng() - 0.5) * 2 * sizeVariation;
     
     // 가로축 위치 계산 (화면을 균등 분할)
     const totalTitles = this.titleInitOrder.length;
@@ -194,12 +213,12 @@ export class TypoMossRenderer {
     // 세로축은 화면 중앙 ±20% 범위에 랜덤 분포
     const centerY = this.config.canvasHeight / 2;
     const yVariation = this.config.canvasHeight * 0.2;
-    const y = centerY + (Math.random() - 0.5) * 2 * yVariation;
+    const y = centerY + (this.rng() - 0.5) * 2 * yVariation;
     
     console.log(`[TypoMossRenderer] Title 인스턴스 생성: ${element.id}, 위치: (${x.toFixed(0)}, ${y.toFixed(0)}), 크기: ${randomSize.toFixed(0)}`);
     
-    const lifespan = Math.round(600 + Math.random() * 300); // 10-15초
-    const flickerCount = Math.floor(Math.random() * 5) + 3; // 3-7번
+    const lifespan = Math.round(600 + this.rng() * 300); // 10-15초
+    const flickerCount = Math.floor(this.rng() * 5) + 3; // 3-7번
     
     return {
       id: `inst-${this.instanceIdCounter++}`,
@@ -213,7 +232,7 @@ export class TypoMossRenderer {
       animationMode: 'title',
       age: 0,
       lifespan,
-      seed: Math.random(),
+      seed: this.rng(),
       customProps: {
         actualMode: 'title',
         flickerCount,
@@ -241,11 +260,11 @@ export class TypoMossRenderer {
     
     // 크기를 baseSize ±30% 범위로 랜덤 설정
     const sizeVariation = baseSize * 0.3;
-    const randomSize = baseSize + (Math.random() - 0.5) * 2 * sizeVariation; // baseSize * 0.7 ~ baseSize * 1.3
+    const randomSize = baseSize + (this.rng() - 0.5) * 2 * sizeVariation; // baseSize * 0.7 ~ baseSize * 1.3
 
     let x: number;
     let y: number;
-    let rotation: number = actualMode === 'title' ? 0 : Math.random() * Math.PI * 2; // title은 각도 0 고정
+    let rotation: number = actualMode === 'title' ? 0 : this.rng() * Math.PI * 2; // title은 각도 0 고정
     let customProps: Record<string, unknown> = { 
       animationSpeed: elementConfig?.animationSpeed || 1,
       actualMode: actualMode, // random 모드일 때 실제 선택된 모드 저장
@@ -281,36 +300,36 @@ export class TypoMossRenderer {
           const newClusterId = maxClusterId + 1;
           
           // 새 위치와 크기
-          x = Math.random() * this.config.canvasWidth;
-          y = Math.random() * this.config.canvasHeight;
+          x = this.rng() * this.config.canvasWidth;
+          y = this.rng() * this.config.canvasHeight;
           
-          const stackDirection = Math.random() * Math.PI * 2;
+          const stackDirection = this.rng() * Math.PI * 2;
           
           // 회전 증가량과 위치 편차 확률 분포
           // 40% 확률로 작은 회전값 & 큰 편차 (0-3도 회전, 15-20px 편차)
           // 60% 확률로 큰 회전값 & 작은 편차 (6-20도 회전, 5-10px 편차)
-          const useSmallRotation = Math.random() < 0.4;
+          const useSmallRotation = this.rng() < 0.4;
           
           let rotationDegrees: number;
           let stackSpacingValue: number;
           
           if (useSmallRotation) {
             // 작은 회전값 (0-3도, 3도 미만이면 0으로)
-            const rawRotation = Math.random() * 3; // 0-3도
+            const rawRotation = this.rng() * 3; // 0-3도
             rotationDegrees = rawRotation < 3 ? 0 : rawRotation;
             // 큰 위치 편차 (15-20px)
-            stackSpacingValue = 15 + Math.random() * 5;
+            stackSpacingValue = 15 + this.rng() * 5;
           } else {
             // 큰 회전값 (6-20도)
-            rotationDegrees = 6 + Math.random() * 14;
+            rotationDegrees = 6 + this.rng() * 14;
             // 작은 위치 편차 (5-10px)
-            stackSpacingValue = 5 + Math.random() * 5;
+            stackSpacingValue = 5 + this.rng() * 5;
           }
           
           const stackRotation = (rotationDegrees * Math.PI) / 180; // 라디안으로 변환
-          const fixedSize = baseSize + (Math.random() - 0.5) * 2 * sizeVariation;
-          const maxLayersInCluster = Math.floor(Math.random() * 3) + 5; // 5-7개
-          const baseRotation = Math.random() * Math.PI * 2; // 뭉치의 기본 회전값 고정
+          const fixedSize = baseSize + (this.rng() - 0.5) * 2 * sizeVariation;
+          const maxLayersInCluster = Math.floor(this.rng() * 3) + 5; // 5-7개
+          const baseRotation = this.rng() * Math.PI * 2; // 뭉치의 기본 회전값 고정
           
           rotation = baseRotation; // 기본 회전값 사용
           
@@ -361,36 +380,36 @@ export class TypoMossRenderer {
         }
       } else {
         // 첫 번째 인스턴스: 기준점 설정
-        x = Math.random() * this.config.canvasWidth;
-        y = Math.random() * this.config.canvasHeight;
+        x = this.rng() * this.config.canvasWidth;
+        y = this.rng() * this.config.canvasHeight;
         
-        const stackDirection = Math.random() * Math.PI * 2;
+        const stackDirection = this.rng() * Math.PI * 2;
         
         // 회전 증가량과 위치 편차 확률 분포
         // 40% 확률로 작은 회전값 & 큰 편차
         // 60% 확률로 큰 회전값 & 작은 편차
-        const useSmallRotation = Math.random() < 0.4;
+        const useSmallRotation = this.rng() < 0.4;
         
         let rotationDegrees: number;
         let stackSpacingValue: number;
         
         if (useSmallRotation) {
           // 작은 회전값 (0-3도, 3도 미만이면 0으로)
-          const rawRotation = Math.random() * 3;
+          const rawRotation = this.rng() * 3;
           rotationDegrees = rawRotation < 3 ? 0 : rawRotation;
           // 큰 위치 편차 (15-20px)
-          stackSpacingValue = 15 + Math.random() * 5;
+          stackSpacingValue = 15 + this.rng() * 5;
         } else {
           // 큰 회전값 (6-20도)
-          rotationDegrees = 6 + Math.random() * 14;
+          rotationDegrees = 6 + this.rng() * 14;
           // 작은 위치 편차 (5-10px)
-          stackSpacingValue = 5 + Math.random() * 5;
+          stackSpacingValue = 5 + this.rng() * 5;
         }
         
         const stackRotation = (rotationDegrees * Math.PI) / 180;
-        const fixedSize = baseSize + (Math.random() - 0.5) * 2 * sizeVariation;
-        const maxLayersInCluster = Math.floor(Math.random() * 3) + 5; // 5-7개
-        const baseRotation = Math.random() * Math.PI * 2; // 뭉치의 기본 회전값 고정
+        const fixedSize = baseSize + (this.rng() - 0.5) * 2 * sizeVariation;
+        const maxLayersInCluster = Math.floor(this.rng() * 3) + 5; // 5-7개
+        const baseRotation = this.rng() * Math.PI * 2; // 뭉치의 기본 회전값 고정
         
         rotation = baseRotation;
         
@@ -410,12 +429,12 @@ export class TypoMossRenderer {
       }
     } else {
       // 다른 모드: 완전히 랜덤 위치
-      x = Math.random() * this.config.canvasWidth;
-      y = Math.random() * this.config.canvasHeight;
+      x = this.rng() * this.config.canvasWidth;
+      y = this.rng() * this.config.canvasHeight;
     }
 
     // size 먼저 계산 (baseSize ±30%)
-    let size = baseSize + (Math.random() - 0.5) * 2 * sizeVariation;
+    let size = baseSize + (this.rng() - 0.5) * 2 * sizeVariation;
     
     // grow 모드의 경우 단방향 쌓임 설정
     if (actualMode === 'grow') {
@@ -491,30 +510,30 @@ export class TypoMossRenderer {
           }
         }
         
-        const edge = Math.floor(Math.random() * 4); // 0: 위, 1: 오른쪽, 2: 아래, 3: 왼쪽
+        const edge = Math.floor(this.rng() * 4); // 0: 위, 1: 오른쪽, 2: 아래, 3: 왼쪽
         let growDirection: number;
         
         switch (edge) {
           case 0: // 위쪽에서 아래로 (대각선)
-            x = Math.random() * this.config.canvasWidth;
+            x = this.rng() * this.config.canvasWidth;
             y = -size;
-            growDirection = Math.PI / 2 + (Math.random() * 0.8 - 0.4); // 90° ± 23°
+            growDirection = Math.PI / 2 + (this.rng() * 0.8 - 0.4); // 90° ± 23°
             break;
           case 1: // 오른쪽에서 왼쪽으로 (대각선)
             x = this.config.canvasWidth + size;
-            y = Math.random() * this.config.canvasHeight;
-            growDirection = Math.PI + (Math.random() * 0.8 - 0.4); // 180° ± 23°
+            y = this.rng() * this.config.canvasHeight;
+            growDirection = Math.PI + (this.rng() * 0.8 - 0.4); // 180° ± 23°
             break;
           case 2: // 아래쪽에서 위로 (대각선)
-            x = Math.random() * this.config.canvasWidth;
+            x = this.rng() * this.config.canvasWidth;
             y = this.config.canvasHeight + size;
-            growDirection = -Math.PI / 2 + (Math.random() * 0.8 - 0.4); // -90° ± 23°
+            growDirection = -Math.PI / 2 + (this.rng() * 0.8 - 0.4); // -90° ± 23°
             break;
           case 3: // 왼쪽에서 오른쪽으로 (대각선)
           default:
             x = -size;
-            y = Math.random() * this.config.canvasHeight;
-            growDirection = (Math.random() * 0.8 - 0.4); // 0° ± 23°
+            y = this.rng() * this.config.canvasHeight;
+            growDirection = (this.rng() * 0.8 - 0.4); // 0° ± 23°
             break;
         }
         const growSpacing = size; // 이미지 크기만큼 간격
@@ -541,11 +560,11 @@ export class TypoMossRenderer {
     }
 
     // rotate 모드의 회전 방향 랜덤 결정
-    const rotationDirection = actualMode === 'rotate' ? (Math.random() < 0.5 ? 1 : -1) : 1;
+    const rotationDirection = actualMode === 'rotate' ? (this.rng() < 0.5 ? 1 : -1) : 1;
     
     // flicker 모드의 깜빡임 횟수 랜덤 결정 (3-7번)
     const flickerCount = (actualMode === 'flicker' || actualMode === 'title')
-      ? Math.floor(Math.random() * 5) + 3 
+      ? Math.floor(this.rng() * 5) + 3 
       : undefined;
 
     const instance: RenderInstance = {
@@ -562,9 +581,9 @@ export class TypoMossRenderer {
       lifespan: (actualMode === 'layered' || actualMode === 'grow') 
         ? 999999 
         : actualMode === 'title'
-        ? Math.round(600 + Math.random() * 300) // title은 10~15초 (600~900 프레임, 랜덤)
+        ? Math.round(600 + this.rng() * 300) // title은 10~15초 (600~900 프레임, 랜덤)
         : Math.round(modeConfig.duration / (elementConfig?.animationSpeed || 1)), // layered, grow는 매우 긴 lifespan
-      seed: Math.random(),
+      seed: this.rng(),
       customProps: {
         ...customProps,
         rotationDirection, // 회전 방향 저장
@@ -628,7 +647,7 @@ export class TypoMossRenderer {
     
     // 2) 새로운 요소 스폰 (빈도 기반)
     if (this.instances.size < dynamicMaxInstances && this.elements.length > 0) {
-      const randomElement = this.elements[Math.floor(Math.random() * this.elements.length)];
+      const randomElement = this.elements[Math.floor(this.rng() * this.elements.length)];
       const elementConfig = this.elementConfigs.get(randomElement.id);
       const frequency = elementConfig?.frequency || 0.1;
       
@@ -662,7 +681,7 @@ export class TypoMossRenderer {
       
       const spawnChance = baseSpawnChance * globalSpeedMultiplier;
       
-      if (Math.random() < spawnChance) {
+      if (this.rng() < spawnChance) {
         const newInstance = this.createInstance(randomElement);
         this.instances.set(newInstance.id, newInstance);
       }
