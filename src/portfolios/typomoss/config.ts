@@ -10,8 +10,8 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   canvasHeight: 1080,
   backgroundColor: '#ffffff', // 흰색 배경
   spawnRate: 0.15, // 프레임당 새로운 요소 생성 확률
-  maxInstances: 80, // 동시 활성 최대 개수
-  spawnSpeed: 1.0, // 생성 속도 배율 (기본값)
+  maxInstances: 350, // 동시 활성 최대 개수 (증가)
+  spawnSpeed: 2.0, // 생성 속도 배율 (기본값, 상향)
 };
 
 // 애니메이션 모드별 기본 설정
@@ -22,7 +22,7 @@ export const ANIMATION_MODE_DEFAULTS = {
   },
   rotate: {
     duration: 1200, // 20초
-    rotationSpeed: 2, // 회전 속도 (바퀴 수)
+    rotationSpeed: 0.2, // 회전 속도 (바퀴 수) — 느리게 조정
   },
   pulse: {
     duration: 900, // 15초

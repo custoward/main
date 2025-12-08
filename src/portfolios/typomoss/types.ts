@@ -30,6 +30,7 @@ export interface ElementConfig {
   frequency: number; // 생성 빈도 (0 ~ 1)
   size: number; // 크기 (이 값 ±30% 범위로 랜덤)
   animationMode: AnimationMode; // 애니메이션 형식
+  color?: string; // 요소별 색상 오버라이드
   animationSpeed: number; // 애니메이션 속도 배율 (1 = 기본 속도)
   randomModeConfig?: Partial<RandomModeConfig>; // random 모드일 때의 확률 설정 (부분 설정 가능)
 }
@@ -61,6 +62,7 @@ export interface RenderConfig {
   maxInstances: number; // 동시 활성 인스턴스 최대 개수
   spawnSpeed?: number; // 생성 속도 배율 (0.5 ~ 3.0, 기본 1.0)
   seed?: number; // 랜덤 시드 (리셋마다 변경)
+  resetIntervalSeconds?: number; // optional: used to align spawn ramp with auto-reset (renderer uses resetIntervalSeconds - 2)
 }
 
 // 애니메이션 상태 (런타임)

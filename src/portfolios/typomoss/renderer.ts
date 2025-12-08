@@ -24,12 +24,15 @@ export class TypoMossRenderer {
   private elements: VectorElement[] = [];
   private elementConfigs: Map<string, ElementConfig> = new Map();
   private frameCount: number = 0;
+  private lastTimestamp: number = 0;
+  private deltaTime: number = 1 / 60;
   private isRunning: boolean = false;
   private animationFrameId: number | null = null;
   private instanceIdCounter: number = 0;
   private startTime: number = Date.now(); // 시작 시간 기록
   private titleElementsInitialized: Set<string> = new Set(); // title 요소 초기화 추적
   private titleInitOrder: string[] = []; // title 요소 순서
+  private allowSpawning: boolean = false; // whether automatic spawning is enabled
   private rng: () => number; // 시드 기반 랜덤 함수
 
   constructor(canvas: HTMLCanvasElement, config?: Partial<RenderConfig>) {
@@ -71,6 +74,9 @@ export class TypoMossRenderer {
     this.elementConfigs.clear();
     
     elements.forEach((el) => {
+      // ensure we keep the original default color on customData for recoloring reference
+      if (!el.customData) el.customData = {};
+      if (!el.customData.defaultColor) el.customData.defaultColor = el.color || '#1AB551';
       // 각 요소에 대한 설정 로드
       const config = ELEMENT_CONFIGS[el.id];
       if (config) {
@@ -114,6 +120,15 @@ export class TypoMossRenderer {
     console.log('[TypoMossRenderer] ElementConfigs:', Array.from(this.elementConfigs.entries()).map(([id, cfg]) => `${id}: ${cfg.animationMode}`));
   }
 
+  // Enable automatic spawning (call from external UI when ready)
+  public enableSpawning(): void {
+    this.allowSpawning = true;
+    // reset startTime to make spawn progression consistent
+    this.startTime = Date.now();
+    // reset timing so titles/spawns are scheduled from now
+    this.lastTimestamp = performance.now();
+  }
+
   /**
    * Title 순서 재계산 (elementConfigs 업데이트 후 호출)
    */
@@ -140,6 +155,34 @@ export class TypoMossRenderer {
     const existing = this.elementConfigs.get(elementId);
     if (existing) {
       this.elementConfigs.set(elementId, { ...existing, ...config });
+      // If a color override was provided in the element config, update the underlying VectorElement
+      if (config.color !== undefined) {
+        const idx = this.elements.findIndex(e => e.id === elementId);
+        console.log('[updateElementConfig] Color update:', {
+          elementId,
+          newColor: config.color,
+          foundIndex: idx,
+          oldColor: idx !== -1 ? this.elements[idx].color : 'N/A'
+        });
+        if (idx !== -1) {
+          this.elements[idx].color = config.color;
+          // clear element map cache so render picks up new color
+          this.elementMapCache = null;
+          // clear any colored canvas cache entries for this element so recolor regenerates
+          const prefix = `${elementId}::`;
+          Array.from(this.coloredCanvasCache.keys()).forEach(k => {
+            if (k.startsWith(prefix)) this.coloredCanvasCache.delete(k);
+          });
+          // clear recolored image cache
+          const svgPath = this.elements[idx].customData?.svgPath as string;
+          if (svgPath) {
+            Array.from(this.recoloredImageCache.keys()).forEach(k => {
+              if (k.startsWith(`${svgPath}::`)) this.recoloredImageCache.delete(k);
+            });
+          }
+          console.log('[updateElementConfig] Color updated successfully, caches cleared');
+        }
+      }
       
       // 기존 인스턴스들의 애니메이션 모드도 업데이트
       if (config.animationMode) {
@@ -154,6 +197,24 @@ export class TypoMossRenderer {
           }
         });
       }
+      if (config.animationSpeed !== undefined) {
+        console.log(`[TypoMossRenderer] updateElementConfig: propagating animationSpeed ${config.animationSpeed} to instances of ${elementId}`);
+      }
+      // propagate animationSpeed to existing instances for this element
+      if (config.animationSpeed !== undefined) {
+        this.instances.forEach((instance) => {
+          if (instance.elementId === elementId) {
+            if (!instance.customProps) instance.customProps = {};
+            instance.customProps.animationSpeed = config.animationSpeed;
+            // adjust lifespan if mode has duration
+            const modeConfig = ANIMATION_MODE_DEFAULTS[instance.animationMode as AnimationMode];
+            if (modeConfig && (modeConfig as any).duration) {
+              const speedVal = (config.animationSpeed as number) || 1;
+              instance.lifespan = Math.round(((modeConfig as any).duration || 999999) / speedVal);
+            }
+          }
+        });
+      }
     }
   }
 
@@ -164,6 +225,7 @@ export class TypoMossRenderer {
     this.config = { ...this.config, ...config };
     // 시드가 변경되면 랜덤 함수 재생성
     if (config.seed !== undefined) {
+      console.log('[TypoMossRenderer] updateConfig: new seed set', config.seed);
       this.rng = this.createSeededRandom(config.seed);
     }
     this.setupCanvas();
@@ -173,27 +235,61 @@ export class TypoMossRenderer {
    * Random 모드에서 실제 모드 선택
    */
   private selectRandomMode(config: Partial<RandomModeConfig>): AnimationMode {
-    // 기본값과 병합
-    const fullConfig = {
-      layered: config.layered ?? DEFAULT_RANDOM_MODE_CONFIG.layered,
-      rotate: config.rotate ?? DEFAULT_RANDOM_MODE_CONFIG.rotate,
-      pulse: config.pulse ?? DEFAULT_RANDOM_MODE_CONFIG.pulse,
-      flicker: config.flicker ?? DEFAULT_RANDOM_MODE_CONFIG.flicker,
-      grow: config.grow ?? DEFAULT_RANDOM_MODE_CONFIG.grow,
+    // Accept numeric strings as well as numbers. If a value is missing or invalid,
+    // fall back to DEFAULT_RANDOM_MODE_CONFIG. Ensure 0 means "never chosen".
+    const modes: (keyof RandomModeConfig)[] = ['layered', 'rotate', 'pulse', 'flicker', 'grow'];
+    const fullConfig: Record<string, number> = {};
+
+    const parseProb = (rawVal: any): number => {
+      if (rawVal === undefined || rawVal === null) return NaN;
+      if (typeof rawVal === 'number') return rawVal;
+      if (typeof rawVal === 'string') {
+        const s = rawVal.trim();
+        // percent string like '20%'
+        if (s.endsWith('%')) {
+          const n = parseFloat(s.slice(0, -1));
+          return isFinite(n) ? n / 100 : NaN;
+        }
+        // bare numeric string
+        const n = Number(s);
+        if (isFinite(n)) return n;
+        // try parseFloat fallback
+        const f = parseFloat(s);
+        return isFinite(f) ? f : NaN;
+      }
+      return NaN;
     };
-    
-    const rand = this.rng();
+
+    const hasAnyProvided = Object.keys(config || {}).length > 0;
+    modes.forEach((m) => {
+      const rawVal = (config as any)[m];
+      let parsed = parseProb(rawVal);
+      // If a user supplied values in 0-100 scale (e.g. 20 for 20%), normalize
+      if (isFinite(parsed) && parsed > 1) parsed = parsed / 100;
+      // If the user provided at least one key in randomModeConfig, treat unspecified keys as 0
+      const val = isFinite(parsed) ? parsed : (hasAnyProvided ? 0 : DEFAULT_RANDOM_MODE_CONFIG[m]);
+      fullConfig[m] = Math.max(0, val);
+    });
+
+    // Exclude zero-probability modes so 0% is respected
+    const positiveModes = modes.filter(m => (fullConfig[m] || 0) > 0);
+    if (positiveModes.length === 0) {
+      console.warn('[TypoMossRenderer] selectRandomMode: all random-mode probabilities are zero or invalid, falling back to pulse', fullConfig);
+      return 'pulse';
+    }
+
+    const total = positiveModes.reduce((s, m) => s + (fullConfig[m] || 0), 0);
+    console.log('[TypoMossRenderer] selectRandomMode parsed config', fullConfig, 'positiveModes', positiveModes, 'total', total);
+    const r = this.rng() * total;
     let cumulative = 0;
-    
-    const modes: (keyof typeof fullConfig)[] = ['layered', 'rotate', 'pulse', 'flicker', 'grow'];
-    for (const mode of modes) {
+    for (const mode of positiveModes) {
       cumulative += fullConfig[mode];
-      if (rand < cumulative) {
+      if (r < cumulative) {
         return mode as AnimationMode;
       }
     }
-    
-    return 'pulse'; // 기본값
+
+    return positiveModes[positiveModes.length - 1] as AnimationMode;
   }
 
   /**
@@ -217,7 +313,7 @@ export class TypoMossRenderer {
     
     console.log(`[TypoMossRenderer] Title 인스턴스 생성: ${element.id}, 위치: (${x.toFixed(0)}, ${y.toFixed(0)}), 크기: ${randomSize.toFixed(0)}`);
     
-    const lifespan = Math.round(600 + this.rng() * 300); // 10-15초
+    const lifespan = 999999; // keep indefinitely
     const flickerCount = Math.floor(this.rng() * 5) + 3; // 3-7번
     
     return {
@@ -253,6 +349,27 @@ export class TypoMossRenderer {
     if (mode === 'random') {
       const randomConfig = elementConfig?.randomModeConfig ?? {};
       actualMode = this.selectRandomMode(randomConfig);
+      console.log('[TypoMossRenderer] createInstance random selection', { elementId: element.id, randomConfig, selected: actualMode });
+      // keep last selection for on-canvas debug overlay
+      (this as any).lastRandomSelection = { elementId: element.id, randomConfig, selected: actualMode };
+    }
+
+    // Extra safeguard logging: if rotate was selected but the element's randomConfig explicitly sets rotate to 0-ish, warn
+    const isExplicitZero = (raw: any) => {
+      if (raw === undefined || raw === null) return false;
+      if (typeof raw === 'number') return raw === 0;
+      const s = String(raw).trim();
+      if (s === '0' || s === '0.0' || s === '0%') return true;
+      // '0.00%' etc
+      if (s.endsWith('%')) {
+        const n = parseFloat(s.slice(0, -1));
+        return isFinite(n) && n === 0;
+      }
+      const n = Number(s);
+      return isFinite(n) && n === 0;
+    };
+    if (actualMode === 'rotate' && elementConfig?.randomModeConfig && isExplicitZero(elementConfig.randomModeConfig.rotate)) {
+      console.warn('[TypoMossRenderer] rotate selected but element.randomModeConfig.rotate appears to be zero-ish', { elementId: element.id, randomModeConfig: elementConfig.randomModeConfig });
     }
     
     const modeConfig = ANIMATION_MODE_DEFAULTS[actualMode === 'random' ? 'rotate' : actualMode];
@@ -499,16 +616,7 @@ export class TypoMossRenderer {
       } else {
         // 새로운 스택 시작
         const newStackId = activeStacks.size;
-        
-        // 최대 2개 스택까지만 허용 (더 빠른 삭제)
-        if (newStackId >= 2) {
-          // 가장 오래된 스택 제거
-          const oldestStackId = Math.min(...Array.from(activeStacks.keys()));
-          const oldestStack = activeStacks.get(oldestStackId);
-          if (oldestStack) {
-            oldestStack.forEach(inst => this.instances.delete(inst.id));
-          }
-        }
+        // NOTE: do NOT delete oldest stacks — keep elements indefinitely per user request
         
         const edge = Math.floor(this.rng() * 4); // 0: 위, 1: 오른쪽, 2: 아래, 3: 왼쪽
         let growDirection: number;
@@ -578,11 +686,8 @@ export class TypoMossRenderer {
       opacity: 1,
       animationMode: mode, // 원본 모드 저장 (random 또는 실제 모드)
       age: 0,
-      lifespan: (actualMode === 'layered' || actualMode === 'grow') 
-        ? 999999 
-        : actualMode === 'title'
-        ? Math.round(600 + this.rng() * 300) // title은 10~15초 (600~900 프레임, 랜덤)
-        : Math.round(modeConfig.duration / (elementConfig?.animationSpeed || 1)), // layered, grow는 매우 긴 lifespan
+      // Keep instances indefinitely per user request (no automatic deletion)
+      lifespan: 999999,
       seed: this.rng(),
       customProps: {
         ...customProps,
@@ -601,61 +706,59 @@ export class TypoMossRenderer {
     // maxInstances 설정 사용 (기본값 80)
     const dynamicMaxInstances = this.config.maxInstances || 80;
     
-    // 0) 각 요소가 최소 1개씩 존재하도록 보장 (layered는 제외 - 3프레임마다만 체크)
-    if (this.frameCount % 3 === 0) {
-      this.elements.forEach((element) => {
-        // layered는 자연스럽게 쌓이도록 강제 생성 제외
-        if (element.animationMode === 'layered') return;
-        
-        const hasInstance = Array.from(this.instances.values()).some(
-          inst => inst.elementId === element.id
-        );
-        
-        if (!hasInstance) {
-          // 해당 요소의 인스턴스가 없으면 강제 생성
-          const newInstance = this.createInstance(element);
-          this.instances.set(newInstance.id, newInstance);
-        }
-      });
-    }
+    // 0) 초기 강제 생성 로직을 제거했습니다.
+    // 요소는 이제 `allowSpawning`이 활성화된 이후에도 자연 스폰 규칙에 따라
+    // 한두 개씩 점진적으로 생성됩니다.
     
-    // 1) title 요소 최초 순차 생성 (가장 먼저, 가로축 순서대로)
-    if (this.titleInitOrder.length > 0 && this.titleElementsInitialized.size < this.titleInitOrder.length) {
-      const elapsedSeconds = (Date.now() - this.startTime) / 1000;
-      
-      // 최초 2.5초 동안만 순차 생성
-      if (elapsedSeconds < 2.5) {
-        const nextTitleId = this.titleInitOrder[this.titleElementsInitialized.size];
-        const titleElement = this.elements.find(el => el.id === nextTitleId);
-        
-        if (titleElement) {
-          // 0.25초마다 하나씩 생성 (프레임 기준: 60fps * 0.25초 = 15프레임)
-          // 0.5초(30프레임) 후부터 시작
-          if (this.frameCount >= 30 && (this.frameCount - 30) % 15 === 0) {
-            console.log(`[TypoMossRenderer] Title 생성: ${nextTitleId} (${this.titleElementsInitialized.size + 1}/${this.titleInitOrder.length})`);
-            const titleInstance = this.createTitleInstance(titleElement, this.titleElementsInitialized.size);
-            this.instances.set(titleInstance.id, titleInstance);
-            this.titleElementsInitialized.add(nextTitleId);
-          }
+    // 1) title 요소 최초 순차 생성 (비활성화 unless spawning enabled)
+    // Title sequential creation: spawn one title every N frames once spawning is enabled
+    if (this.allowSpawning && this.titleInitOrder.length > 0 && this.titleElementsInitialized.size < this.titleInitOrder.length) {
+      const nextTitleId = this.titleInitOrder[this.titleElementsInitialized.size];
+      const titleElement = this.elements.find(el => el.id === nextTitleId);
+      if (titleElement) {
+        // Make title spawn timing scale with global spawnSpeed so increasing spawnSpeed
+        // makes title appear earlier and at shorter intervals.
+        const spawnSpeed = Math.max(0.01, this.config.spawnSpeed || 1);
+        const TITLE_SPAWN_START_FRAME_BASE = 4; // base small delay to allow canvas to settle
+        const TITLE_SPAWN_INTERVAL_BASE = 12; // base frames between title spawns (~12 @60fps = 0.2s)
+
+        // Use sqrt scaling so large spawnSpeed values have a less-aggressive effect
+        const speedFactor = Math.sqrt(spawnSpeed);
+        const titleStartFrame = Math.max(0, Math.floor(TITLE_SPAWN_START_FRAME_BASE / speedFactor));
+        // enforce a small minimum interval to avoid instant flooding
+        const titleInterval = Math.max(2, Math.round(TITLE_SPAWN_INTERVAL_BASE / speedFactor));
+
+        if (this.frameCount >= titleStartFrame && (this.frameCount - titleStartFrame) % titleInterval === 0) {
+          const titleInstance = this.createTitleInstance(titleElement, this.titleElementsInitialized.size);
+          this.instances.set(titleInstance.id, titleInstance);
+          this.titleElementsInitialized.add(nextTitleId);
         }
       } else {
-        // 2.5초 후에는 모든 title 요소를 초기화된 것으로 간주
-        console.log('[TypoMossRenderer] Title 초기화 완료 (2.5초 경과)');
-        this.titleInitOrder.forEach(id => this.titleElementsInitialized.add(id));
+        // if element missing, mark as initialized to avoid infinite loop
+        this.titleElementsInitialized.add(nextTitleId);
       }
     }
     
     // 2) 새로운 요소 스폰 (빈도 기반)
-    if (this.instances.size < dynamicMaxInstances && this.elements.length > 0) {
+    // Only spawn when spawning has been enabled externally (keeps initial canvas empty)
+    if (this.allowSpawning && this.instances.size < dynamicMaxInstances && this.elements.length > 0) {
       const randomElement = this.elements[Math.floor(this.rng() * this.elements.length)];
       const elementConfig = this.elementConfigs.get(randomElement.id);
       const frequency = elementConfig?.frequency || 0.1;
       
       // 전역 생성 속도 배율 적용 (지수 함수로 점진적 증가)
       const elapsedSeconds = (Date.now() - this.startTime) / 1000;
-      const progressRatio = Math.min(elapsedSeconds / 8, 1.0); // 8초에 걸쳐 최대치 도달
-      const exponentialGrowth = Math.pow(progressRatio, 3); // 3제곱으로 급격한 지수 증가
-      let dynamicSpeedMultiplier = 0.02 + exponentialGrowth * 0.98; // 0.02배에서 시작 → 1.0배까지
+      // Determine ramp duration: if a resetIntervalSeconds is provided by the host, use
+      // resetIntervalSeconds - 2 so that ramp reaches max 2 seconds before reset.
+      const configuredReset = (this.config as any).resetIntervalSeconds;
+      // reach max 1 second before reset (user requested) -- use resetIntervalSeconds - 1
+      const rampTotal = (typeof configuredReset === 'number' && configuredReset > 1)
+        ? Math.max(0.1, configuredReset - 1)
+        : 12;
+      const progressRatio = Math.min(elapsedSeconds / rampTotal, 1.0);
+      // Use squared growth and a lower base multiplier so initial spawning is much slower
+      const exponentialGrowth = Math.pow(progressRatio, 2);
+      let dynamicSpeedMultiplier = 0.01 + exponentialGrowth * 0.99; // 0.01배에서 시작 → 1.0배까지
       
       // 타이틀 생성 중일 때 (2.5초 이내) 다른 요소들의 생성 속도를 20%로 감소
       const isTitleSpawning = this.titleInitOrder.length > 0 && 
@@ -680,9 +783,19 @@ export class TypoMossRenderer {
         : frequency * 1.5; // 다른 모드는 150%
       
       const spawnChance = baseSpawnChance * globalSpeedMultiplier;
+
+      // record last spawn info for debugging / overlay
+      (this as any).lastSpawnInfo = {
+        elementId: randomElement.id,
+        frequency,
+        baseSpawnChance,
+        globalSpeedMultiplier,
+        spawnChance,
+      };
       
       if (this.rng() < spawnChance) {
         const newInstance = this.createInstance(randomElement);
+        console.log('[TypoMossRenderer] spawn: element', randomElement.id, 'spawnChance', spawnChance.toFixed(4), 'globalSpeedMultiplier', globalSpeedMultiplier.toFixed(3));
         this.instances.set(newInstance.id, newInstance);
       }
     }
@@ -690,127 +803,24 @@ export class TypoMossRenderer {
     // 2) 기존 요소 업데이트
     this.instances.forEach((instance) => {
       instance.age++;
+
+      // Update persistent rotation for rotate-mode instances so rotation accumulates
+      const actualMode = (instance.animationMode === 'random')
+        ? ((instance.customProps?.actualMode as AnimationMode) || 'pulse')
+        : instance.animationMode;
+
+      if (actualMode === 'rotate') {
+        const rotationSpeed = (ANIMATION_MODE_DEFAULTS.rotate.rotationSpeed || 1) as number;
+        const rotationDirection = (instance.customProps?.rotationDirection as number) || 1;
+        const speedMultiplier = (instance.customProps?.animationSpeed as number) || 1;
+        const deltaRot = this.deltaTime * Math.PI * 2 * rotationSpeed * rotationDirection * speedMultiplier;
+        instance.rotation = (instance.rotation || 0) + deltaRot;
+      }
     });
 
-    // 3) 최대 인스턴스 수의 95%를 넘으면 layered와 grow 제거 (천천히 제거)
-    // 하지만 각 요소별로 최소 개수가 확보된 후에만 제거 시작
-    const removalThreshold = dynamicMaxInstances * 0.95; // 95%에서 제거 시작
-    const stopRemovalThreshold = dynamicMaxInstances * 0.90; // 90% 아래로 떨어지면 중단
-    
-    // 각 요소별 최소 개수 확인 (layered 기준) - 최대 인스턴스 수에 비례
-    const minInstancesPerElement = Math.max(1, Math.floor(dynamicMaxInstances * 0.03)); // 최대치의 3% (최소 1개)
-    const layeredCountByElement = new Map<string, number>();
-    
-    this.instances.forEach((inst) => {
-      const actualMode = (inst.customProps?.actualMode as AnimationMode) || inst.animationMode;
-      if (actualMode === 'layered') {
-        const count = layeredCountByElement.get(inst.elementId) || 0;
-        layeredCountByElement.set(inst.elementId, count + 1);
-      }
-    });
-    
-    // layered 모드를 사용하는 요소들이 최소 개수를 만족하는지 확인
-    const layeredElements = this.elements.filter(e => e.animationMode === 'layered');
-    const allElementsHaveMinimum = layeredElements.length === 0 || layeredElements.every((element) => {
-      const count = layeredCountByElement.get(element.id) || 0;
-      return count >= minInstancesPerElement;
-    });
-    
-    if (this.instances.size > removalThreshold && allElementsHaveMinimum) {
-      const layeredInstances = Array.from(this.instances.values())
-        .filter(inst => {
-          const actualMode = (inst.customProps?.actualMode as AnimationMode) || inst.animationMode;
-          return actualMode === 'layered';
-        });
-      const growInstances = Array.from(this.instances.values())
-        .filter(inst => {
-          const actualMode = (inst.customProps?.actualMode as AnimationMode) || inst.animationMode;
-          return actualMode === 'grow';
-        });
-      
-      // layered 제거 (15프레임마다 제거하여 천천히 제거, 그리고 90% 아래로만 제거)
-      if (layeredInstances.length > 0 && 
-          this.frameCount % 15 === 0 && 
-          this.instances.size > stopRemovalThreshold) {
-        // 가장 오래된 뭉치 찾기
-        const oldestInstance = layeredInstances.reduce((oldest, current) => {
-          return current.age > oldest.age ? current : oldest;
-        });
-        
-        const clusterToRemove = oldestInstance.customProps?.clusterId as number;
-        const elementToRemove = oldestInstance.elementId;
-        
-        // 같은 clusterId와 elementId를 가진 인스턴스들을 layerIndex 순으로 정렬
-        const clusterInstances: RenderInstance[] = [];
-        this.instances.forEach((inst) => {
-          const actualMode = (inst.customProps?.actualMode as AnimationMode) || inst.animationMode;
-          if (actualMode === 'layered' && 
-              inst.elementId === elementToRemove &&
-              (inst.customProps?.clusterId as number) === clusterToRemove) {
-            clusterInstances.push(inst);
-          }
-        });
-        
-        // layerIndex 기준 오름차순 정렬 (앞에 쌓인 것부터)
-        clusterInstances.sort((a, b) => {
-          const layerA = (a.customProps?.layerIndex as number) || 0;
-          const layerB = (b.customProps?.layerIndex as number) || 0;
-          return layerA - layerB;
-        });
-        
-        // 첫 번째(가장 아래 레이어)만 제거
-        if (clusterInstances.length > 0) {
-          this.instances.delete(clusterInstances[0].id);
-        }
-      }
-      
-      // grow 제거 - 전체 스택 단위로 빠르게 제거
-      if (growInstances.length > 0) {
-        // 스택별로 그룹화
-        const growStacks = new Map<string, RenderInstance[]>();
-        growInstances.forEach(inst => {
-          const key = `${inst.elementId}-${inst.customProps?.stackId || 0}`;
-          if (!growStacks.has(key)) {
-            growStacks.set(key, []);
-          }
-          growStacks.get(key)!.push(inst);
-        });
-        
-        // 화면 밖으로 완전히 나간 스택 찾기
-        let stackToRemove: RenderInstance[] | undefined;
-        const margin = 100; // 고정 여유값 (최적화)
-        
-        growStacks.forEach(stack => {
-          if (stackToRemove) return;
-          
-          const firstInst = stack[0];
-          const isFullyOut = 
-            firstInst.x < -margin || 
-            firstInst.x > this.config.canvasWidth + margin ||
-            firstInst.y < -margin || 
-            firstInst.y > this.config.canvasHeight + margin;
-          
-          if (isFullyOut) {
-            stackToRemove = stack;
-          }
-        });
-        
-        // 전체 스택 한번에 제거
-        if (stackToRemove) {
-          stackToRemove.forEach((inst: RenderInstance) => this.instances.delete(inst.id));
-        }
-      }
-    }
+    // 3) 제거 로직 비활성화: 사용자가 요청한대로 한번 생성된 요소는 삭제되지 않습니다.
 
-    // 4) 다른 모드는 lifespan 기반으로 제거
-    const idsToDelete: string[] = [];
-    this.instances.forEach((instance, id) => {
-      const actualMode = (instance.customProps?.actualMode as AnimationMode) || instance.animationMode;
-      if (actualMode !== 'layered' && actualMode !== 'grow' && instance.age >= instance.lifespan) {
-        idsToDelete.push(id);
-      }
-    });
-    idsToDelete.forEach((id) => this.instances.delete(id));
+    // 4) lifespan 기반 제거 비활성화 — 요소를 삭제하지 않습니다.
 
     this.frameCount++;
   }
@@ -819,6 +829,110 @@ export class TypoMossRenderer {
    * Canvas에 요소 렌더링
    */
   private elementMapCache: Map<string, VectorElement> | null = null;
+  private coloredCanvasCache: Map<string, HTMLCanvasElement> = new Map();
+  private svgTextCache: Map<string, string> = new Map();
+  private recoloredImageCache: Map<string, HTMLImageElement> = new Map();
+  private recoloringInProgress: Set<string> | undefined;
+
+  private hexToRgb(hex: string): { r: number; g: number; b: number } | null {
+    if (!hex) return null;
+    const h = hex.replace('#', '').trim();
+    if (h.length === 3) {
+      const r = parseInt(h[0] + h[0], 16);
+      const g = parseInt(h[1] + h[1], 16);
+      const b = parseInt(h[2] + h[2], 16);
+      return { r, g, b };
+    } else if (h.length === 6) {
+      const r = parseInt(h.substring(0, 2), 16);
+      const g = parseInt(h.substring(2, 4), 16);
+      const b = parseInt(h.substring(4, 6), 16);
+      return { r, g, b };
+    }
+    return null;
+  }
+
+  private colorDistance(a: { r: number; g: number; b: number }, b: { r: number; g: number; b: number }) {
+    const dr = a.r - b.r;
+    const dg = a.g - b.g;
+    const db = a.b - b.b;
+    return Math.sqrt(dr * dr + dg * dg + db * db);
+  }
+
+  private async recolorSVG(svgPath: string, targetColor: string): Promise<HTMLImageElement | null> {
+    const cacheKey = `${svgPath}::${targetColor}`;
+    
+    if (this.recoloredImageCache.has(cacheKey)) {
+      return this.recoloredImageCache.get(cacheKey)!;
+    }
+
+    try {
+      console.log('[recolorSVG] Starting recolor process:', svgPath, targetColor);
+      
+      // Fetch SVG text if not cached
+      if (!this.svgTextCache.has(svgPath)) {
+        console.log('[recolorSVG] Fetching SVG file:', svgPath);
+        const response = await fetch(svgPath);
+        if (!response.ok) {
+          console.error('[recolorSVG] Fetch failed:', response.status, response.statusText);
+          return null;
+        }
+        const svgText = await response.text();
+        console.log('[recolorSVG] SVG fetched, length:', svgText.length);
+        this.svgTextCache.set(svgPath, svgText);
+      }
+
+      let svgText = this.svgTextCache.get(svgPath)!;
+      console.log('[recolorSVG] Original SVG preview:', svgText.substring(0, 200));
+      
+      // Replace fill colors in SVG
+      // 1. Replace inline fill attributes
+      // 2. Replace fill inside CSS <style> blocks (for class-based SVGs)
+      const originalText = svgText;
+      
+      svgText = svgText
+        // Inline fill attributes
+        .replace(/fill="#[0-9a-fA-F]{6}"/gi, `fill="${targetColor}"`)
+        .replace(/fill="#[0-9a-fA-F]{3}"/gi, `fill="${targetColor}"`)
+        .replace(/fill='#[0-9a-fA-F]{6}'/gi, `fill='${targetColor}'`)
+        .replace(/fill='#[0-9a-fA-F]{3}'/gi, `fill='${targetColor}'`)
+        .replace(/fill="rgb\([^)]+\)"/gi, `fill="${targetColor}"`)
+        // CSS style blocks - match fill: #color; or fill:#color;
+        .replace(/fill:\s*#[0-9a-fA-F]{6};/gi, `fill: ${targetColor};`)
+        .replace(/fill:\s*#[0-9a-fA-F]{3};/gi, `fill: ${targetColor};`)
+        .replace(/fill:\s*rgb\([^)]+\);/gi, `fill: ${targetColor};`);
+      
+      const changed = svgText !== originalText;
+      console.log('[recolorSVG] Text replacement done, changed:', changed);
+      if (changed) {
+        console.log('[recolorSVG] Modified SVG preview:', svgText.substring(0, 200));
+      }
+
+      // Create blob URL for the modified SVG
+      const blob = new Blob([svgText], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      console.log('[recolorSVG] Blob URL created:', url);
+
+      // Load as image
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          console.log('[recolorSVG] Image loaded successfully:', img.width, 'x', img.height);
+          URL.revokeObjectURL(url);
+          this.recoloredImageCache.set(cacheKey, img);
+          resolve(img);
+        };
+        img.onerror = (e) => {
+          console.error('[recolorSVG] Image load error:', e);
+          URL.revokeObjectURL(url);
+          resolve(null);
+        };
+        img.src = url;
+      });
+    } catch (e) {
+      console.error('[recolorSVG] Exception:', e);
+      return null;
+    }
+  }
   
   private render(): void {
     // 배경 초기화
@@ -837,7 +951,7 @@ export class TypoMossRenderer {
 
       const animProps = getAnimationProperties(
         instance,
-        1 / 60, // deltaTime (assumed 60 FPS)
+        this.deltaTime,
         instance.animationMode,
         instance.elementName
       );
@@ -912,13 +1026,61 @@ export class TypoMossRenderer {
         }
 
         // 이미지를 중앙 기준으로 그리기 (aspect ratio 유지)
-        this.ctx.drawImage(
-          img,
-          -drawWidth / 2,
-          -drawHeight / 2,
-          drawWidth,
-          drawHeight
-        );
+        const defaultColor = (element.customData?.defaultColor as string) || '#1AB551';
+        const targetColor = element.color || defaultColor;
+        const svgPath = (element.customData?.svgPath as string);
+
+        // Check if recoloring is needed
+        const needsRecolor = svgPath && targetColor && targetColor.toLowerCase() !== defaultColor.toLowerCase();
+
+        // Debug: log first instance of each element once per 60 frames
+        if (this.frameCount % 60 === 0 && svgPath) {
+          const cacheKey = `${svgPath}::${targetColor}`;
+          const hasCached = this.recoloredImageCache.has(cacheKey);
+          console.log('[Recolor Debug]', {
+            elementId: element.id,
+            svgPath,
+            targetColor,
+            defaultColor,
+            needsRecolor,
+            hasCachedRecolor: hasCached,
+          });
+        }
+
+        if (needsRecolor) {
+          // Use SVG recoloring for better quality
+          const cacheKey = `${svgPath}::${targetColor}`;
+          const recoloredImg = this.recoloredImageCache.get(cacheKey);
+          
+          if (recoloredImg) {
+            // Use cached recolored version
+            this.ctx.imageSmoothingEnabled = true;
+            this.ctx.drawImage(recoloredImg, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+          } else {
+            // Show original while recoloring
+            this.ctx.imageSmoothingEnabled = true;
+            this.ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+            // Trigger async recolor (will be ready next frame)
+            // Only log once per cache key to avoid spam
+            if (!this.recoloringInProgress) this.recoloringInProgress = new Set();
+            if (!this.recoloringInProgress.has(cacheKey)) {
+              this.recoloringInProgress.add(cacheKey);
+              console.log('[Recolor] Triggering recolor:', svgPath, '→', targetColor);
+              this.recolorSVG(svgPath, targetColor)
+                .then(() => {
+                  this.recoloringInProgress?.delete(cacheKey);
+                })
+                .catch((err) => {
+                  console.error('[Recolor] Failed:', err);
+                  this.recoloringInProgress?.delete(cacheKey);
+                });
+            }
+          }
+        } else {
+          // No recoloring needed - draw original
+          this.ctx.imageSmoothingEnabled = true;
+          this.ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+        }
       }
     } else if (path.type === 'text') {
       // Fallback: 텍스트 렌더링
@@ -937,7 +1099,16 @@ export class TypoMossRenderer {
   /**
    * 메인 루프
    */
-  private mainLoop = (): void => {
+  private mainLoop = (timestamp?: number): void => {
+    if (!timestamp) timestamp = performance.now();
+    if (!this.lastTimestamp) {
+      this.lastTimestamp = timestamp;
+    }
+    // compute deltaTime (sec), cap to avoid large jumps
+    const rawDelta = (timestamp - this.lastTimestamp) / 1000;
+    this.deltaTime = Math.min(Math.max(rawDelta, 1 / 240), 1 / 30);
+    this.lastTimestamp = timestamp;
+
     this.update();
     this.render();
 
@@ -952,7 +1123,8 @@ export class TypoMossRenderer {
   public start(): void {
     if (this.isRunning) return;
     this.isRunning = true;
-    this.mainLoop();
+    this.lastTimestamp = performance.now();
+    this.animationFrameId = requestAnimationFrame(this.mainLoop);
   }
 
   /**

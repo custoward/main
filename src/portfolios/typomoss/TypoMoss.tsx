@@ -95,7 +95,7 @@ const TypoMoss: React.FC = () => {
   const [expandedElement, setExpandedElement] = useState<string | null>(null);
   const [maxInstances, setMaxInstances] = useState(savedSettings.maxInstances);
   const [minElementSize, setMinElementSize] = useState(savedSettings.minElementSize);
-  const [spawnSpeed, setSpawnSpeed] = useState(1.0); // 생성 속도 배율
+  const [spawnSpeed, setSpawnSpeed] = useState(2.0); // 생성 속도 배율
   const [presetLoaded, setPresetLoaded] = useState(false); // 프리셋 로딩 완료 플래그
   
   // 시드 상태
@@ -243,6 +243,10 @@ const TypoMoss: React.FC = () => {
         if (rendererRef.current) {
           rendererRef.current.updateConfig({ seed: newSeed });
           rendererRef.current.reset();
+          // enable spawning after applying seed
+          if ((rendererRef.current as any).enableSpawning) {
+            (rendererRef.current as any).enableSpawning();
+          }
         }
         
         autoResetStartTimeRef.current = Date.now();
@@ -261,6 +265,15 @@ const TypoMoss: React.FC = () => {
       }
     }
   }, [autoResetEnabled, autoResetInterval, isRecording]);
+
+  // Notify renderer about auto-reset interval so spawn ramp can align and reach
+  // maximum ~2 seconds before reset. If auto-reset is disabled, clear the setting.
+  useEffect(() => {
+    if (rendererRef.current) {
+      const resetVal = autoResetEnabled ? autoResetInterval : undefined;
+      rendererRef.current.updateConfig({ resetIntervalSeconds: resetVal as any });
+    }
+  }, [autoResetEnabled, autoResetInterval, presetLoaded]);
 
   useEffect(() => {
     const initializeRenderer = async () => {
@@ -298,9 +311,26 @@ const TypoMoss: React.FC = () => {
         // 그 다음 저장된 프리셋 설정으로 덮어쓰기
         Object.entries(elementConfigs).forEach(([elementId, config]) => {
           // 모바일에서는 크기를 0.6배로 조정
-          const adjustedConfig = isMobile 
-            ? { ...config, size: Math.round(config.size * 0.6) }
-            : config;
+          // Ensure randomModeConfig values are numeric 0..1 (coerce strings/percentages)
+          const sanitizeRandomConfig = (rc: any) => {
+            if (!rc) return rc;
+            const out: Record<string, number> = {};
+            (['layered','rotate','pulse','flicker','grow'] as const).forEach((k) => {
+              const raw = rc[k as string];
+              if (raw === undefined || raw === null) return;
+              let n = typeof raw === 'number' ? raw : Number(String(raw).replace('%',''));
+              if (!isFinite(n)) return;
+              if (String(raw).trim().endsWith('%')) n = n / 100;
+              if (n > 1) n = n / 100;
+              out[k] = Math.max(0, Math.min(1, n));
+            });
+            return out;
+          };
+
+          const sanitizedRandom = sanitizeRandomConfig((config as any).randomModeConfig);
+          const adjustedConfig = isMobile
+            ? { ...config, size: Math.round(config.size * 0.6), randomModeConfig: sanitizedRandom }
+            : { ...config, randomModeConfig: sanitizedRandom };
           renderer.updateElementConfig(elementId, adjustedConfig);
         });
         
@@ -311,6 +341,15 @@ const TypoMoss: React.FC = () => {
         console.log('[TypoMoss] 렌더러 시작');
 
         rendererRef.current = renderer;
+
+        // Auto-enable spawning so canvas shows content immediately for users
+        try {
+          if ((renderer as any).enableSpawning) {
+            (renderer as any).enableSpawning();
+          }
+        } catch (e) {
+          console.warn('[TypoMoss] enableSpawning 호출 실패:', e);
+        }
         
         // 로딩 완료
         setIsLoading(false);
@@ -678,6 +717,9 @@ const TypoMoss: React.FC = () => {
     if (rendererRef.current) {
       rendererRef.current.updateConfig({ seed: newSeed });
       rendererRef.current.reset();
+      if ((rendererRef.current as any).enableSpawning) {
+        (rendererRef.current as any).enableSpawning();
+      }
     }
   };
 
@@ -713,6 +755,9 @@ const TypoMoss: React.FC = () => {
     if (rendererRef.current) {
       rendererRef.current.updateConfig({ seed: historySeed });
       rendererRef.current.reset();
+      if ((rendererRef.current as any).enableSpawning) {
+        (rendererRef.current as any).enableSpawning();
+      }
     }
   };
 
@@ -747,7 +792,7 @@ const TypoMoss: React.FC = () => {
                     id="max-instances-slider"
                     type="range"
                     min="20"
-                    max="200"
+                    max="350"
                     step="10"
                     value={maxInstances}
                     onChange={(e) => handleUpdateMaxInstances(parseInt(e.target.value))}
@@ -761,7 +806,7 @@ const TypoMoss: React.FC = () => {
                     id="spawn-speed-slider"
                     type="range"
                     min="0.5"
-                    max="3.0"
+                    max="10.0"
                     step="0.1"
                     value={spawnSpeed}
                     onChange={(e) => handleUpdateSpawnSpeed(parseFloat(e.target.value))}
@@ -1018,6 +1063,17 @@ const TypoMoss: React.FC = () => {
                                 onChange={(e) => handleUpdateElementConfig(elementId, 'size', parseInt(e.target.value))}
                               />
                               <span>{config.size}</span>
+                            </div>
+
+                            <div className="control-row">
+                              <label>색상:</label>
+                              <input
+                                type="color"
+                                value={(config as any).color || '#1AB551'}
+                                onChange={(e) => handleUpdateElementConfig(elementId, 'color', e.target.value)}
+                                style={{ width: '48px', height: '28px', padding: 0, border: 'none' }}
+                              />
+                              <span style={{ marginLeft: '8px' }}>{((config as any).color || '#1AB551').toUpperCase()}</span>
                             </div>
 
                             <div className="control-row">

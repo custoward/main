@@ -63,38 +63,11 @@ export function animateRotate(
   opacity: number;
   rotation: number;
 } {
-  const rotationSpeed = ANIMATION_MODE_DEFAULTS.rotate.rotationSpeed;
-  const fadeInDuration = 0.2; // 처음 20%
-  const fadeOutStart = 0.8; // 마지막 20%
-  
-  let scale: number;
-  let opacity: number;
-  
-  // 등장 (0 ~ 0.2): 0.3 → 1.0
-  if (progress < fadeInDuration) {
-    const fadeProgress = progress / fadeInDuration;
-    scale = 0.3 + fadeProgress * 0.7;
-    opacity = fadeProgress;
-  }
-  // 사라짐 (0.8 ~ 1.0): 1.0 → 1.5, 투명해짐
-  else if (progress > fadeOutStart) {
-    const fadeProgress = (progress - fadeOutStart) / (1 - fadeOutStart);
-    scale = 1.0 + fadeProgress * 0.5;
-    opacity = 1.0 - fadeProgress;
-  }
-  // 유지 (0.2 ~ 0.8)
-  else {
-    scale = 1.0;
-    opacity = 1.0;
-  }
-  
-  // 계속 회전 (방향 적용)
-  const rotationDirection = (instance.customProps?.rotationDirection as number) || 1;
-  const rotation = progress * Math.PI * 2 * rotationSpeed * rotationDirection;
-
+  // Rotation is maintained on the instance and updated each frame in the renderer update loop.
+  const rotation = instance.rotation || 0;
   return {
-    scale,
-    opacity,
+    scale: 1.0,
+    opacity: 1.0,
     rotation,
   };
 }
@@ -111,37 +84,10 @@ export function animatePulse(
   scale: number;
   opacity: number;
 } {
-  const fadeInDuration = 0.15; // 처음 15%만 페이드 인
-  const fadeOutStart = 0.85; // 마지막 15%
-  const pulseSpeed = 3; // 펄스 속도 (3 사이클)
-  
-  let scale: number;
-  let opacity: number;
-  
-  // 등장 (0 ~ 0.15): 0 → 1.0
-  if (progress < fadeInDuration) {
-    const fadeProgress = progress / fadeInDuration;
-    scale = fadeProgress;
-    opacity = fadeProgress;
-  }
-  // 사라짐 (0.85 ~ 1.0): 페이드 아웃
-  else if (progress > fadeOutStart) {
-    const fadeProgress = (progress - fadeOutStart) / (1 - fadeOutStart);
-    // 계속 펄스하면서 페이드 아웃
-    const pulseAmount = Math.sin(progress * Math.PI * 2 * pulseSpeed) * 0.15;
-    scale = (1.0 + pulseAmount) * (1.0 - fadeProgress * 0.7);
-    opacity = 1.0 - fadeProgress;
-  }
-  // 펄스 반복 (0.15 ~ 0.85): 0.85 ~ 1.15 반복
-  else {
-    const pulseAmount = Math.sin(progress * Math.PI * 2 * pulseSpeed) * 0.15;
-    scale = 1.0 + pulseAmount;
-    opacity = 1.0;
-  }
-
+  // Remove fade/scale transitions; keep constant appearance
   return {
-    scale,
-    opacity,
+    scale: 1.0,
+    opacity: 1.0,
   };
 }
 
@@ -158,26 +104,10 @@ export function animateFlicker(
   opacity: number;
   rotation: number;
 } {
-  const flickerCount = (instance.customProps?.flickerCount as number) || 5;
-  // 깜빡임 속도를 느리게 (flickerCount를 절반으로)
-  const flickerProgress = progress * (flickerCount * 0.5);
-  
-  let opacity = 1.0;
-  let scale = 1.0;
-  
-  // 85% 이전에는 깜빡이지 않고 그냥 보임
-  if (progress <= 0.85) {
-    opacity = 1.0;
-  } else {
-    // 마지막 15%에서만 크기가 커지며 페이드 아웃
-    const endProgress = (progress - 0.85) / 0.15;
-    opacity = 1.0 - endProgress;
-    scale = 1.0 + endProgress * 0.5; // 최대 1.5배까지 커짐
-  }
-  
+  // Remove fade/scale transitions; keep constant appearance and rotation
   return {
-    scale,
-    opacity,
+    scale: 1.0,
+    opacity: 1.0,
     rotation: instance.rotation,
   };
 }
@@ -196,23 +126,11 @@ export function animateTitle(
   opacity: number;
   rotation: number;
 } {
-  let opacity = 1.0;
-  let scale = 1.0;
-  
-  // 85% 이전에는 그냥 보임
-  if (progress <= 0.85) {
-    opacity = 1.0;
-  } else {
-    // 마지막 15%에서만 크기가 커지며 페이드 아웃
-    const endProgress = (progress - 0.85) / 0.15;
-    opacity = 1.0 - endProgress;
-    scale = 1.0 + endProgress * 0.5; // 최대 1.5배까지 커짐
-  }
-  
+  // Title: no fade/scale transitions, fixed rotation 0
   return {
-    scale,
-    opacity,
-    rotation: 0, // 항상 0
+    scale: 1.0,
+    opacity: 1.0,
+    rotation: 0,
   };
 }
 
