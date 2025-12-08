@@ -158,12 +158,6 @@ export class TypoMossRenderer {
       // If a color override was provided in the element config, update the underlying VectorElement
       if (config.color !== undefined) {
         const idx = this.elements.findIndex(e => e.id === elementId);
-        console.log('[updateElementConfig] Color update:', {
-          elementId,
-          newColor: config.color,
-          foundIndex: idx,
-          oldColor: idx !== -1 ? this.elements[idx].color : 'N/A'
-        });
         if (idx !== -1) {
           this.elements[idx].color = config.color;
           // clear element map cache so render picks up new color
@@ -180,7 +174,6 @@ export class TypoMossRenderer {
               if (k.startsWith(`${svgPath}::`)) this.recoloredImageCache.delete(k);
             });
           }
-          console.log('[updateElementConfig] Color updated successfully, caches cleared');
         }
       }
       
@@ -866,70 +859,63 @@ export class TypoMossRenderer {
     }
 
     try {
-      console.log('[recolorSVG] Starting recolor process:', svgPath, targetColor);
-      
       // Fetch SVG text if not cached
       if (!this.svgTextCache.has(svgPath)) {
-        console.log('[recolorSVG] Fetching SVG file:', svgPath);
         const response = await fetch(svgPath);
-        if (!response.ok) {
-          console.error('[recolorSVG] Fetch failed:', response.status, response.statusText);
-          return null;
-        }
+        if (!response.ok) return null;
         const svgText = await response.text();
-        console.log('[recolorSVG] SVG fetched, length:', svgText.length);
         this.svgTextCache.set(svgPath, svgText);
       }
 
       let svgText = this.svgTextCache.get(svgPath)!;
-      console.log('[recolorSVG] Original SVG preview:', svgText.substring(0, 200));
       
       // Replace fill colors in SVG
-      // 1. Replace inline fill attributes
-      // 2. Replace fill inside CSS <style> blocks (for class-based SVGs)
-      const originalText = svgText;
-      
+      // Only replace green/main colors, preserve white/black/gray
       svgText = svgText
-        // Inline fill attributes
-        .replace(/fill="#[0-9a-fA-F]{6}"/gi, `fill="${targetColor}"`)
-        .replace(/fill="#[0-9a-fA-F]{3}"/gi, `fill="${targetColor}"`)
-        .replace(/fill='#[0-9a-fA-F]{6}'/gi, `fill='${targetColor}'`)
-        .replace(/fill='#[0-9a-fA-F]{3}'/gi, `fill='${targetColor}'`)
-        .replace(/fill="rgb\([^)]+\)"/gi, `fill="${targetColor}"`)
-        // CSS style blocks - match fill: #color; or fill:#color;
-        .replace(/fill:\s*#[0-9a-fA-F]{6};/gi, `fill: ${targetColor};`)
-        .replace(/fill:\s*#[0-9a-fA-F]{3};/gi, `fill: ${targetColor};`)
-        .replace(/fill:\s*rgb\([^)]+\);/gi, `fill: ${targetColor};`);
-      
-      const changed = svgText !== originalText;
-      console.log('[recolorSVG] Text replacement done, changed:', changed);
-      if (changed) {
-        console.log('[recolorSVG] Modified SVG preview:', svgText.substring(0, 200));
-      }
+        // Inline fill attributes - specific green shades only
+        .replace(/fill="#1AB551"/gi, `fill="${targetColor}"`)
+        .replace(/fill="#1ab551"/gi, `fill="${targetColor}"`)
+        .replace(/fill="#0d5a29"/gi, `fill="${targetColor}"`)
+        .replace(/fill="#4edb9a"/gi, `fill="${targetColor}"`)
+        .replace(/fill="#1f8331"/gi, `fill="${targetColor}"`)
+        .replace(/fill="#2d9e45"/gi, `fill="${targetColor}"`)
+        .replace(/fill='#1AB551'/gi, `fill='${targetColor}'`)
+        .replace(/fill='#1ab551'/gi, `fill='${targetColor}'`)
+        .replace(/fill='#0d5a29'/gi, `fill='${targetColor}'`)
+        .replace(/fill='#4edb9a'/gi, `fill='${targetColor}'`)
+        .replace(/fill='#1f8331'/gi, `fill='${targetColor}'`)
+        .replace(/fill='#2d9e45'/gi, `fill='${targetColor}'`)
+        .replace(/fill="rgb\(26,\s*181,\s*81\)"/gi, `fill="${targetColor}"`)
+        .replace(/fill="rgb\(31,\s*131,\s*49\)"/gi, `fill="${targetColor}"`)
+        // CSS style blocks - specific green shades only
+        .replace(/fill:\s*#1AB551;/gi, `fill: ${targetColor};`)
+        .replace(/fill:\s*#1ab551;/gi, `fill: ${targetColor};`)
+        .replace(/fill:\s*#0d5a29;/gi, `fill: ${targetColor};`)
+        .replace(/fill:\s*#4edb9a;/gi, `fill: ${targetColor};`)
+        .replace(/fill:\s*#1f8331;/gi, `fill: ${targetColor};`)
+        .replace(/fill:\s*#2d9e45;/gi, `fill: ${targetColor};`)
+        .replace(/fill:\s*rgb\(26,\s*181,\s*81\);/gi, `fill: ${targetColor};`)
+        .replace(/fill:\s*rgb\(31,\s*131,\s*49\);/gi, `fill: ${targetColor};`);
 
       // Create blob URL for the modified SVG
       const blob = new Blob([svgText], { type: 'image/svg+xml' });
       const url = URL.createObjectURL(blob);
-      console.log('[recolorSVG] Blob URL created:', url);
 
       // Load as image
       return new Promise((resolve) => {
         const img = new Image();
         img.onload = () => {
-          console.log('[recolorSVG] Image loaded successfully:', img.width, 'x', img.height);
           URL.revokeObjectURL(url);
           this.recoloredImageCache.set(cacheKey, img);
           resolve(img);
         };
-        img.onerror = (e) => {
-          console.error('[recolorSVG] Image load error:', e);
+        img.onerror = () => {
           URL.revokeObjectURL(url);
           resolve(null);
         };
         img.src = url;
       });
     } catch (e) {
-      console.error('[recolorSVG] Exception:', e);
       return null;
     }
   }
@@ -1033,20 +1019,6 @@ export class TypoMossRenderer {
         // Check if recoloring is needed
         const needsRecolor = svgPath && targetColor && targetColor.toLowerCase() !== defaultColor.toLowerCase();
 
-        // Debug: log first instance of each element once per 60 frames
-        if (this.frameCount % 60 === 0 && svgPath) {
-          const cacheKey = `${svgPath}::${targetColor}`;
-          const hasCached = this.recoloredImageCache.has(cacheKey);
-          console.log('[Recolor Debug]', {
-            elementId: element.id,
-            svgPath,
-            targetColor,
-            defaultColor,
-            needsRecolor,
-            hasCachedRecolor: hasCached,
-          });
-        }
-
         if (needsRecolor) {
           // Use SVG recoloring for better quality
           const cacheKey = `${svgPath}::${targetColor}`;
@@ -1061,17 +1033,14 @@ export class TypoMossRenderer {
             this.ctx.imageSmoothingEnabled = true;
             this.ctx.drawImage(img, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
             // Trigger async recolor (will be ready next frame)
-            // Only log once per cache key to avoid spam
             if (!this.recoloringInProgress) this.recoloringInProgress = new Set();
             if (!this.recoloringInProgress.has(cacheKey)) {
               this.recoloringInProgress.add(cacheKey);
-              console.log('[Recolor] Triggering recolor:', svgPath, '→', targetColor);
               this.recolorSVG(svgPath, targetColor)
                 .then(() => {
                   this.recoloringInProgress?.delete(cacheKey);
                 })
-                .catch((err) => {
-                  console.error('[Recolor] Failed:', err);
+                .catch(() => {
                   this.recoloringInProgress?.delete(cacheKey);
                 });
             }
