@@ -10,7 +10,7 @@ export const DEFAULT_RENDER_CONFIG: RenderConfig = {
   canvasHeight: 1080,
   backgroundColor: '#ffffff', // 흰색 배경
   spawnRate: 0.15, // 프레임당 새로운 요소 생성 확률
-  maxInstances: 350, // 동시 활성 최대 개수 (증가)
+  maxInstances: 400, // 동시 활성 최대 개수 (증가)
   spawnSpeed: 2.0, // 생성 속도 배율 (기본값, 상향)
 };
 

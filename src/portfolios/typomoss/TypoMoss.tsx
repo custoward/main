@@ -794,7 +794,7 @@ const TypoMoss: React.FC = () => {
                     id="max-instances-slider"
                     type="range"
                     min="20"
-                    max="350"
+                    max="400"
                     step="10"
                     value={maxInstances}
                     onChange={(e) => handleUpdateMaxInstances(parseInt(e.target.value))}
