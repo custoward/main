@@ -404,5 +404,223 @@ export const DEFAULT_PRESETS = [
     "spawnSpeed": 1,
     "autoResetEnabled": true,
     "autoResetInterval": 20
+  },
+  {
+    "name": "컬러",
+    "elementConfigs": {
+      "svg-vector_sticker_1": {
+        "elementId": "svg-vector_sticker_1",
+        "frequency": 0.8,
+        "size": 195,
+        "animationMode": "random" as const,
+        "animationSpeed": 0.1,
+        "randomModeConfig": {
+          "rotate": 0,
+          "layered": 0.54,
+          "flicker": 0.14
+        },
+        "color": "#21733e"
+      },
+      "svg-vector_sticker_2": {
+        "elementId": "svg-vector_sticker_2",
+        "frequency": 0.8,
+        "size": 215,
+        "animationMode": "random" as const,
+        "animationSpeed": 0.1,
+        "randomModeConfig": {
+          "layered": 0.7,
+          "flicker": 0.21
+        },
+        "color": "#0e5d2a"
+      },
+      "svg-vector_sticker_3": {
+        "elementId": "svg-vector_sticker_3",
+        "frequency": 0.85,
+        "size": 195,
+        "animationMode": "random" as const,
+        "animationSpeed": 0.1,
+        "randomModeConfig": {
+          "grow": 0.53,
+          "flicker": 0.08
+        },
+        "color": "#4b8b61"
+      },
+      "svg-vector_circle_1": {
+        "elementId": "svg-vector_circle_1",
+        "frequency": 0.12,
+        "size": 140,
+        "animationMode": "rotate" as const,
+        "animationSpeed": 0.2,
+        "color": "#345640"
+      },
+      "svg-vector_circle_2": {
+        "elementId": "svg-vector_circle_2",
+        "frequency": 0.12,
+        "size": 185,
+        "animationMode": "rotate" as const,
+        "animationSpeed": 0.1,
+        "color": "#2d4837"
+      },
+      "svg-vector_4": {
+        "elementId": "svg-vector_4",
+        "frequency": 0.1,
+        "size": 180,
+        "animationMode": "random" as const,
+        "animationSpeed": 0.1,
+        "randomModeConfig": {
+          "pulse": 0.2,
+          "flicker": 0.18
+        },
+        "color": "#2f4c39"
+      },
+      "svg-vector_5": {
+        "elementId": "svg-vector_5",
+        "frequency": 0.1,
+        "size": 150,
+        "animationMode": "random" as const,
+        "animationSpeed": 0.1,
+        "randomModeConfig": {
+          "pulse": 0.22,
+          "flicker": 0.27,
+          "rotate": 0
+        },
+        "color": "#386b4a"
+      },
+      "svg-vector_6": {
+        "elementId": "svg-vector_6",
+        "frequency": 0.1,
+        "size": 160,
+        "animationMode": "random" as const,
+        "animationSpeed": 0.1,
+        "randomModeConfig": {
+          "pulse": 0.25,
+          "flicker": 0.26,
+          "rotate": 0.07
+        },
+        "color": "#13632f"
+      },
+      "svg-vector_7": {
+        "elementId": "svg-vector_7",
+        "frequency": 0.1,
+        "size": 165,
+        "animationMode": "random" as const,
+        "animationSpeed": 0.1,
+        "randomModeConfig": {
+          "pulse": 0.25,
+          "flicker": 0.25,
+          "rotate": 0.05
+        },
+        "color": "#237b42"
+      },
+      "svg-vector_8": {
+        "elementId": "svg-vector_8",
+        "frequency": 0.05,
+        "size": 165,
+        "animationMode": "random" as const,
+        "animationSpeed": 0.1,
+        "randomModeConfig": {
+          "pulse": 0.26,
+          "flicker": 0.24
+        }
+      },
+      "svg-vector_9": {
+        "elementId": "svg-vector_9",
+        "frequency": 0.05,
+        "size": 140,
+        "animationMode": "random" as const,
+        "animationSpeed": 0.1,
+        "randomModeConfig": {
+          "pulse": 0.14,
+          "flicker": 0.16
+        }
+      },
+      "svg-vector_10": {
+        "elementId": "svg-vector_10",
+        "frequency": 0.1,
+        "size": 140,
+        "animationMode": "random" as const,
+        "animationSpeed": 1,
+        "randomModeConfig": {
+          "pulse": 0.19,
+          "flicker": 0.19
+        }
+      },
+      "svg-vector_11": {
+        "elementId": "svg-vector_11",
+        "frequency": 0.1,
+        "size": 75,
+        "animationMode": "title" as const,
+        "animationSpeed": 1
+      },
+      "svg-vector_12": {
+        "elementId": "svg-vector_12",
+        "frequency": 0.1,
+        "size": 105,
+        "animationMode": "title" as const,
+        "animationSpeed": 1
+      },
+      "svg-vector_13": {
+        "elementId": "svg-vector_13",
+        "frequency": 0.1,
+        "size": 105,
+        "animationMode": "title" as const,
+        "animationSpeed": 1
+      },
+      "svg-vector_14": {
+        "elementId": "svg-vector_14",
+        "frequency": 0.1,
+        "size": 105,
+        "animationMode": "title" as const,
+        "animationSpeed": 1
+      },
+      "svg-vector_15": {
+        "elementId": "svg-vector_15",
+        "frequency": 0.1,
+        "size": 105,
+        "animationMode": "title" as const,
+        "animationSpeed": 1
+      },
+      "svg-vector_sticker_4": {
+        "elementId": "svg-vector_sticker_4",
+        "frequency": 0.8,
+        "size": 195,
+        "animationMode": "random" as const,
+        "animationSpeed": 0.1,
+        "randomModeConfig": {
+          "grow": 0.61,
+          "flicker": 0.13
+        }
+      },
+      "svg-vector_sticker_5": {
+        "elementId": "svg-vector_sticker_5",
+        "frequency": 0.85,
+        "size": 130,
+        "animationMode": "random" as const,
+        "animationSpeed": 0.1,
+        "randomModeConfig": {
+          "layered": 0.62,
+          "flicker": 0.14
+        }
+      },
+      "svg-vector_circle_3": {
+        "elementId": "svg-vector_circle_3",
+        "frequency": 0.12,
+        "size": 255,
+        "animationMode": "rotate" as const,
+        "animationSpeed": 0.1
+      },
+      "svg-vector_원": {
+        "elementId": "svg-vector_원",
+        "frequency": 0.12,
+        "size": 300,
+        "animationMode": "flicker" as const,
+        "animationSpeed": 1
+      }
+    },
+    "maxInstances": 350,
+    "minElementSize": 165,
+    "spawnSpeed": 2.8,
+    "autoResetEnabled": true,
+    "autoResetInterval": 20
   }
 ];

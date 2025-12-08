@@ -167,20 +167,20 @@ const TypoMoss: React.FC = () => {
       
       setPresets(presetsToLoad);
       
-      // 첫 번째 프리셋을 자동으로 적용
-      if (presetsToLoad.length > 0) {
-        const firstPreset = presetsToLoad[0];
+      // 두 번째 프리셋('컬러')을 자동으로 적용
+      if (presetsToLoad.length > 1) {
+        const colorPreset = presetsToLoad[1];
         
-        console.log('[TypoMoss] 프리셋 로딩:', firstPreset.name);
-        console.log('[TypoMoss] 프리셋 elementConfigs:', Object.keys(firstPreset.elementConfigs).length);
+        console.log('[TypoMoss] 프리셋 로딩:', colorPreset.name);
+        console.log('[TypoMoss] 프리셋 elementConfigs:', Object.keys(colorPreset.elementConfigs).length);
         
         // 프리셋의 elementConfigs를 그대로 적용
-        setElementConfigs(firstPreset.elementConfigs);
-        setMaxInstances(firstPreset.maxInstances);
-        setMinElementSize(firstPreset.minElementSize);
-        setSpawnSpeed(firstPreset.spawnSpeed ?? 1.0);
-        setAutoResetEnabled(firstPreset.autoResetEnabled ?? false);
-        setAutoResetInterval(firstPreset.autoResetInterval ?? 60);
+        setElementConfigs(colorPreset.elementConfigs);
+        setMaxInstances(colorPreset.maxInstances);
+        setMinElementSize(colorPreset.minElementSize);
+        setSpawnSpeed(colorPreset.spawnSpeed ?? 1.0);
+        setAutoResetEnabled(colorPreset.autoResetEnabled ?? false);
+        setAutoResetInterval(colorPreset.autoResetInterval ?? 60);
         
         // 프리셋 로딩 완료 표시
         setPresetLoaded(true);
@@ -637,7 +637,9 @@ const TypoMoss: React.FC = () => {
       recordedChunksRef.current = [];
       setRecordingTime(0);
 
-      const stream = canvasRef.current.captureStream(60); // 60 FPS
+      // captureStream() without FPS argument - captures at actual canvas update rate
+      // This prevents frame drops from being recorded
+      const stream = canvasRef.current.captureStream();
       
       // MP4 지원 확인 (Safari/iOS는 MP4 지원)
       let mimeType = 'video/webm;codecs=vp9';
@@ -655,7 +657,7 @@ const TypoMoss: React.FC = () => {
 
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: mimeType,
-        videoBitsPerSecond: 8000000 // 8 Mbps
+        videoBitsPerSecond: 5000000 // 5 Mbps (reduced from 8 for better performance)
       });
 
       mediaRecorder.ondataavailable = (event) => {
