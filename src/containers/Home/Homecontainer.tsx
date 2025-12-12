@@ -14,7 +14,7 @@ const Homecontainer = () => {
 
     // 프로젝트별 라우트 매핑
     const getProjectRoute = (projectId: string) => {
-        if (projectId === 'proj-1') return '/typo-moss';
+        if (projectId === 'proj-1') return '/typomoss';
         if (projectId === 'proj-2') return '/breath-hidden-city';
         return '#';
     };

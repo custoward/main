@@ -1,0 +1,249 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  overflow-x: hidden;
+  position: relative;
+  background-color: #1AB551;
+}
+
+header {
+  width: 100%;
+  height: 100px;
+  font-family: 'Rubik Bubbles', helvetica, sans-serif;
+  font-weight: 600;
+  font-size: 3em;
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 100;
+  color: #000;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-bottom: 1.5px solid black;
+  overflow: hidden;
+  transition: height 0.3s ease, font-size 0.3s ease, gap 0.3s ease;
+}
+
+header.scrolled {
+  height: 50px;
+  font-size: 1.6em;
+  gap: 15px;
+}
+
+#headerBackground {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  overflow: hidden;
+}
+
+#headerBackground img {
+  position: absolute;
+  filter: brightness(0.8);
+}
+
+#animatedTitle {
+  display: flex;
+  gap: 0.1em;
+  position: relative;
+  z-index: 10;
+  letter-spacing: 0.03em;
+}
+
+.letter {
+  display: inline-block;
+  animation: wiggle 5s ease-in-out infinite;
+}
+
+#koreanTitle {
+  display: flex;
+  gap: 0.1em;
+  font-size: 0.8em;
+  font-family: 'Jua', 'Rubik Bubbles', helvetica, sans-serif;
+  font-weight: 400;
+  position: relative;
+  z-index: 10;
+  margin-top: 5px;
+  letter-spacing: 0.02em;
+}
+
+#qrSection {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+  transition: top 0.3s ease, gap 0.3s ease;
+}
+
+#qrCode {
+  width: 60px;
+  height: 60px;
+  transition: width 0.3s ease, height 0.3s ease;
+}
+
+#qrLabel {
+  font-size: 0.28em;
+  font-weight: 400;
+  color: #000;
+  white-space: nowrap;
+  letter-spacing: 0.05em;
+  transition: font-size 0.3s ease;
+}
+
+header.scrolled #qrSection {
+  top: 8px;
+  gap: 6px;
+}
+
+header.scrolled #qrCode {
+  width: 35px;
+  height: 35px;
+}
+
+header.scrolled #qrLabel {
+  font-size: 0.22em;
+}
+
+@keyframes wiggle {
+  0%, 85% {
+    transform: scale(1) rotate(0deg);
+  }
+  87% {
+    transform: scale(1.08) rotate(3deg);
+  }
+  90% {
+    transform: scale(0.95) rotate(-2deg);
+  }
+  93% {
+    transform: scale(1.05) rotate(2deg);
+  }
+  96%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  padding: 120px 20px 20px;
+  row-gap: 30px;
+  height: auto;
+  position: relative;
+  z-index: 10;
+}
+
+.container img {
+  width: 70%;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  cursor: pointer;
+  border: 1.5px solid black;
+}
+
+.text-block {
+  grid-column: span 2;
+  background-color: #fff;
+  border: 1.5px solid black;
+  padding: 35px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  line-height: 1.7;
+  font-size: 0.9em;
+  width: 85%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.text-block p {
+  margin-bottom: 0;
+  text-align: justify;
+}
+
+.text-block .credit {
+  margin-top: 15px;
+  font-size: 0.85em;
+  color: #666;
+  text-align: right;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .container {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  header {
+    flex-direction: column;
+    gap: 5px;
+    height: auto;
+    padding: 15px 0;
+  }
+  
+  header.scrolled {
+    padding: 12px 0;
+    font-size: 2em;
+  }
+  
+  .container {
+    padding-top: 100px;
+  }
+}
+
+@media (max-width: 400px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
+  
+  .text-block {
+    grid-column: span 1;
+    width: 90%;
+    padding: 40px 30px;
+  }
+  
+  .container img {
+    width: 90%;
+  }
+}
+
+#captionBox {
+  position: fixed;
+  display: none;
+  background-color: #fff;
+  color: black;
+  padding: 8px 12px;
+  font-size: 1.2em;
+  border: 1.5px solid black;
+  pointer-events: none;
+  z-index: 200;
+  max-width: 130px;
+  white-space: pre-wrap;
+  word-break: keep-all; /*하이폰 제거*/
+}

@@ -25,7 +25,8 @@ const App: React.FC = () => {
         <Route path="/contact" component={Contact} />
         <Route path="/portfolio" component={PortfolioMain} />
   <Route path="/breath-hidden-city" component={BreathHiddenCity} />
-  <Route path="/typo-moss" component={TypoMoss} />
+  <Route path="/typomoss" component={TypoMoss} />
+  <Route path="/typomoss_archive" render={() => { window.location.href = '/portfolios/typomoss_archive/'; return null; }} />
         <Route path="/portfolio/graphic" component={Graphic} />
         <Route path="/portfolio/product" component={Product} />
         {/* <Route path="/bravecookie" component={BraveCookieRoutes} /> */}

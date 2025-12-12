@@ -42,7 +42,7 @@ const ProjectList: React.FC = () => {
         {SAMPLE_PROJECTS.map((p) => {
           // 특정 프로젝트는 페이지 이동
           const hasRoute = p.id === 'proj-1' || p.id === 'proj-2';
-          const route = p.id === 'proj-1' ? '/typo-moss' : '/breath-hidden-city';
+          const route = p.id === 'proj-1' ? '/typomoss' : '/breath-hidden-city';
           
           return (
             <li
