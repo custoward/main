@@ -22,6 +22,14 @@ export const SAMPLE_PROJECTS: Project[] = [
     type: 'canvas'
   },
   {
+    id: 'proj-3',
+    title: '타이포 이끼 아카이브',
+    englishTitle: 'typo moss archive',
+    date: '25/12/13',
+    description: '도시 틈새에서 발견한 스티커 타이포그래피 아카이브',
+    type: 'canvas'
+  },
+  {
     id: 'proj-2',
     title: '숨은 도시',
     englishTitle: 'breath hidden city',
@@ -41,8 +49,8 @@ const ProjectList: React.FC = () => {
       <ul className="project-items">
         {SAMPLE_PROJECTS.map((p) => {
           // 특정 프로젝트는 페이지 이동
-          const hasRoute = p.id === 'proj-1' || p.id === 'proj-2';
-          const route = p.id === 'proj-1' ? '/typomoss' : '/breath-hidden-city';
+          const hasRoute = p.id === 'proj-1' || p.id === 'proj-2' || p.id === 'proj-3';
+          const route = p.id === 'proj-1' ? '/typomoss' : p.id === 'proj-3' ? '/typomoss_archive' : '/breath-hidden-city';
           
           return (
             <li
