@@ -25,7 +25,7 @@ header {
   gap: 20px;
   z-index: 100;
   color: #000;
-  background-color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(255, 255, 255, 1);
   border-bottom: 1.5px solid black;
   overflow: hidden;
   transition: height 0.3s ease, font-size 0.3s ease, gap 0.3s ease;
@@ -96,7 +96,7 @@ header.scrolled {
 }
 
 #qrLabel {
-  font-size: 0.28em;
+  font-size: 16.8px;
   font-weight: 400;
   color: #000;
   white-space: nowrap;
@@ -115,7 +115,7 @@ header.scrolled #qrCode {
 }
 
 header.scrolled #qrLabel {
-  font-size: 0.22em;
+  font-size: 7px;
 }
 
 @keyframes wiggle {
@@ -126,7 +126,7 @@ header.scrolled #qrLabel {
     transform: scale(1.08) rotate(3deg);
   }
   90% {
-    transform: scale(0.95) rotate(-2deg);
+    transform: scale(0.98) rotate(-2deg);
   }
   93% {
     transform: scale(1.05) rotate(2deg);
@@ -243,7 +243,83 @@ header.scrolled #qrLabel {
   border: 1.5px solid black;
   pointer-events: none;
   z-index: 200;
-  max-width: 130px;
+  max-width: 160px;
   white-space: pre-wrap;
   word-break: keep-all; /*하이폰 제거*/
+}
+
+/* Essay Modal */
+.essay-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  justify-content: center;
+  align-items: center;
+}
+
+.essay-modal-content {
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 0;
+  border: 1.5px solid #000;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.essay-modal-close {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.essay-modal-close:hover {
+  color: #000;
+}
+
+.essay-modal-content h2 {
+  font-family: 'Jua', sans-serif;
+  font-size: 2em;
+  font-weight: 900;
+  margin-bottom: 20px;
+  color: #188D41;
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+.essay-modal-content h2 .letter {
+  display: inline-block;
+  animation: wiggle 5s ease-in-out infinite;
+}
+
+.essay-text {
+  font-size: 1em;
+  line-height: 1.8;
+  color: #333;
+}
+
+.essay-text p {
+  margin-bottom: 15px;
+  text-indent: 1em;
+}
+
+header {
+  cursor: pointer;
+}
+
+#qrSection {
+  cursor: pointer;
 }

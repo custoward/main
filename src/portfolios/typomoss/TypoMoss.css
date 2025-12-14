@@ -6,18 +6,18 @@
 .typo-moss-page {
   width: 100vw;
   height: 100vh;
-  background: #000000; /* 검정 배경 - 페이지 전체 */
+  background: #188D41; /* 초록 배경 - 아카이브와 동일 */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   margin: 0;
-  font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Jua', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   overflow: hidden;
 }
 
 .typo-moss-container {
-  background: #000000; /* 검정 배경 */
+  background: #188D41; /* 초록 배경 */
   border-radius: 0;
   box-shadow: none;
   overflow: visible;
@@ -89,13 +89,13 @@
 .typo-moss-modal {
   width: 100%;
   max-width: 400px;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 4px;
+  background: #ffffff;
+  border: 1.5px solid #000;
+  border-radius: 0;
   display: flex;
   flex-direction: column;
   max-height: 90vh;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   margin-top: 20px;
 }
 
@@ -104,24 +104,24 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px solid #333;
-  background: #0a0a0a;
+  border-bottom: 1.5px solid #ddd;
+  background: #ffffff;
 }
 
 .typo-moss-modal-header h2 {
   margin: 0;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
-  color: #999;
-  text-transform: uppercase;
+  color: #188D41;
+  font-family: 'Jua', sans-serif;
   letter-spacing: 0.5px;
 }
 
 .typo-moss-modal-close {
   background: transparent;
   border: none;
-  color: #666;
-  font-size: 20px;
+  color: #333;
+  font-size: 24px;
   cursor: pointer;
   padding: 0;
   width: 24px;
@@ -133,7 +133,7 @@
 }
 
 .typo-moss-modal-close:hover {
-  color: #1ab551;
+  color: #000;
 }
 
 .typo-moss-modal-content {
@@ -143,6 +143,8 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  background: #ffffff;
+  color: #333;
 }
 
 /* 설정 열기 FAB (모달 닫혔을 때) */
@@ -153,8 +155,8 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #1ab551;
-  border: none;
+  background: #ffffff;
+  border: 1.5px solid #000;
   color: #000;
   font-size: 24px;
   cursor: pointer;
@@ -167,8 +169,9 @@
 }
 
 .typo-moss-settings-fab:hover {
-  background: #1ecc5f;
-  box-shadow: 0 6px 20px rgba(26, 181, 81, 0.5);
+  background: #188D41;
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(24, 141, 65, 0.5);
   transform: scale(1.05);
 }
 
@@ -256,16 +259,16 @@
 .typo-moss-help-fab {
   position: fixed;
   bottom: 24px;
-  right: 168px;
+  right: 96px;
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
+  background: #ffffff;
+  border: 1.5px solid #000;
   color: #000;
   font-size: 28px;
   font-weight: 700;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Jua', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -276,8 +279,9 @@
 }
 
 .typo-moss-help-fab:hover {
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+  background: #188D41;
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(24, 141, 65, 0.5);
   transform: scale(1.05);
 }
 
@@ -333,9 +337,10 @@
 
 /* 도움말 모달 */
 .typo-moss-help-modal {
-  background: #1a1a1a;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  background: #ffffff;
+  border: 1.5px solid #000;
+  border-radius: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   width: 90%;
   max-width: 600px;
   max-height: 80vh;
@@ -359,33 +364,34 @@
   justify-content: space-between;
   align-items: center;
   padding: 24px 24px 16px 24px;
-  border-bottom: 1px solid #333;
+  border-bottom: 1.5px solid #ddd;
 }
 
 .typo-moss-help-header h2 {
   margin: 0;
   font-size: 24px;
   font-weight: 700;
-  color: #1ab551;
+  color: #188D41;
+  font-family: 'Jua', sans-serif;
 }
 
 .typo-moss-help-content {
   padding: 24px;
-  color: #ccc;
+  color: #333;
   line-height: 1.6;
 }
 
 .typo-moss-help-content p {
   margin: 0 0 20px 0;
   font-size: 15px;
-  color: #aaa;
+  color: #333;
 }
 
 .typo-moss-help-content h3 {
   margin: 24px 0 12px 0;
   font-size: 18px;
   font-weight: 600;
-  color: #fff;
+  color: #188D41;
 }
 
 .typo-moss-help-content h3:first-of-type {
@@ -407,7 +413,7 @@
 
 .typo-moss-help-content li::before {
   content: '•';
-  color: #1ab551;
+  color: #188D41;
   font-weight: bold;
   display: inline-block;
   width: 1em;
@@ -415,21 +421,21 @@
 }
 
 .typo-moss-help-content strong {
-  color: #fff;
+  color: #000;
   font-weight: 600;
 }
 
 .typo-moss-help-footer {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #333;
+  border-top: 1px solid #ddd;
   display: flex;
   justify-content: center;
 }
 
 .typo-moss-help-footer button {
-  background: #1ab551;
-  color: #000;
+  background: #188D41;
+  color: #fff;
   border: none;
   padding: 12px 32px;
   border-radius: 8px;
@@ -440,9 +446,9 @@
 }
 
 .typo-moss-help-footer button:hover {
-  background: #1ecc5f;
+  background: #156f34;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(26, 181, 81, 0.3);
+  box-shadow: 0 4px 12px rgba(24, 141, 65, 0.3);
 }
 
 .record-icon {
@@ -468,7 +474,7 @@
 
 .control-group label {
   font-weight: 500;
-  color: #888;
+  color: #333;
   min-width: 90px;
   font-size: 12px;
   margin: 0;
@@ -479,7 +485,7 @@
   min-width: 150px;
   height: 4px;
   border-radius: 2px;
-  background: #333;
+  background: #ddd;
   outline: none;
   cursor: pointer;
 }
@@ -490,7 +496,7 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #1ab551;
+  background: #188D41;
   cursor: pointer;
 }
 
@@ -498,13 +504,13 @@
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #1ab551;
+  background: #188D41;
   cursor: pointer;
   border: none;
 }
 
 .control-group span {
-  color: #1ab551;
+  color: #188D41;
   font-weight: 600;
   min-width: 40px;
   text-align: right;
@@ -521,7 +527,7 @@
 .modal-button-group button {
   flex: 1;
   padding: 10px 16px;
-  background: #1ab551;
+  background: #188D41;
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -532,20 +538,20 @@
 }
 
 .modal-button-group button:hover {
-  background: #0d5a29;
+  background: #156f34;
 }
 
 /* 프리셋 섹션 */
 .presets-section {
   margin-top: 24px;
   padding-top: 24px;
-  border-top: 1px solid #333;
+  border-top: 1px solid #ddd;
 }
 
 .presets-section h3 {
   font-size: 14px;
   font-weight: 600;
-  color: #fff;
+  color: #188D41;
   margin: 0 0 12px 0;
 }
 
@@ -558,9 +564,9 @@
 .preset-load-btn {
   flex: 1;
   padding: 10px 16px;
-  background: #333;
-  color: #fff;
-  border: 1px solid #555;
+  background: #f5f5f5;
+  color: #333;
+  border: 1.5px solid #ddd;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
@@ -569,8 +575,8 @@
 }
 
 .preset-load-btn:hover {
-  background: #444;
-  border-color: #1ab551;
+  background: #e8e8e8;
+  border-color: #188D41;
 }
 
 .preset-rename-btn {
@@ -623,8 +629,9 @@
 
 /* 프리셋 저장 모달 */
 .typo-moss-preset-modal {
-  background: #1a1a1a;
-  border-radius: 8px;
+  background: #ffffff;
+  border: 1.5px solid #000;
+  border-radius: 0;
   width: 90%;
   max-width: 500px;
   max-height: 90vh;
@@ -636,26 +643,26 @@
 .preset-name-input {
   width: 100%;
   padding: 12px;
-  background: #222;
-  border: 1px solid #444;
+  background: #f5f5f5;
+  border: 1.5px solid #ddd;
   border-radius: 4px;
-  color: #fff;
+  color: #333;
   font-size: 14px;
   margin-bottom: 16px;
 }
 
 .preset-name-input:focus {
   outline: none;
-  border-color: #1ab551;
+  border-color: #188D41;
 }
 
 .typo-moss-controls button {
   align-self: flex-start;
   padding: 8px 16px;
-  background: #333;
-  color: #1ab551;
-  border: 1px solid #1ab551;
-  border-radius: 0; /* 둥근 모서리 제거 */
+  background: #ffffff;
+  color: #188D41;
+  border: 1.5px solid #188D41;
+  border-radius: 4px;
   font-weight: 600;
   font-size: 12px;
   cursor: pointer;
@@ -663,8 +670,8 @@
 }
 
 .typo-moss-controls button:hover {
-  background: #1ab551;
-  color: #000;
+  background: #188D41;
+  color: #fff;
 }
 
 .stats {
@@ -673,8 +680,8 @@
   gap: 4px;
   margin-top: 8px;
   padding: 8px;
-  background: #0a0a0a;
-  border-left: 2px solid #1ab551;
+  background: #f5f5f5;
+  border-left: 2px solid #188D41;
   border-radius: 0;
   font-size: 11px;
   font-family: 'Courier New', monospace;
@@ -688,8 +695,8 @@
 /* 통계 섹션 (모달 내) */
 .stats-section {
   padding: 8px 12px;
-  background: #0a0a0a;
-  border: 1px solid #333;
+  background: #f5f5f5;
+  border: 1px solid #ddd;
   border-radius: 2px;
   font-size: 11px;
   font-family: 'Courier New', monospace;
@@ -700,7 +707,7 @@
   margin: 0 0 6px 0;
   font-size: 11px;
   font-weight: 600;
-  color: #999;
+  color: #188D41;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -711,10 +718,10 @@
 
 button {
   padding: 8px 16px;
-  background: #333;
-  color: #1ab551;
-  border: 1px solid #1ab551;
-  border-radius: 2px;
+  background: #ffffff;
+  color: #188D41;
+  border: 1.5px solid #188D41;
+  border-radius: 4px;
   font-weight: 600;
   font-size: 12px;
   cursor: pointer;
@@ -722,15 +729,15 @@ button {
 }
 
 button:hover {
-  background: #1ab551;
-  color: #000;
+  background: #188D41;
+  color: #fff;
 }
 
 .element-controls h3 {
   margin: 0 0 8px 0;
   font-size: 12px;
   font-weight: 600;
-  color: #999;
+  color: #188D41;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -750,10 +757,10 @@ button:hover {
 .element-toggle {
   width: 100%;
   padding: 8px 12px;
-  background: #252525;
-  color: #ccc;
-  border: 1px solid #333;
-  border-radius: 0;
+  background: #f5f5f5;
+  color: #333;
+  border: 1.5px solid #ddd;
+  border-radius: 4px;
   font-weight: 500;
   font-size: 11px;
   cursor: pointer;
@@ -763,9 +770,9 @@ button:hover {
 }
 
 .element-toggle:hover {
-  background: #2a2a2a;
-  border-color: #1ab551;
-  color: #1ab551;
+  background: #e8e8e8;
+  border-color: #188D41;
+  color: #188D41;
 }
 
 .element-toggle-content {
@@ -796,7 +803,7 @@ button:hover {
 }
 
 .element-toggle:hover .element-toggle-arrow {
-  color: #1ab551;
+  color: #188D41;
 }
 
 .element-toggle-name {
@@ -807,8 +814,8 @@ button:hover {
 }
 
 .element-control-panel {
-  background: #0a0a0a;
-  border: 1px solid #333;
+  background: #f9f9f9;
+  border: 1.5px solid #ddd;
   border-top: none;
   padding: 8px 12px;
   display: flex;
@@ -834,7 +841,7 @@ button:hover {
   flex: 1;
   height: 4px;
   border-radius: 2px;
-  background: #1a1a1a;
+  background: #ddd;
   outline: none;
   cursor: pointer;
   min-width: 100px;
@@ -846,7 +853,7 @@ button:hover {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #1ab551;
+  background: #188D41;
   cursor: pointer;
 }
 
@@ -854,7 +861,7 @@ button:hover {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #1ab551;
+  background: #188D41;
   cursor: pointer;
   border: none;
 }
@@ -862,10 +869,10 @@ button:hover {
 .control-row select {
   flex: 1;
   padding: 4px 8px;
-  background: #1a1a1a;
-  color: #ccc;
-  border: 1px solid #333;
-  border-radius: 0;
+  background: #f5f5f5;
+  color: #333;
+  border: 1.5px solid #ddd;
+  border-radius: 4px;
   font-size: 11px;
   font-family: 'Courier New', monospace;
   cursor: pointer;

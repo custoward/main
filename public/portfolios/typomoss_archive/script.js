@@ -10,7 +10,7 @@ titleText.split('').forEach((char, index) => {
   const span = document.createElement('span');
   span.className = 'letter';
   span.textContent = char;
-  span.style.animationDelay = '0s';
+  span.style.animationDelay = `${Math.random() * -5}s`;
   span.style.animationDuration = `${4 + Math.random() * 2}s`;
   animatedTitle.appendChild(span);
 });
@@ -21,7 +21,7 @@ koreanText.split('').forEach((char, index) => {
   const span = document.createElement('span');
   span.className = 'letter';
   span.textContent = char;
-  span.style.animationDelay = '0s';
+  span.style.animationDelay = `${Math.random() * -5}s`;
   span.style.animationDuration = `${4 + Math.random() * 2}s`;
   koreanTitle.appendChild(span);
 });
@@ -67,7 +67,7 @@ fetch('imageData.json')
 
       // 마우스호버시 캡션 띄우기
       img.addEventListener('mouseenter', () => {
-        captionBox.innerHTML = `<div style="font-size: 1.05em; font-weight: 600; margin-bottom: 4px; word-break: break-all;">${data.title}</div><div style="font-size: 0.9em; word-break: break-all;">${data.caption}</div>`;
+        captionBox.innerHTML = `<div style="font-size: 1.05em; font-weight: 900; margin-bottom: 4px; word-break: break-all; font-family: 'Jua', 'Rubik Bubbles', helvetica, sans-serif;">${data.title}</div><div style="font-size: 0.9em; word-break: break-all;">${data.caption}</div>`;
         captionBox.style.display = 'block';
       });
 
@@ -86,3 +86,57 @@ fetch('imageData.json')
 
   })
   .catch(error => console.error('JSON 불러오기 오류:', error));
+
+// Essay Modal 기능
+const essayModal = document.getElementById('essayModal');
+const modalClose = document.querySelector('.essay-modal-close');
+const qrSection = document.getElementById('qrSection');
+const essayTitle = document.getElementById('essayTitle');
+
+// 에세이 제목 애니메이션 생성
+const essayTitleEnglish = 'TYPO MOSS';
+const essayTitleKorean = '타이포 이끼';
+
+const englishSpan = essayTitle.children[0];
+essayTitleEnglish.split('').forEach((char) => {
+  const span = document.createElement('span');
+  span.className = 'letter';
+  span.textContent = char;
+  span.style.animationDelay = `${Math.random() * -5}s`;
+  span.style.animationDuration = `${4 + Math.random() * 2}s`;
+  englishSpan.appendChild(span);
+});
+
+const koreanSpan = essayTitle.children[1];
+essayTitleKorean.split('').forEach((char) => {
+  const span = document.createElement('span');
+  span.className = 'letter';
+  span.textContent = char;
+  span.style.animationDelay = `${Math.random() * -5}s`;
+  span.style.animationDuration = `${4 + Math.random() * 2}s`;
+  koreanSpan.appendChild(span);
+});
+
+// QR 섹션 클릭 시 모션포스터 페이지 열기
+qrSection.addEventListener('click', (e) => {
+  e.stopPropagation();
+  window.open('/typomoss', '_blank');
+});
+
+// 헤더 클릭 시 모달 열기
+header.addEventListener('click', () => {
+  essayModal.style.display = 'flex';
+});
+
+// 닫기 버튼 클릭
+modalClose.addEventListener('click', (e) => {
+  e.stopPropagation();
+  essayModal.style.display = 'none';
+});
+
+// 모달 배경 클릭 시 닫기
+essayModal.addEventListener('click', (e) => {
+  if (e.target === essayModal) {
+    essayModal.style.display = 'none';
+  }
+});

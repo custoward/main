@@ -10,6 +10,12 @@ import { ELEMENT_CONFIGS, DEFAULT_PRESETS } from './config';
 import { ElementConfig } from './types';
 import './TypoMoss.css';
 
+// Google Fonts 추가
+const link = document.createElement('link');
+link.href = 'https://fonts.googleapis.com/css2?family=Jua&display=swap';
+link.rel = 'stylesheet';
+document.head.appendChild(link);
+
 const STORAGE_KEY = 'typomoss-settings';
 const PRESETS_KEY = 'typomoss-presets';
 
@@ -1208,13 +1214,6 @@ const TypoMoss: React.FC = () => {
         {/* 설정 열기 버튼 (모달 닫혔을 때) */}
         {!showSettings && !showHelp && (
           <>
-            <button 
-              className="typo-moss-back-button"
-              onClick={() => window.location.href = '/portfolio'}
-              title="포트폴리오 목록"
-            >
-              ←
-            </button>
             <button 
               className="typo-moss-settings-fab"
               onClick={() => setShowSettings(true)}

@@ -16,6 +16,7 @@ const Homecontainer = () => {
     const getProjectRoute = (projectId: string) => {
         if (projectId === 'proj-1') return '/typomoss';
         if (projectId === 'proj-2') return '/breath-hidden-city';
+        if (projectId === 'proj-3') return '/typomoss_archive';
         return '#';
     };
 
