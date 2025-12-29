@@ -8,6 +8,7 @@ import Product from './pages/Product';
 import Graphic from './pages/Graphic';
 import BreathHiddenCity from './portfolios/breath-hidden-city/BreathHiddenCity';
 import TypoMoss from './portfolios/typomoss/TypoMoss';
+import OriginalityWorkbook from './portfolios/originality-workbook/OriginalityWorkbook';
 // import CookieHomePage from './bravecookie/cpages/CookieHome';
 // import SetListIntroPage from './bravecookie/cpages/SetListIntroPage';
 // import SetListDayPage from './bravecookie/cpages/SetListDayPage';
@@ -24,9 +25,10 @@ const App: React.FC = () => {
         <Route path="/designer" component={Designer} />
         <Route path="/contact" component={Contact} />
         <Route path="/portfolio" component={PortfolioMain} />
-  <Route path="/breath-hidden-city" component={BreathHiddenCity} />
-  <Route path="/typomoss" component={TypoMoss} />
-  <Route path="/typomoss_archive" render={() => { window.location.href = '/portfolios/typomoss_archive/'; return null; }} />
+        <Route path="/breath-hidden-city" component={BreathHiddenCity} />
+        <Route path="/typomoss" component={TypoMoss} />
+        <Route path="/typomoss_archive" render={() => { window.location.href = '/portfolios/typomoss_archive/'; return null; }} />
+        <Route path="/originality-lab" component={OriginalityWorkbook} />
         <Route path="/portfolio/graphic" component={Graphic} />
         <Route path="/portfolio/product" component={Product} />
         {/* <Route path="/bravecookie" component={BraveCookieRoutes} /> */}
