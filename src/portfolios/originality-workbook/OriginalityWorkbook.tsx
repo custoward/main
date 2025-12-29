@@ -359,9 +359,9 @@ const OriginalityWorkbook: React.FC = () => {
 
         <section className="ow-step" aria-hidden="true">
           <p className="ow-label">질문 1</p>
-          <h2>다른 사람이 더 빠르게 결과를 냈던 순간에도 끝까지 놓지 않고 싶었던 작업이 있다면 그 장면을 적어주세요.그 작업에서 특히 중요하게 지키고 싶었던 것은 무엇이었나요?</h2>
+          <h2>다른 사람이 더 빠르게 결과를 냈던 순간에도 끝까지 놓지 않고 싶었던 작업이 있다면, 그 작업에서 특히 중요하게 지키고 싶었던 것은 무엇이었나요?</h2>
           <div className="ow-choice-grid ow-followup">
-            <p className="ow-label">Q1-1. 이 작업에서 가장 중요했던 기준은?</p>
+  
             <button className="ow-choice" data-choice-key="choice1" data-choice-value="결과보다 작업의 이유가 분명한 상태">결과보다 작업의 이유가 분명한 상태</button>
             <button className="ow-choice" data-choice-key="choice1" data-choice-value="작은 디테일까지 직접 책임질 수 있는 과정">작은 디테일까지 직접 책임질 수 있는 과정</button>
             <button className="ow-choice" data-choice-key="choice1" data-choice-value="남의 기준이 아니라 내 판단으로 결정할 수 있는 구조">남의 기준이 아니라 내 판단으로 결정할 수 있는 구조</button>
@@ -379,7 +379,7 @@ const OriginalityWorkbook: React.FC = () => {
           <p className="ow-label">질문 2</p>
           <h2>작업을 하다 비슷한 이유로 여러 번 멈추거나 방향을 바꾼 경험이 있다면, 그때 어떤 선택 앞에서 주로 멈췄나요?</h2>
           <div className="ow-choice-grid ow-followup">
-            <p className="ow-label">Q2-1. 주로 어떤 선택 앞에서 멈추었나요?</p>
+  
             <button className="ow-choice" data-choice-key="choice2" data-choice-value="기준이 흐려진 채 조건만 좋아 보이는 선택">기준이 흐려진 채 조건만 좋아 보이는 선택</button>
             <button className="ow-choice" data-choice-key="choice2" data-choice-value="내가 통제할 수 없는 외부 일정과 구조">내가 통제할 수 없는 외부 일정과 구조</button>
             <button className="ow-choice" data-choice-key="choice2" data-choice-value="결과만 요구되고 과정은 중요하지 않은 상황">결과만 요구되고 과정은 중요하지 않은 상황</button>
@@ -412,9 +412,9 @@ const OriginalityWorkbook: React.FC = () => {
 
         <section className="ow-step" aria-hidden="true">
           <p className="ow-label">질문 4</p>
-          <h2>여러 번 멈추고 돌아섰음에도 불구하고, 이상하게 계속 마음에 남아 있던 작업의 감각이 있다면 무엇이었나요? 구체적인 느낌이나 기준을 적어주세요.</h2>
+          <h2>여러 번 멈추고 돌아섰음에도 불구하고, 이상하게 계속 마음에 남아 있던 작업의 감각이 있다면 무엇이었나요? 가장 가까운 표현을 고르거나 구체적인 느낌이나 기준을 적어주세요.</h2>
           <div className="ow-choice-grid ow-followup">
-            <p className="ow-label">Q4-1. 가장 가까운 표현을 골라 주세요.</p>
+
             <button className="ow-choice" data-choice-key="choice4" data-choice-value="이유를 끝까지 설명할 수 있어야 한다는 감각">이유를 끝까지 설명할 수 있어야 한다는 감각</button>
             <button className="ow-choice" data-choice-key="choice4" data-choice-value="속도가 느려져도 밀도를 포기할 수 없다는 기준">속도가 느려져도 밀도를 포기할 수 없다는 기준</button>
             <button className="ow-choice" data-choice-key="choice4" data-choice-value="이 작업은 내가 아니면 안 된다는 책임감">이 작업은 내가 아니면 안 된다는 책임감</button>
@@ -433,7 +433,7 @@ const OriginalityWorkbook: React.FC = () => {
           <h2>앞으로 작업을 시작할 때, 이것만큼은 지켜지지 않으면 시작하지 않겠다고 느끼는 조건은 무엇인가요? <br></br>
             지금의 당신에게 가장 중요한 기준 하나를 적어주세요.</h2>
           <div className="ow-choice-grid ow-followup">
-            <p className="ow-label">Q5-1. 시작 전에 지켜져야 하는 조건은?</p>
+
             <button className="ow-choice" data-choice-key="choice5" data-choice-value="작업의 목적을 한 문장으로 말할 수 있는 상태">작업의 목적을 한 문장으로 말할 수 있는 상태</button>
             <button className="ow-choice" data-choice-key="choice5" data-choice-value="중간에 멈추거나 거절할 수 있는 권한">중간에 멈추거나 거절할 수 있는 권한</button>
             <button className="ow-choice" data-choice-key="choice5" data-choice-value="작업 속도를 스스로 조절할 수 있는 구조">작업 속도를 스스로 조절할 수 있는 구조</button>
@@ -451,7 +451,7 @@ const OriginalityWorkbook: React.FC = () => {
           <p className="ow-label">질문 6</p>
           <h2>위의 조건을 지키기 위해서라면, 지금은 포기하거나 늦춰도 괜찮다고 느끼는 것은 무엇인가요?</h2>
           <div className="ow-choice-grid ow-followup">
-            <p className="ow-label">Q6-1. 어떤 것을 감수하기로 했나요?</p>
+ 
             <button className="ow-choice" data-choice-key="choice6" data-choice-value="남들보다 빠르게 결과를 내는 속도">남들보다 빠르게 결과를 내는 속도</button>
             <button className="ow-choice" data-choice-key="choice6" data-choice-value="많은 사람에게 바로 이해되는 방식">많은 사람에게 바로 이해되는 방식</button>
             <button className="ow-choice" data-choice-key="choice6" data-choice-value="모든 플랫폼에 맞는 범용성">모든 플랫폼에 맞는 범용성</button>
