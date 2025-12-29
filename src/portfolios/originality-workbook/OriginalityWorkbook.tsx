@@ -192,6 +192,11 @@ const OriginalityWorkbook: React.FC = () => {
         const value = state[key as keyof typeof state];
         el.textContent = value || '—';
       });
+      const choice5El = summaryFields.choice5;
+      if (choice5El) {
+        const fallback = state.choice5 || state.question5;
+        choice5El.textContent = fallback || '—';
+      }
       Object.entries(answerFields).forEach(([key, el]) => {
         if (!el) return;
         const value = state[key as keyof typeof state];
@@ -521,17 +526,15 @@ const OriginalityWorkbook: React.FC = () => {
         <section className="ow-step" aria-hidden="true">
           <p className="ow-label">나의 오리지널리티 기록</p>
           <div className="ow-summary-lines">
-            
-            <p className="ow-summary-line">나는 여러 작업을 거치며<br></br> 반복해서 <span className="ow-inline-value" data-summary="choice2">—</span> 앞에서 자주 멈추거나 방향을 바꿔왔다.</p>
-            <p className="ow-summary-line">그때마다 결정을 가장 흔들었던 것은 <span className="ow-inline-value" data-summary="choice3">—</span>였다.</p>
-            <p className="ow-summary-line">그럼에도 계속 남아 있던 감각은 <span className="ow-inline-value" data-summary="choice4">—</span>이었다.</p>
-            <p className="ow-summary-line">이 흐름을 돌아보며,  <br></br> 지금의 나는 <span className="ow-inline-value" data-summary="choice1">—</span>이 지켜지는 작업을 더 중요하게 여기고 있다.</p>
-            <p className="ow-summary-line">앞으로 나는 <span className="ow-inline-value" data-summary="choice5">—</span>이 지켜지지 않으면 작업을 시작하지 않습니다.</p>
-            <p className="ow-summary-line">그 대신 <span className="ow-inline-value" data-summary="choice6">—</span>을 감수하는 선택도 받아들이게 되었다.</p>
-          </div>
 
-          <p className="ow-body">이 기록은 나를 규정하기 위한 결론이 아니라,  
-다음 작업 앞에서 다시 참고할 수 있는 현재의 작업 메모다.</p>
+            <p className="ow-summary-line">나는 여러 작업을 거치며<br></br> 반복해서 <span className="ow-inline-value" data-summary="choice2">—</span> 앞에서 자주 멈추거나 방향을 바꿔왔다.</p>
+            <p className="ow-summary-line">그 선택 앞에서 <span className="ow-inline-value" data-summary="choice3">—</span>이 나를 가장 흔들었다.</p>
+            <p className="ow-summary-line">그럼에도 사라지지 않고 계속 남아 있던 감각은 <span className="ow-inline-value" data-summary="choice4">—</span>이었다.</p>
+            <p className="ow-summary-line">이 흐름을 지나 지금의 나는, 작업을 시작하기 위해 최소한 <span className="ow-inline-value" data-summary="choice5">—</span>이 지켜지기를 바라고 있다.</p>
+            <p className="ow-summary-line">그래서 나는 <span className="ow-inline-value" data-summary="choice5">—</span>이 지켜지는 작업을 선택하고,</p>
+             <p className="ow-summary-line">그 대신 <span className="ow-inline-value" data-summary="choice6">—</span>을 감수하는 쪽을 택한다.</p>
+            <p className="ow-summary-line">이 기록은 나를 규정하는 결론이 아니라, <br></br>다음 작업 앞에서 다시 참고하기 위한 현재의 기준이다.</p>
+          </div>
           <p className="ow-note">이 기록을 저장해 두고,
             새로운 작업을 시작하기 전이나 중요한 결정을 앞두었을 때
             다시 읽어보세요.
