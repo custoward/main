@@ -39,23 +39,14 @@ const OriginalityWorkbook: React.FC = () => {
       choice6: parsed?.choice6 ?? '',
     };
 
-    const answerFields: Record<string, HTMLElement | null> = {
-      question1: document.querySelector('[data-answer="question1"]'),
-      question2: document.querySelector('[data-answer="question2"]'),
-      question3: document.querySelector('[data-answer="question3"]'),
-      question4: document.querySelector('[data-answer="question4"]'),
-      question5: document.querySelector('[data-answer="question5"]'),
-      question6: document.querySelector('[data-answer="question6"]'),
-    };
-
     const clampStep = (index: number) => Math.max(0, Math.min(index, steps.length - 1));
     const requirements: Record<number, (keyof typeof state)[]> = {
-      1: ['question1', 'choice1'],
-      2: ['question2', 'choice2'],
+      1: ['choice1'],
+      2: ['choice2'],
       3: ['choice3'],
-      4: ['question4', 'choice4'],
-      5: ['question5', 'choice5'],
-      6: ['question6', 'choice6'],
+      4: ['choice4'],
+      5: ['choice5'],
+      6: ['choice6'],
     };
     const choiceOptions: Record<string, string[]> = {
       choice1: [
@@ -171,6 +162,17 @@ const OriginalityWorkbook: React.FC = () => {
       updateNextButtons();
     };
 
+    const getSubjectParticle = (value: string) => {
+      if (!value) return '이';
+      const trimmed = value.trim();
+      if (!trimmed) return '이';
+      const lastChar = trimmed.charAt(trimmed.length - 1);
+      const code = lastChar.charCodeAt(0);
+      if (code < 0xac00 || code > 0xd7a3) return '이';
+      const jong = (code - 0xac00) % 28;
+      return jong === 0 ? '가' : '이';
+    };
+
     const renderSummary = () => {
       const summaryValues: Record<string, string> = {
         question1: state.question1,
@@ -192,11 +194,10 @@ const OriginalityWorkbook: React.FC = () => {
         nodes.forEach((node) => {
           node.textContent = val || '—';
         });
-      });
-      Object.entries(answerFields).forEach(([key, el]) => {
-        if (!el) return;
-        const value = state[key as keyof typeof state];
-        el.textContent = value || '—';
+        const particleNodes = document.querySelectorAll<HTMLElement>(`[data-particle-for="${key}"]`);
+        particleNodes.forEach((node) => {
+          node.textContent = getSubjectParticle(val);
+        });
       });
       syncUI();
     };
@@ -316,16 +317,6 @@ const OriginalityWorkbook: React.FC = () => {
       });
     }
 
-    const toggleButton = document.querySelector<HTMLButtonElement>('[data-toggle-answers]');
-    const answersPanel = document.querySelector<HTMLElement>('.ow-answers-panel');
-    if (toggleButton && answersPanel) {
-      toggleButton.addEventListener('click', () => {
-        const isOpen = answersPanel.classList.toggle('is-open');
-        answersPanel.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
-        toggleButton.textContent = isOpen ? '주관식 답변 접기' : '주관식 답변 보기';
-      });
-    }
-
     renderSummary();
 
     return () => {
@@ -336,7 +327,6 @@ const OriginalityWorkbook: React.FC = () => {
       resetButtons.forEach((button) => button.replaceWith(button.cloneNode(true)));
       if (modalConfirm) modalConfirm.replaceWith(modalConfirm.cloneNode(true));
       if (modalCancel) modalCancel.replaceWith(modalCancel.cloneNode(true));
-      if (toggleButton) toggleButton.replaceWith(toggleButton.cloneNode(true));
     };
   }, []);
 
@@ -370,15 +360,6 @@ const OriginalityWorkbook: React.FC = () => {
         <section className="ow-step" aria-hidden="true">
           <p className="ow-label">질문 1</p>
           <h2>다른 사람이 더 빠르게 결과를 냈던 순간에도 끝까지 놓지 않고 싶었던 작업이 있다면 그 장면을 적어주세요.그 작업에서 특히 중요하게 지키고 싶었던 것은 무엇이었나요?</h2>
-          <textarea
-            className="ow-textarea"
-            data-choice-key="question1"
-            placeholder="예:
-                        “다른 사람이 이미 끝냈어도, ○○만큼은 직접 확인하고 싶었다”
-                        “효율이 떨어져도 이 부분만큼은 넘기고 싶지 않았다”
-                        “이 작업을 할 때만큼은 ○○을 지키고 싶었다”
-                        "
-          />
           <div className="ow-choice-grid ow-followup">
             <p className="ow-label">Q1-1. 이 작업에서 가장 중요했던 기준은?</p>
             <button className="ow-choice" data-choice-key="choice1" data-choice-value="결과보다 작업의 이유가 분명한 상태">결과보다 작업의 이유가 분명한 상태</button>
@@ -397,15 +378,6 @@ const OriginalityWorkbook: React.FC = () => {
         <section className="ow-step" aria-hidden="true">
           <p className="ow-label">질문 2</p>
           <h2>작업을 하다 비슷한 이유로 여러 번 멈추거나 방향을 바꾼 경험이 있다면, 그때 어떤 선택 앞에서 주로 멈췄나요?</h2>
-          <textarea
-            className="ow-textarea"
-            data-choice-key="question2"
-            placeholder="예:
-                        “조건은 괜찮았지만 ○○ 때문에 계속 망설여졌다”
-                        “이 방향으로 가면 ○○을 잃을 것 같았다”
-                        “결정해야 할 순간마다 비슷한 이유로 멈췄다”
-                        "
-          />
           <div className="ow-choice-grid ow-followup">
             <p className="ow-label">Q2-1. 주로 어떤 선택 앞에서 멈추었나요?</p>
             <button className="ow-choice" data-choice-key="choice2" data-choice-value="기준이 흐려진 채 조건만 좋아 보이는 선택">기준이 흐려진 채 조건만 좋아 보이는 선택</button>
@@ -441,15 +413,6 @@ const OriginalityWorkbook: React.FC = () => {
         <section className="ow-step" aria-hidden="true">
           <p className="ow-label">질문 4</p>
           <h2>여러 번 멈추고 돌아섰음에도 불구하고, 이상하게 계속 마음에 남아 있던 작업의 감각이 있다면 무엇이었나요? 구체적인 느낌이나 기준을 적어주세요.</h2>
-          <textarea
-            className="ow-textarea"
-            data-choice-key="question4"
-            placeholder="예:
-                        “이 감각만큼은 놓치면 다시는 작업을 못 할 것 같았다”
-                        “말로 설명하기 어렵지만, 계속 돌아오게 되는 기준이었다”
-                        “이게 없으면 나답지 않다고 느꼈다”
-                        "
-          />
           <div className="ow-choice-grid ow-followup">
             <p className="ow-label">Q4-1. 가장 가까운 표현을 골라 주세요.</p>
             <button className="ow-choice" data-choice-key="choice4" data-choice-value="이유를 끝까지 설명할 수 있어야 한다는 감각">이유를 끝까지 설명할 수 있어야 한다는 감각</button>
@@ -469,15 +432,6 @@ const OriginalityWorkbook: React.FC = () => {
           <p className="ow-label">질문 5</p>
           <h2>앞으로 작업을 시작할 때, 이것만큼은 지켜지지 않으면 시작하지 않겠다고 느끼는 조건은 무엇인가요? <br></br>
             지금의 당신에게 가장 중요한 기준 하나를 적어주세요.</h2>
-          <textarea
-            className="ow-textarea"
-            data-choice-key="question5"
-            placeholder="예:
-                        “이게 지켜지지 않으면 시작하지 않겠다고 느낀다”
-                        “지금의 나에게 가장 중요한 기준 하나다”
-                        “이 기준만큼은 양보하지 않겠다고 정했다”
-                        "
-          />
           <div className="ow-choice-grid ow-followup">
             <p className="ow-label">Q5-1. 시작 전에 지켜져야 하는 조건은?</p>
             <button className="ow-choice" data-choice-key="choice5" data-choice-value="작업의 목적을 한 문장으로 말할 수 있는 상태">작업의 목적을 한 문장으로 말할 수 있는 상태</button>
@@ -496,14 +450,6 @@ const OriginalityWorkbook: React.FC = () => {
         <section className="ow-step" aria-hidden="true">
           <p className="ow-label">질문 6</p>
           <h2>위의 조건을 지키기 위해서라면, 지금은 포기하거나 늦춰도 괜찮다고 느끼는 것은 무엇인가요?</h2>
-          <textarea
-            className="ow-textarea"
-            data-choice-key="question6"
-            placeholder="예:
-                        “이 기준을 지키기 위해서라면 ○○은 감수할 수 있다”
-                        “지금은 ○○을 내려놓아도 괜찮다고 느낀다”
-                        "
-          />
           <div className="ow-choice-grid ow-followup">
             <p className="ow-label">Q6-1. 어떤 것을 감수하기로 했나요?</p>
             <button className="ow-choice" data-choice-key="choice6" data-choice-value="남들보다 빠르게 결과를 내는 속도">남들보다 빠르게 결과를 내는 속도</button>
@@ -524,10 +470,10 @@ const OriginalityWorkbook: React.FC = () => {
           <div className="ow-summary-lines">
 
             <p className="ow-summary-line">나는 여러 작업을 거치며<br></br> 반복해서 <span className="ow-inline-value" data-summary="choice2">—</span> 앞에서 자주 멈추거나 방향을 바꿔왔다.</p>
-            <p className="ow-summary-line">그 선택 앞에서 <span className="ow-inline-value" data-summary="choice3">—</span>이 나를 가장 흔들었다.</p>
+            <p className="ow-summary-line">그 선택 앞에서 <span className="ow-inline-value" data-summary="choice3">—</span><span data-particle-for="choice3">이</span> 나를 가장 흔들었다.</p>
             <p className="ow-summary-line">그럼에도 사라지지 않고 계속 남아 있던 감각은 <span className="ow-inline-value" data-summary="choice4">—</span>이었다.</p>
-            <p className="ow-summary-line">이 흐름을 지나 지금의 나는, 작업을 시작하기 위해 최소한 <span className="ow-inline-value" data-summary="choice5">—</span>이 지켜지기를 바라고 있다.</p>
-            <p className="ow-summary-line">그래서 나는 <span className="ow-inline-value" data-summary="choice1">—</span>이 지켜지는 작업을 선택하고,</p>
+            <p className="ow-summary-line">이 흐름을 지나 지금의 나는, 작업을 시작하기 위해 최소한 <span className="ow-inline-value" data-summary="choice5">—</span><span data-particle-for="choice5">이</span> 지켜지기를 바라고 있다.</p>
+            <p className="ow-summary-line">그래서 나는 <span className="ow-inline-value" data-summary="choice1">—</span><span data-particle-for="choice1">이</span> 지켜지는 작업을 선택하고,</p>
              <p className="ow-summary-line">그 대신 <span className="ow-inline-value" data-summary="choice6">—</span>을 감수하는 쪽을 택한다.</p>
             <p className="ow-summary-line">이 기록은 나를 규정하는 결론이 아니라, <br></br>다음 작업 앞에서 다시 참고하기 위한 현재의 기준이다.</p>
           </div>
@@ -543,17 +489,6 @@ const OriginalityWorkbook: React.FC = () => {
           <button className="ow-secondary" data-reset>
             처음부터 다시 시작하기
           </button>
-          <div className="ow-answers">
-            <button className="ow-tertiary" data-toggle-answers>주관식 답변 보기</button>
-            <div className="ow-answers-panel" aria-hidden="true">
-              <p className="ow-answer-line">Q1: <span data-answer="question1">—</span></p>
-              <p className="ow-answer-line">Q2: <span data-answer="question2">—</span></p>
-              <p className="ow-answer-line">Q3: <span data-answer="question3">—</span></p>
-              <p className="ow-answer-line">Q4: <span data-answer="question4">—</span></p>
-              <p className="ow-answer-line">Q5: <span data-answer="question5">—</span></p>
-              <p className="ow-answer-line">Q6: <span data-answer="question6">—</span></p>
-            </div>
-          </div>
         </section>
 
         <footer className="ow-footer">
