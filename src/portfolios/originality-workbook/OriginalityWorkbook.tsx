@@ -39,21 +39,6 @@ const OriginalityWorkbook: React.FC = () => {
       choice6: parsed?.choice6 ?? '',
     };
 
-    const summaryFields: Record<string, HTMLElement | null> = {
-      question1: document.querySelector('[data-summary="question1"]'),
-      question2: document.querySelector('[data-summary="question2"]'),
-      question3: document.querySelector('[data-summary="question3"]'),
-      question4: document.querySelector('[data-summary="question4"]'),
-      question5: document.querySelector('[data-summary="question5"]'),
-      question6: document.querySelector('[data-summary="question6"]'),
-      choice1: document.querySelector('[data-summary="choice1"]'),
-      choice2: document.querySelector('[data-summary="choice2"]'),
-      choice3: document.querySelector('[data-summary="choice3"]'),
-      choice4: document.querySelector('[data-summary="choice4"]'),
-      choice5: document.querySelector('[data-summary="choice5"]'),
-      choice6: document.querySelector('[data-summary="choice6"]'),
-    };
-
     const answerFields: Record<string, HTMLElement | null> = {
       question1: document.querySelector('[data-answer="question1"]'),
       question2: document.querySelector('[data-answer="question2"]'),
@@ -187,16 +172,27 @@ const OriginalityWorkbook: React.FC = () => {
     };
 
     const renderSummary = () => {
-      Object.entries(summaryFields).forEach(([key, el]) => {
-        if (!el) return;
-        const value = state[key as keyof typeof state];
-        el.textContent = value || '—';
+      const summaryValues: Record<string, string> = {
+        question1: state.question1,
+        question2: state.question2,
+        question3: state.question3,
+        question4: state.question4,
+        question5: state.question5,
+        question6: state.question6,
+        choice1: state.choice1,
+        choice2: state.choice2,
+        choice3: state.choice3,
+        choice4: state.choice4,
+        choice5: state.choice5 || state.question5,
+        choice6: state.choice6,
+      };
+
+      Object.entries(summaryValues).forEach(([key, val]) => {
+        const nodes = document.querySelectorAll<HTMLElement>(`[data-summary="${key}"]`);
+        nodes.forEach((node) => {
+          node.textContent = val || '—';
+        });
       });
-      const choice5El = summaryFields.choice5;
-      if (choice5El) {
-        const fallback = state.choice5 || state.question5;
-        choice5El.textContent = fallback || '—';
-      }
       Object.entries(answerFields).forEach(([key, el]) => {
         if (!el) return;
         const value = state[key as keyof typeof state];
@@ -531,7 +527,7 @@ const OriginalityWorkbook: React.FC = () => {
             <p className="ow-summary-line">그 선택 앞에서 <span className="ow-inline-value" data-summary="choice3">—</span>이 나를 가장 흔들었다.</p>
             <p className="ow-summary-line">그럼에도 사라지지 않고 계속 남아 있던 감각은 <span className="ow-inline-value" data-summary="choice4">—</span>이었다.</p>
             <p className="ow-summary-line">이 흐름을 지나 지금의 나는, 작업을 시작하기 위해 최소한 <span className="ow-inline-value" data-summary="choice5">—</span>이 지켜지기를 바라고 있다.</p>
-            <p className="ow-summary-line">그래서 나는 <span className="ow-inline-value" data-summary="choice5">—</span>이 지켜지는 작업을 선택하고,</p>
+            <p className="ow-summary-line">그래서 나는 <span className="ow-inline-value" data-summary="choice1">—</span>이 지켜지는 작업을 선택하고,</p>
              <p className="ow-summary-line">그 대신 <span className="ow-inline-value" data-summary="choice6">—</span>을 감수하는 쪽을 택한다.</p>
             <p className="ow-summary-line">이 기록은 나를 규정하는 결론이 아니라, <br></br>다음 작업 앞에서 다시 참고하기 위한 현재의 기준이다.</p>
           </div>
