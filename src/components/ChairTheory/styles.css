@@ -67,8 +67,20 @@
 
 .webcam-controls {
   display: flex;
-  gap: 15px;
+  gap: 12px;
   flex-wrap: wrap;
+}
+
+/* 모바일: 버튼을 세로로 꽉 채워 누르기 쉽게 */
+@media (max-width: 600px) {
+  .webcam-controls {
+    flex-direction: column;
+  }
+  .webcam-controls .btn-primary,
+  .webcam-controls .btn-secondary {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 .btn-primary,

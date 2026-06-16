@@ -8,6 +8,7 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ onCapture }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
   const [isCameraReady, setIsCameraReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +30,7 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ onCapture }) => {
           setIsCameraReady(true);
         }
       } catch (err) {
-        setError('카메라에 접근할 수 없습니다. 권한을 확인해주세요.');
+        setError('카메라를 사용할 수 없습니다. 아래에서 사진을 직접 올려주세요.');
         console.error('Camera error:', err);
       }
     };
@@ -62,6 +63,7 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ onCapture }) => {
     }, 1000);
 
     return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [countdown]);
 
   const captureImage = () => {
@@ -78,10 +80,47 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ onCapture }) => {
     setCountdown(null);
   };
 
+  // 파일(폰카 촬영 또는 앨범) 업로드 처리
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === 'string') {
+        onCapture(reader.result);
+      }
+    };
+    reader.readAsDataURL(file);
+    // 같은 파일을 다시 선택해도 onChange가 다시 발생하도록 초기화
+    e.target.value = '';
+  };
+
+  const openFilePicker = () => fileInputRef.current?.click();
+
+  // accept="image/*" + capture 미지정 → 모바일에서 "사진 찍기 / 앨범에서 선택" 모두 가능
+  const fileInput = (
+    <input
+      ref={fileInputRef}
+      type="file"
+      accept="image/*"
+      onChange={handleFileChange}
+      style={{ display: 'none' }}
+    />
+  );
+
+  // 카메라를 못 쓰는 경우(권한 거부/미지원): 파일 업로드만 제공
   if (error) {
     return (
-      <div className="webcam-error">
-        <p>{error}</p>
+      <div className="webcam-capture">
+        <div className="webcam-error">
+          <p>{error}</p>
+        </div>
+        {fileInput}
+        <div className="webcam-controls">
+          <button className="btn-primary" onClick={openFilePicker}>
+            📷 사진 찍기 / 앨범에서 선택
+          </button>
+        </div>
       </div>
     );
   }
@@ -117,6 +156,8 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ onCapture }) => {
         )}
       </div>
 
+      {fileInput}
+
       {/* 제어 버튼 */}
       <div className="webcam-controls">
         <button
@@ -132,6 +173,9 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ onCapture }) => {
           disabled={!isCameraReady || countdown !== null}
         >
           지금 촬영
+        </button>
+        <button className="btn-secondary" onClick={openFilePicker}>
+          📷 사진 / 앨범에서 선택
         </button>
       </div>
     </div>

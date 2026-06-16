@@ -17,34 +17,45 @@ const SCRIPT_ID = 'opencv-js';
 let loaderPromise: Promise<any> | null = null;
 
 function waitForRuntime(resolve: (cv: any) => void, reject: (e: Error) => void) {
-  const cv = window.cv;
-
   // 이미 초기화 완료
-  if (cv && cv.Mat) {
-    resolve(cv);
-    return;
-  }
-  // 일부 빌드는 promise 형태로 노출
-  if (cv && typeof cv.then === 'function') {
-    cv.then(resolve).catch((e: Error) => reject(e));
-    return;
-  }
-  // Emscripten 모듈: 런타임 초기화 콜백 등록
-  if (cv) {
-    cv.onRuntimeInitialized = () => resolve(window.cv);
+  if (window.cv && window.cv.Mat) {
+    resolve(window.cv);
     return;
   }
 
-  // 폴링 폴백 (최대 ~10초)
+  let settled = false;
+
+  const finish = () => {
+    if (settled) return;
+    if (window.cv && window.cv.Mat) {
+      settled = true;
+      clearInterval(timer);
+      resolve(window.cv);
+    }
+  };
+
+  // Emscripten 런타임 초기화 콜백 (지원하는 빌드에서)
+  if (window.cv) {
+    try {
+      window.cv.onRuntimeInitialized = finish;
+    } catch {
+      /* cv가 thenable이라 할당 불가한 경우는 폴링으로 처리 */
+    }
+    // cv가 thenable이면 Promise.resolve로 안전하게 소비 (진짜 Promise라 .catch 존재)
+    if (typeof window.cv.then === 'function') {
+      Promise.resolve(window.cv).then(finish).catch(() => {});
+    }
+  }
+
+  // 어떤 빌드(thenable/Module)든 안전하게 동작하도록 폴링 (최대 ~20초)
   let tries = 0;
   const timer = setInterval(() => {
     tries += 1;
     if (window.cv && window.cv.Mat) {
+      finish();
+    } else if (tries > 400) {
       clearInterval(timer);
-      resolve(window.cv);
-    } else if (tries > 200) {
-      clearInterval(timer);
-      reject(new Error('OpenCV 초기화 시간 초과'));
+      if (!settled) reject(new Error('OpenCV 초기화 시간 초과'));
     }
   }, 50);
 }
