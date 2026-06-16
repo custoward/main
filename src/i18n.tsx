@@ -10,7 +10,7 @@ const EN: Dict = {
   emptyHint: 'Tap the button below to put the chair you imagine on the board.',
   addChair: '+ Add chair',
   remove: 'Remove from board',
-  othersImage: "Someone else's drawing",
+  othersImage: "Someone else's chair",
   instructionsTitle: 'What is The Chair Theory?',
   step1Label: 'Step 1',
   step1Body:
@@ -45,8 +45,8 @@ const EN: Dict = {
   back: '← The Chair Theory',
   catalogLoading: 'Loading…',
   catalogError: 'The catalog is being prepared.',
-  // language toggle shows the OTHER language
-  toggle: '한국어',
+  // language toggle: single character showing the OTHER language
+  toggle: '한',
 };
 
 const KO: Dict = {
@@ -55,7 +55,7 @@ const KO: Dict = {
   emptyHint: '아래 버튼을 눌러 당신이 생각하는 의자를 보드에 올려보세요.',
   addChair: '+ 의자 추가',
   remove: '보드에서 삭제',
-  othersImage: '다른 참여자가 올린 그림이에요',
+  othersImage: '다른 참여자가 올린 의자예요',
   instructionsTitle: 'The Chair Theory란?',
   step1Label: '1단계',
   step1Body: '설문지에 당신이 생각하는 의자를 자유롭게 그리고, 그렇게 그린 이유를 적습니다.',
@@ -85,7 +85,7 @@ const KO: Dict = {
   back: '← The Chair Theory',
   catalogLoading: '불러오는 중…',
   catalogError: '카탈로그를 준비 중입니다.',
-  toggle: 'EN',
+  toggle: 'A',
 };
 
 const DICT: Record<Lang, Dict> = { en: EN, ko: KO };

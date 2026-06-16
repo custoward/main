@@ -57,6 +57,9 @@ const ChairTheoryInner: React.FC = () => {
       {/* Header */}
       <header className="chair-theory-header">
         <div className="header-left">
+          <button className="lang-btn" onClick={toggle} aria-label="Language">
+            {t('toggle')}
+          </button>
           <button
             className="instructions-btn"
             onClick={() => setShowInstructions(true)}
@@ -68,16 +71,15 @@ const ChairTheoryInner: React.FC = () => {
           <button className="survey-btn" onClick={() => setShowSurvey(true)}>
             {t('survey')}
           </button>
-          <button className="survey-btn lang-btn" onClick={toggle}>
-            {t('toggle')}
-          </button>
         </div>
 
         <h1 className="chair-theory-title">The Chair Theory</h1>
 
-        <a href="/catalog" className="catalog-link">
-          The Chair Catalog →
-        </a>
+        <div className="header-right">
+          <a href="/catalog" className="catalog-link">
+            The Chair Catalog →
+          </a>
+        </div>
       </header>
 
       {/* Main Board */}

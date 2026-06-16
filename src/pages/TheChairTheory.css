@@ -19,22 +19,33 @@
 .chair-theory-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 20px 40px;
   border-bottom: 1px solid #f0f0f0;
   background: #ffffff;
   height: 80px;
 }
 
-.header-left {
+/* 양쪽을 동일 비율로 두어 가운데 타이틀이 항상 정중앙에 오도록 */
+.header-left,
+.header-right {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-shrink: 0;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
-/* 헤더 버튼 통일: ? / 설문지 양식 / The Chair Catalog */
+.header-left {
+  justify-content: flex-start;
+}
+
+.header-right {
+  justify-content: flex-end;
+}
+
+/* 헤더 버튼 공통 */
 .instructions-btn,
+.lang-btn,
 .survey-btn,
 .catalog-link {
   height: 40px;
@@ -43,7 +54,6 @@
   justify-content: center;
   padding: 0 16px;
   border: 1px solid #000;
-  border-radius: 0;
   background: #ffffff;
   color: #000;
   font-size: 0.9rem;
@@ -56,14 +66,23 @@
   flex-shrink: 0;
 }
 
-/* "?"는 정사각형 */
+/* 사각형: 설문지 양식 / The Chair Catalog */
+.survey-btn,
+.catalog-link {
+  border-radius: 0;
+}
+
+/* 동그라미: 한영 토글 / ? */
+.lang-btn,
 .instructions-btn {
   width: 40px;
   padding: 0;
-  font-size: 1.15rem;
+  border-radius: 50%;
+  font-size: 1.05rem;
 }
 
 .instructions-btn:hover,
+.lang-btn:hover,
 .survey-btn:hover,
 .catalog-link:hover {
   background: #000;
@@ -71,6 +90,7 @@
 }
 
 .instructions-btn:focus-visible,
+.lang-btn:focus-visible,
 .survey-btn:focus-visible,
 .catalog-link:focus-visible {
   outline: 2px solid #000;
@@ -81,10 +101,10 @@
   font-size: 2rem;
   font-weight: 700;
   margin: 0;
-  flex: 1;
+  flex: 0 0 auto;
   text-align: center;
   letter-spacing: 1px;
-  position: relative;
+  white-space: nowrap;
 }
 
 /* ========== MAIN BOARD ========== */
@@ -147,6 +167,7 @@
   background: #000;
   color: #ffffff;
   border: none;
+  border-radius: 0;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -388,7 +409,8 @@
     gap: 8px;
   }
 
-  .header-left {
+  .header-left,
+  .header-right {
     gap: 8px;
   }
 
@@ -400,6 +422,7 @@
   }
 
   .instructions-btn,
+  .lang-btn,
   .survey-btn,
   .catalog-link {
     height: 34px;
@@ -407,10 +430,11 @@
     padding: 0 10px;
   }
 
-  .instructions-btn {
+  .instructions-btn,
+  .lang-btn {
     width: 34px;
     padding: 0;
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
   .capture-btn {
@@ -443,11 +467,8 @@
     margin-bottom: 6px;
   }
 
-  .header-left {
-    flex: 0 0 auto;
-  }
-
   .instructions-btn,
+  .lang-btn,
   .survey-btn,
   .catalog-link {
     height: 32px;
@@ -455,13 +476,10 @@
     padding: 0 9px;
   }
 
-  .instructions-btn {
+  .instructions-btn,
+  .lang-btn {
     width: 32px;
     padding: 0;
-  }
-
-  .catalog-link {
-    flex: 0 0 auto;
   }
 
   .capture-btn {
