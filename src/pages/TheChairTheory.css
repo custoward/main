@@ -79,11 +79,10 @@
 }
 
 .shared-badge {
-  position: absolute;
-  top: -10px;
+  display: inline-block;
   margin-left: 8px;
-  padding: 2px 8px;
-  font-size: 0.65rem;
+  padding: 3px 8px;
+  font-size: 0.6rem;
   font-weight: 600;
   letter-spacing: 0;
   color: #fff;
@@ -377,34 +376,94 @@
 /* ========== 반응형 ========== */
 @media (max-width: 768px) {
   .chair-theory-header {
-    padding: 15px 20px;
-    height: 70px;
+    padding: 12px 16px;
+    height: auto;
+    min-height: 60px;
+    gap: 8px;
+  }
+
+  .header-left {
+    gap: 8px;
   }
 
   .chair-theory-title {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .survey-btn {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+
+  .instructions-btn {
+    width: 34px;
+    height: 34px;
+    font-size: 17px;
   }
 
   .catalog-link {
-    font-size: 0.85rem;
-    padding: 8px 15px;
+    font-size: 0.78rem;
+    padding: 7px 10px;
   }
 
   .capture-btn {
-    bottom: 30px;
-    right: 30px;
-    padding: 12px 24px;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 22px;
     font-size: 0.9rem;
   }
 
-  .board-image {
-    width: 120px;
-    height: 120px;
+  .modal-content {
+    padding: 28px 18px;
+    width: 95%;
+    max-height: 88vh;
   }
 
-  .modal-content {
-    padding: 30px 20px;
-    width: 95%;
+  .shared-badge {
+    font-size: 0.55rem;
+    padding: 2px 6px;
+    margin-left: 6px;
+  }
+}
+
+/* 좁은 폰: 헤더를 두 줄로 (위 제목 / 아래 좌·우 컨트롤) */
+@media (max-width: 480px) {
+  .chair-theory-header {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 10px 12px;
+  }
+
+  .chair-theory-title {
+    order: -1;
+    flex-basis: 100%;
+    font-size: 1.15rem;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  .header-left {
+    flex: 0 0 auto;
+  }
+
+  .catalog-link {
+    flex: 0 0 auto;
+    font-size: 0.72rem;
+    padding: 6px 9px;
+  }
+
+  .capture-btn {
+    bottom: 18px;
+    right: 18px;
+    padding: 11px 18px;
+    font-size: 0.85rem;
+  }
+
+  .image-modal-content .enlarged-image {
+    max-height: 70vh;
   }
 }
 
