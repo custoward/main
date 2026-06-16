@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './TheChairCatalog.css';
+import { LanguageProvider, useLang } from '../i18n';
 
 interface Manifest {
   count: number;
@@ -8,7 +9,8 @@ interface Manifest {
 
 const BASE = `${process.env.PUBLIC_URL}/catalog_pages`;
 
-const TheChairCatalog: React.FC = () => {
+const CatalogInner: React.FC = () => {
+  const { t } = useLang();
   const [pages, setPages] = useState<string[]>([]);
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading');
 
@@ -41,12 +43,8 @@ const TheChairCatalog: React.FC = () => {
         <span className="catalog-spacer" aria-hidden="true" />
       </header>
 
-      {status === 'loading' && <p className="catalog-msg">불러오는 중…</p>}
-      {status === 'error' && (
-        <p className="catalog-msg">
-          카탈로그를 준비 중입니다. (<code>public/catalog</code> 생성 필요)
-        </p>
-      )}
+      {status === 'loading' && <p className="catalog-msg">{t('catalogLoading')}</p>}
+      {status === 'error' && <p className="catalog-msg">{t('catalogError')}</p>}
 
       <div className="catalog-pages">
         {pages.map((p, i) => (
@@ -62,5 +60,11 @@ const TheChairCatalog: React.FC = () => {
     </div>
   );
 };
+
+const TheChairCatalog: React.FC = () => (
+  <LanguageProvider>
+    <CatalogInner />
+  </LanguageProvider>
+);
 
 export default TheChairCatalog;

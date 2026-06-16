@@ -6,13 +6,15 @@ import '../components/ChairTheory/styles.css';
 import { generateRandomCenter, buildWebPaths } from '../utils/geometryUtils';
 import { CapturedImage } from '../components/ChairTheory/types';
 import { useChairImages } from '../hooks/useChairImages';
+import { LanguageProvider, useLang } from '../i18n';
 
 const SURVEY_PDF_URL = `${process.env.PUBLIC_URL}/the-chair-theory-survey.pdf`;
 
 /** 저장값을 정규화 비율(0~1)로 해석. 레거시 px(>1) 값은 중앙으로 폴백. */
 const toUnit = (v: number): number => (v > 1 ? 0.5 : v);
 
-const TheChairTheory: React.FC = () => {
+const ChairTheoryInner: React.FC = () => {
+  const { t, toggle } = useLang();
   const { images, isLoading, error, clientId, addImage, removeImage } = useChairImages();
 
   const [showCaptureModal, setShowCaptureModal] = useState(false);
@@ -35,7 +37,6 @@ const TheChairTheory: React.FC = () => {
       id: Date.now().toString(),
       dataUrl: imageData,
       timestamp: Date.now(),
-      // 정규화 중심(0~1) 저장 → CSS 퍼센트로 어느 화면에서도 동일 비율 배치
       x: center.x,
       y: center.y,
     };
@@ -59,13 +60,16 @@ const TheChairTheory: React.FC = () => {
           <button
             className="instructions-btn"
             onClick={() => setShowInstructions(true)}
-            title="설명서"
-            aria-label="설명서 열기"
+            title={t('openInstructions')}
+            aria-label={t('openInstructions')}
           >
             ?
           </button>
           <button className="survey-btn" onClick={() => setShowSurvey(true)}>
-            설문지 양식
+            {t('survey')}
+          </button>
+          <button className="survey-btn lang-btn" onClick={toggle}>
+            {t('toggle')}
           </button>
         </div>
 
@@ -106,7 +110,7 @@ const TheChairTheory: React.FC = () => {
               style={{ left: `${toUnit(image.x) * 100}%`, top: `${toUnit(image.y) * 100}%` }}
               onClick={() => setSelectedImage(image)}
             >
-              <img src={image.dataUrl} alt="누군가가 그린 의자" />
+              <img src={image.dataUrl} alt={t('capturedAlt')} />
             </div>
           ))}
         </div>
@@ -114,10 +118,8 @@ const TheChairTheory: React.FC = () => {
         {/* 빈 상태 메시지 */}
         {!isLoading && images.length === 0 && (
           <div className="empty-state">
-            <p>아직 의자가 없습니다.</p>
-            <p className="empty-hint">
-              아래 버튼을 눌러 당신이 생각하는 의자를 보드에 올려보세요.
-            </p>
+            <p>{t('emptyTitle')}</p>
+            <p className="empty-hint">{t('emptyHint')}</p>
           </div>
         )}
 
@@ -125,7 +127,7 @@ const TheChairTheory: React.FC = () => {
 
         {/* 캡처 버튼 */}
         <button className="capture-btn" onClick={() => setShowCaptureModal(true)}>
-          + 의자 추가
+          {t('addChair')}
         </button>
       </main>
 
@@ -136,7 +138,7 @@ const TheChairTheory: React.FC = () => {
             <button
               className="modal-close"
               onClick={() => setShowCaptureModal(false)}
-              aria-label="닫기"
+              aria-label={t('close')}
             >
               ×
             </button>
@@ -152,18 +154,18 @@ const TheChairTheory: React.FC = () => {
             <button
               className="modal-close"
               onClick={() => setSelectedImage(null)}
-              aria-label="닫기"
+              aria-label={t('close')}
             >
               ×
             </button>
-            <img src={selectedImage.dataUrl} alt="확대된 의자 그림" className="enlarged-image" />
+            <img src={selectedImage.dataUrl} alt={t('enlargedAlt')} className="enlarged-image" />
             <div className="image-modal-actions">
               {selectedImage.ownerId && selectedImage.ownerId === clientId ? (
                 <button className="btn-delete" onClick={handleDeleteSelected}>
-                  보드에서 삭제
+                  {t('remove')}
                 </button>
               ) : (
-                <span className="image-modal-note">다른 참여자가 올린 그림이에요</span>
+                <span className="image-modal-note">{t('othersImage')}</span>
               )}
             </div>
           </div>
@@ -177,32 +179,27 @@ const TheChairTheory: React.FC = () => {
             <button
               className="modal-close"
               onClick={() => setShowInstructions(false)}
-              aria-label="닫기"
+              aria-label={t('close')}
             >
               ×
             </button>
-            <h2>The Chair Theory란?</h2>
+            <h2>{t('instructionsTitle')}</h2>
             <div className="instructions-content">
               <p>
-                <strong>1단계:</strong> 설문지에 <em>당신이 생각하는 의자</em>를 자유롭게 그리고,
-                그렇게 그린 이유를 적습니다.
+                <strong>{t('step1Label')}:</strong> {t('step1Body')}
               </p>
               <p>
-                <strong>2단계:</strong> "+ 의자 추가" 버튼을 누릅니다. 카메라로 설문지를 비추면
-                5초 후 자동 촬영되고, <strong>휴대폰에서는 폰카로 찍거나 앨범에서 사진을 골라</strong>
-                올릴 수도 있습니다.
+                <strong>{t('step2Label')}:</strong> {t('step2Body')}
               </p>
               <p>
-                <strong>3단계:</strong> 촬영된 그림이 보드의 무작위 위치에 놓입니다.
+                <strong>{t('step3Label')}:</strong> {t('step3Body')}
               </p>
               <p>
-                <strong>4단계:</strong> 보드의 그림을 클릭하면 크게 볼 수 있습니다.
+                <strong>{t('step4Label')}:</strong> {t('step4Body')}
               </p>
               <hr />
               <p>
-                <em>
-                  사람마다 다르게 상상한 의자들이 모여, 거미줄처럼 연결된 하나의 보드를 만들어갑니다.
-                </em>
+                <em>{t('instructionsClosing')}</em>
               </p>
             </div>
           </div>
@@ -212,18 +209,15 @@ const TheChairTheory: React.FC = () => {
       {/* Survey PDF Modal */}
       {showSurvey && (
         <div className="modal-overlay" onClick={() => setShowSurvey(false)}>
-          <div
-            className="modal-content pdf-modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="modal-content pdf-modal-content" onClick={(e) => e.stopPropagation()}>
             <button
               className="modal-close"
               onClick={() => setShowSurvey(false)}
-              aria-label="닫기"
+              aria-label={t('close')}
             >
               ×
             </button>
-            <h2>설문지 양식</h2>
+            <h2>{t('survey')}</h2>
             <PDFViewer url={SURVEY_PDF_URL} />
           </div>
         </div>
@@ -231,5 +225,11 @@ const TheChairTheory: React.FC = () => {
     </div>
   );
 };
+
+const TheChairTheory: React.FC = () => (
+  <LanguageProvider>
+    <ChairTheoryInner />
+  </LanguageProvider>
+);
 
 export default TheChairTheory;

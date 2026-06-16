@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
+import { useLang } from '../../i18n';
 
 // 전시 컴퓨터 오프라인 동작을 위해 public/vendor 의 로컬 worker를 사용한다.
 // (node_modules/pdfjs-dist/build/pdf.worker.min.js 를 복사한 파일)
@@ -13,6 +14,7 @@ interface PDFViewerProps {
 type Status = 'loading' | 'done' | 'error';
 
 const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
+  const { t } = useLang();
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<Status>('loading');
 
@@ -71,15 +73,13 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ url }) => {
       {status === 'loading' && (
         <div className="pdf-status">
           <div className="doc-spinner" />
-          <p>설문지 양식을 불러오는 중…</p>
+          <p>{t('pdfLoading')}</p>
         </div>
       )}
       {status === 'error' && (
         <div className="pdf-status">
-          <p>설문지 양식을 불러오지 못했습니다.</p>
-          <p className="pdf-status-hint">
-            <code>public/the-chair-theory-survey.pdf</code> 파일을 확인해주세요.
-          </p>
+          <p>{t('pdfError')}</p>
+          <p className="pdf-status-hint">{t('pdfHint')}</p>
         </div>
       )}
       <div className="pdf-pages" ref={containerRef} />

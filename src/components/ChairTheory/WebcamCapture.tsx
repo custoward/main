@@ -1,10 +1,12 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { useLang } from '../../i18n';
 
 interface WebcamCaptureProps {
   onCapture: (imageData: string) => void;
 }
 
 const WebcamCapture: React.FC<WebcamCaptureProps> = ({ onCapture }) => {
+  const { t } = useLang();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -30,7 +32,7 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ onCapture }) => {
           setIsCameraReady(true);
         }
       } catch (err) {
-        setError('카메라를 사용할 수 없습니다. 아래에서 사진을 직접 올려주세요.');
+        setError(t('cameraUnavailable'));
         console.error('Camera error:', err);
       }
     };
@@ -118,7 +120,7 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ onCapture }) => {
         {fileInput}
         <div className="webcam-controls">
           <button className="btn-primary" onClick={openFilePicker}>
-            📷 사진 찍기 / 앨범에서 선택
+            {t('takeOrChoose')}
           </button>
         </div>
       </div>
@@ -151,7 +153,7 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ onCapture }) => {
         {/* 설명 텍스트 */}
         {!countdown && (
           <div className="webcam-instruction">
-            <p>설문지를 카메라에 대세요</p>
+            <p>{t('pointSurvey')}</p>
           </div>
         )}
       </div>
@@ -165,17 +167,17 @@ const WebcamCapture: React.FC<WebcamCaptureProps> = ({ onCapture }) => {
           onClick={startCapture}
           disabled={!isCameraReady || countdown !== null}
         >
-          {countdown !== null ? '촬영 중...' : '5초 타이머로 촬영'}
+          {countdown !== null ? t('capturing') : t('timerCapture')}
         </button>
         <button
           className="btn-secondary"
           onClick={captureImage}
           disabled={!isCameraReady || countdown !== null}
         >
-          지금 촬영
+          {t('captureNow')}
         </button>
         <button className="btn-secondary" onClick={openFilePicker}>
-          📷 사진 / 앨범에서 선택
+          {t('chooseFromAlbum')}
         </button>
       </div>
     </div>
