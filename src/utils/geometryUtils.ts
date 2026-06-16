@@ -1,110 +1,68 @@
-// 거미줄 연결선 유틸리티
+// 보드 좌표는 모두 정규화(0~1) 값으로 다룬다.
+// 화면 배치는 CSS 퍼센트가 담당하므로, 여기서는 컨테이너 픽셀 크기를 알 필요가 없다.
 
-export interface ImagePosition {
-  id: string;
+export interface Center {
+  /** 0~1, 보드 폭 기준 가로 비율(이미지 중심) */
   x: number;
+  /** 0~1, 보드 높이 기준 세로 비율(이미지 중심) */
   y: number;
-  width: number;
-  height: number;
 }
 
 /**
- * SVG 거미줄 경로를 생성합니다
+ * 기존 이미지들과 너무 겹치지 않는 새 위치(정규화 중심)를 고른다.
+ * 컨테이너 크기와 무관하므로 어떤 화면에서도 동일하게 동작한다.
  */
-export const generateWebLines = (
-  images: ImagePosition[],
-  svgWidth: number,
-  svgHeight: number
-): string[] => {
-  if (images.length < 2) return [];
+export function generateRandomCenter(
+  existing: Center[],
+  minDist = 0.16,
+  maxAttempts = 30
+): Center {
+  const lo = 0.1;
+  const hi = 0.9;
 
-  const lines: string[] = [];
-
-  // 각 이미지의 중심점 계산
-  const centers = images.map((img) => ({
-    x: img.x + img.width / 2,
-    y: img.y + img.height / 2,
-    id: img.id,
-  }));
-
-  // 인접한 이미지들을 연결
-  for (let i = 0; i < centers.length; i++) {
-    // 다음 이미지와 연결 (순환)
-    const next = (i + 1) % centers.length;
-    const path = `M${centers[i].x},${centers[i].y} Q${
-      (centers[i].x + centers[next].x) / 2
-    },${(centers[i].y + centers[next].y) / 2 + 30} ${centers[next].x},${centers[next].y}`;
-
-    lines.push(path);
-  }
-
-  return lines;
-};
-
-/**
- * 이미지가 화면 내에 있는지 확인
- */
-export const isImageInBounds = (
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  containerWidth: number,
-  containerHeight: number
-): boolean => {
-  return x >= 0 && y >= 0 && x + width <= containerWidth && y + height <= containerHeight;
-};
-
-/**
- * 겹치지 않는 랜덤 위치 생성
- */
-export const generateRandomPosition = (
-  images: ImagePosition[],
-  imageWidth: number,
-  imageHeight: number,
-  containerWidth: number,
-  containerHeight: number,
-  maxAttempts: number = 10
-): { x: number; y: number } => {
-  let attempts = 0;
-
-  while (attempts < maxAttempts) {
-    const x = Math.random() * (containerWidth - imageWidth);
-    const y = Math.random() * (containerHeight - imageHeight - 100); // 하단 100px 여유
-
-    const newImageBounds: ImagePosition = {
-      id: 'temp',
-      x,
-      y,
-      width: imageWidth,
-      height: imageHeight,
-    };
-
-    // 기존 이미지와 겹치는지 확인
-    const overlaps = images.some((img) => checkOverlap(newImageBounds, img));
-
-    if (!overlaps && isImageInBounds(x, y, imageWidth, imageHeight, containerWidth, containerHeight)) {
-      return { x, y };
-    }
-
-    attempts++;
-  }
-
-  // 겹침이 있어도 위치 반환
-  return {
-    x: Math.random() * (containerWidth - imageWidth),
-    y: Math.random() * (containerHeight - imageHeight - 100),
+  let best: Center = {
+    x: lo + Math.random() * (hi - lo),
+    y: lo + Math.random() * (hi - lo),
   };
-};
+  let bestNearest = -1;
+
+  for (let i = 0; i < maxAttempts; i++) {
+    const cand: Center = {
+      x: lo + Math.random() * (hi - lo),
+      y: lo + Math.random() * (hi - lo),
+    };
+    if (existing.length === 0) return cand;
+
+    let nearest = Infinity;
+    for (const e of existing) {
+      const d = Math.hypot(cand.x - e.x, cand.y - e.y);
+      if (d < nearest) nearest = d;
+    }
+    if (nearest >= minDist) return cand;
+    if (nearest > bestNearest) {
+      bestNearest = nearest;
+      best = cand;
+    }
+  }
+  return best;
+}
 
 /**
- * 두 영역이 겹치는지 확인
+ * 정규화 중심점들을 연결하는 거미줄 SVG 경로를 만든다.
+ * 좌표계는 0~100 (viewBox="0 0 100 100", preserveAspectRatio="none" 기준).
  */
-const checkOverlap = (rect1: ImagePosition, rect2: ImagePosition, margin: number = 20): boolean => {
-  return !(
-    rect1.x + rect1.width + margin < rect2.x ||
-    rect1.x > rect2.x + rect2.width + margin ||
-    rect1.y + rect1.height + margin < rect2.y ||
-    rect1.y > rect2.y + rect2.height + margin
-  );
-};
+export function buildWebPaths(centers: Center[]): string[] {
+  if (centers.length < 2) return [];
+
+  const pts = centers.map((c) => ({ x: c.x * 100, y: c.y * 100 }));
+  const paths: string[] = [];
+
+  for (let i = 0; i < pts.length; i++) {
+    const a = pts[i];
+    const b = pts[(i + 1) % pts.length];
+    const mx = (a.x + b.x) / 2;
+    const my = (a.y + b.y) / 2 + 4; // 살짝 늘어지는 곡선
+    paths.push(`M${a.x},${a.y} Q${mx},${my} ${b.x},${b.y}`);
+  }
+  return paths;
+}

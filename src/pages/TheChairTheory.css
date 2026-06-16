@@ -137,13 +137,16 @@
 
 .board-image {
   position: absolute;
-  width: 150px;
-  height: 150px;
+  /* 크기는 CSS가 반응형 처리, 위치는 left/top % + 중심 정렬 */
+  width: clamp(84px, 12vw, 150px);
+  height: clamp(84px, 12vw, 150px);
+  transform: translate(-50%, -50%);
   cursor: pointer;
   background: #ffffff;
   border: 1px solid #e0e0e0;
   overflow: hidden;
-  transition: all 0.2s ease;
+  /* hover 효과만 부드럽게 (위치 변화는 즉시) */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   z-index: 2;
 }
 
@@ -155,7 +158,8 @@
 
 .board-image:hover {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  transform: scale(1.05);
+  /* 중심 정렬(translate)을 유지하면서 확대 */
+  transform: translate(-50%, -50%) scale(1.05);
 }
 
 .capture-btn {

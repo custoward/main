@@ -1,38 +1,17 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import './TheChairTheory.css';
 import WebcamCapture from '../components/ChairTheory/WebcamCapture';
 import DocumentCorrection from '../components/ChairTheory/DocumentCorrection';
 import PDFViewer from '../components/ChairTheory/PDFViewer';
 import '../components/ChairTheory/styles.css';
-import { generateRandomPosition, generateWebLines } from '../utils/geometryUtils';
-import { CapturedImage, IMAGE_SIZE } from '../components/ChairTheory/types';
+import { generateRandomCenter, buildWebPaths } from '../utils/geometryUtils';
+import { CapturedImage } from '../components/ChairTheory/types';
 import { useChairImages } from '../hooks/useChairImages';
-import { loadOpenCV } from '../utils/opencvLoader';
 
 const SURVEY_PDF_URL = `${process.env.PUBLIC_URL}/the-chair-theory-survey.pdf`;
 
-/** 컨테이너 폭에 맞춘 반응형 이미지 크기(px) */
-function getImageSize(containerWidth: number): number {
-  const w = containerWidth || window.innerWidth;
-  return Math.round(Math.max(80, Math.min(IMAGE_SIZE, w / 8)));
-}
-
-/**
- * 저장된 위치(정규화 0~1 또는 레거시 px)를 현재 화면의 좌상단 px 좌표로 변환.
- * 정규화 좌표를 쓰므로 창 크기/기기가 달라도 비율대로 배치된다(반응형 + 공동 보드 일관성).
- */
-function resolvePixel(
-  img: CapturedImage,
-  containerWidth: number,
-  containerHeight: number,
-  size: number
-): { left: number; top: number } {
-  const maxLeft = Math.max(0, containerWidth - size);
-  const maxTop = Math.max(0, containerHeight - size);
-  const left = img.x <= 1 ? img.x * maxLeft : Math.min(img.x, maxLeft);
-  const top = img.y <= 1 ? img.y * maxTop : Math.min(img.y, maxTop);
-  return { left, top };
-}
+/** 저장값을 정규화 비율(0~1)로 해석. 레거시 px(>1) 값은 중앙으로 폴백. */
+const toUnit = (v: number): number => (v > 1 ? 0.5 : v);
 
 const TheChairTheory: React.FC = () => {
   const { images, isLoading, error, isShared, addImage, removeImage } = useChairImages();
@@ -44,42 +23,11 @@ const TheChairTheory: React.FC = () => {
   // 촬영 직후 원근 보정 단계에 넘길 원본 이미지
   const [pendingRaw, setPendingRaw] = useState<string | null>(null);
 
-  const boardRef = useRef<HTMLDivElement>(null);
-  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
-
-  // OpenCV를 미리 로드해 둔다. 촬영 후 "펼치기"가 즉시 동작하도록.
-  useEffect(() => {
-    loadOpenCV().catch((err) => console.error('OpenCV 사전 로드 실패:', err));
-  }, []);
-
-  // 컨테이너 크기 감지
-  useEffect(() => {
-    const updateSize = () => {
-      if (boardRef.current) {
-        setContainerSize({
-          width: boardRef.current.clientWidth,
-          height: boardRef.current.clientHeight,
-        });
-      }
-    };
-
-    updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
-  }, [isLoading]);
-
-  // 반응형 이미지 크기
-  const imageSize = useMemo(() => getImageSize(containerSize.width), [containerSize.width]);
-
-  // 거미줄 경로 계산 (현재 화면 px 기준)
-  const webPaths = useMemo(() => {
-    if (images.length < 2) return [];
-    const positions = images.map((img) => {
-      const { left, top } = resolvePixel(img, containerSize.width, containerSize.height, imageSize);
-      return { id: img.id, x: left, y: top, width: imageSize, height: imageSize };
-    });
-    return generateWebLines(positions, containerSize.width, containerSize.height);
-  }, [images, containerSize, imageSize]);
+  // 거미줄 경로 (정규화 좌표 → 0~100 SVG 공간). 컨테이너 픽셀과 무관.
+  const webPaths = useMemo(
+    () => buildWebPaths(images.map((img) => ({ x: toUnit(img.x), y: toUnit(img.y) }))),
+    [images]
+  );
 
   // 촬영 완료 → 원근 보정 단계로
   const handleCaptured = (rawDataUrl: string) => {
@@ -92,26 +40,17 @@ const TheChairTheory: React.FC = () => {
   };
 
   const handleAddImage = (imageData: string) => {
-    const W = containerSize.width || window.innerWidth;
-    const H = containerSize.height || window.innerHeight;
-    const maxLeft = Math.max(1, W - imageSize);
-    const maxTop = Math.max(1, H - imageSize);
-
-    // 기존 이미지를 현재 px로 변환해 겹침 검사
-    const existingPx = images.map((img) => {
-      const { left, top } = resolvePixel(img, W, H, imageSize);
-      return { id: img.id, x: left, y: top, width: imageSize, height: imageSize };
-    });
-
-    const { x: px, y: py } = generateRandomPosition(existingPx, imageSize, imageSize, W, H);
+    const center = generateRandomCenter(
+      images.map((img) => ({ x: toUnit(img.x), y: toUnit(img.y) }))
+    );
 
     const newImage: CapturedImage = {
       id: Date.now().toString(),
       dataUrl: imageData,
       timestamp: Date.now(),
-      // 정규화(0~1)해서 저장 → 어느 화면에서도 비율대로 배치
-      x: px / maxLeft,
-      y: py / maxTop,
+      // 정규화 중심(0~1) 저장 → CSS 퍼센트로 어느 화면에서도 동일 비율 배치
+      x: center.x,
+      y: center.y,
     };
 
     addImage(newImage);
@@ -155,8 +94,13 @@ const TheChairTheory: React.FC = () => {
       </header>
 
       {/* Main Board */}
-      <main className="chair-theory-board" ref={boardRef}>
-        <svg className="web-canvas" width="100%" height="100%">
+      <main className="chair-theory-board">
+        <svg
+          className="web-canvas"
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
           {webPaths.map((d, i) => (
             <path
               key={i}
@@ -164,36 +108,24 @@ const TheChairTheory: React.FC = () => {
               stroke="#d0d0d0"
               strokeWidth="1"
               fill="none"
-              strokeDasharray="5,5"
+              strokeDasharray="4 4"
+              vectorEffect="non-scaling-stroke"
             />
           ))}
         </svg>
 
         {/* 이미지 보드 */}
         <div className="images-board">
-          {images.map((image) => {
-            const { left, top } = resolvePixel(
-              image,
-              containerSize.width,
-              containerSize.height,
-              imageSize
-            );
-            return (
-              <div
-                key={image.id}
-                className="board-image"
-                style={{
-                  left: `${left}px`,
-                  top: `${top}px`,
-                  width: `${imageSize}px`,
-                  height: `${imageSize}px`,
-                }}
-                onClick={() => setSelectedImage(image)}
-              >
-                <img src={image.dataUrl} alt="누군가가 그린 의자" />
-              </div>
-            );
-          })}
+          {images.map((image) => (
+            <div
+              key={image.id}
+              className="board-image"
+              style={{ left: `${toUnit(image.x) * 100}%`, top: `${toUnit(image.y) * 100}%` }}
+              onClick={() => setSelectedImage(image)}
+            >
+              <img src={image.dataUrl} alt="누군가가 그린 의자" />
+            </div>
+          ))}
         </div>
 
         {/* 빈 상태 메시지 */}
