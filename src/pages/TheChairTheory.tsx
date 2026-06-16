@@ -114,7 +114,7 @@ const TheChairTheory: React.FC = () => {
         {/* 빈 상태 메시지 */}
         {!isLoading && images.length === 0 && (
           <div className="empty-state">
-            <p>아직 그림이 없습니다.</p>
+            <p>아직 의자가 없습니다.</p>
             <p className="empty-hint">
               아래 버튼을 눌러 당신이 생각하는 의자를 보드에 올려보세요.
             </p>
@@ -125,7 +125,7 @@ const TheChairTheory: React.FC = () => {
 
         {/* 캡처 버튼 */}
         <button className="capture-btn" onClick={() => setShowCaptureModal(true)}>
-          + 그림 추가
+          + 의자 추가
         </button>
       </main>
 
@@ -188,7 +188,7 @@ const TheChairTheory: React.FC = () => {
                 그렇게 그린 이유를 적습니다.
               </p>
               <p>
-                <strong>2단계:</strong> "+ 그림 추가" 버튼을 누릅니다. 카메라로 설문지를 비추면
+                <strong>2단계:</strong> "+ 의자 추가" 버튼을 누릅니다. 카메라로 설문지를 비추면
                 5초 후 자동 촬영되고, <strong>휴대폰에서는 폰카로 찍거나 앨범에서 사진을 골라</strong>
                 올릴 수도 있습니다.
               </p>
