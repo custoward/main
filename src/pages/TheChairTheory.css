@@ -313,6 +313,11 @@
   color: #ffffff;
 }
 
+.image-modal-note {
+  font-size: 0.85rem;
+  color: #999;
+}
+
 /* ========== PDF VIEWER ========== */
 .pdf-modal-content {
   max-width: 760px;

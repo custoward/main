@@ -7,6 +7,8 @@ export interface CapturedImage {
   timestamp: number;
   x: number;
   y: number;
+  /** 올린 기기의 식별자. 본인만 삭제 가능하도록 비교에 사용 */
+  ownerId?: string;
 }
 
 /** 보드 위 이미지 한 변의 크기(px) */

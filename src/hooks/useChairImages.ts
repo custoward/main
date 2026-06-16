@@ -18,6 +18,7 @@ import {
 } from '../utils/db';
 import { firebaseEnabled, getDb, CHAIR_COLLECTION } from '../utils/firebase';
 import { downscaleDataUrl } from '../utils/imageScale';
+import { getClientId } from '../utils/clientId';
 
 interface UseChairImagesResult {
   images: CapturedImage[];
@@ -25,10 +26,14 @@ interface UseChairImagesResult {
   error: string | null;
   /** 서버(공동 보드) 모드 여부 */
   isShared: boolean;
+  /** 이 기기의 식별자 (본인 그림 판별용) */
+  clientId: string;
   addImage: (image: CapturedImage) => Promise<void>;
   removeImage: (id: string) => Promise<void>;
   clearImages: () => Promise<void>;
 }
+
+const CLIENT_ID = getClientId();
 
 /**
  * 보드 이미지 상태 관리 훅.
@@ -58,6 +63,7 @@ export function useChairImages(): UseChairImagesResult {
             timestamp: data.timestamp,
             x: data.x,
             y: data.y,
+            ownerId: data.ownerId,
           };
         });
         setImages(items);
@@ -110,6 +116,7 @@ export function useChairImages(): UseChairImagesResult {
           timestamp: image.timestamp,
           x: image.x,
           y: image.y,
+          ownerId: CLIENT_ID,
         });
       } catch (err) {
         console.error('서버 저장 실패:', err);
@@ -119,9 +126,10 @@ export function useChairImages(): UseChairImagesResult {
     }
 
     // 로컬 모드: 낙관적 갱신 후 IndexedDB 저장
-    setImages((prev) => [...prev, image]);
+    const owned = { ...image, ownerId: CLIENT_ID };
+    setImages((prev) => [...prev, owned]);
     try {
-      await saveImage(image);
+      await saveImage(owned);
     } catch (err) {
       console.error('이미지 저장 실패:', err);
     }
@@ -163,6 +171,7 @@ export function useChairImages(): UseChairImagesResult {
     isLoading,
     error,
     isShared: firebaseEnabled,
+    clientId: CLIENT_ID,
     addImage,
     removeImage,
     clearImages,

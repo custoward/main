@@ -13,7 +13,7 @@ const SURVEY_PDF_URL = `${process.env.PUBLIC_URL}/the-chair-theory-survey.pdf`;
 const toUnit = (v: number): number => (v > 1 ? 0.5 : v);
 
 const TheChairTheory: React.FC = () => {
-  const { images, isLoading, error, addImage, removeImage } = useChairImages();
+  const { images, isLoading, error, clientId, addImage, removeImage } = useChairImages();
 
   const [showCaptureModal, setShowCaptureModal] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
@@ -158,9 +158,13 @@ const TheChairTheory: React.FC = () => {
             </button>
             <img src={selectedImage.dataUrl} alt="확대된 의자 그림" className="enlarged-image" />
             <div className="image-modal-actions">
-              <button className="btn-delete" onClick={handleDeleteSelected}>
-                보드에서 삭제
-              </button>
+              {selectedImage.ownerId && selectedImage.ownerId === clientId ? (
+                <button className="btn-delete" onClick={handleDeleteSelected}>
+                  보드에서 삭제
+                </button>
+              ) : (
+                <span className="image-modal-note">다른 참여자가 올린 그림이에요</span>
+              )}
             </div>
           </div>
         </div>
