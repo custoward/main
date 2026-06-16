@@ -1,36 +1,58 @@
-// The Chair Theory - 플레이스홀더 설문지 PDF 생성기
-// 외부 의존성 없이 xref 오프셋을 정확히 계산해 유효한 1페이지 A4 PDF를 만든다.
-// 사용자는 public/the-chair-theory-survey.pdf 를 실제 양식으로 교체하면 된다.
+// The Chair Theory - "What is chair?" 설문지 PDF 생성기 (가로 A4, 벡터)
+// 외부 의존성 없이 xref 오프셋을 계산해 유효한 PDF를 만든다.
+// 디자인을 바꾸려면 content 문자열을 수정하고 다시 실행:  node scripts/genSurveyPdf.js
 const fs = require('fs');
 const path = require('path');
 
-const content = `BT
-/F1 26 Tf
-60 770 Td
-(The Chair Theory) Tj
-/F1 13 Tf
-0 -34 Td
-(Draw the chair you imagine - and write why.) Tj
-0 -50 Td
-(1. Your chair) Tj
+// 가로 A4: 842 x 595 (pt). PDF 좌표 원점은 좌하단.
+const content = `q
+2 w
+60 470 m 782 470 l S
+60 88 m 782 88 l S
+Q
+q
+3 w
+60 150 360 250 re S
+Q
+q
+1 w
+470 360 m 782 360 l S
+470 318 m 782 318 l S
+470 276 m 782 276 l S
+470 234 m 782 234 l S
+470 192 m 782 192 l S
+470 150 m 782 150 l S
+Q
+BT
+/F2 46 Tf
+60 512 Td
+(What is chair?) Tj
 ET
-1 0 0 1 60 470 cm
-0 0 475 210 re
-S
-1 0 0 1 -60 -470 cm
 BT
 /F1 13 Tf
-60 440 Td
-(2. Why this chair?) Tj
+60 442 Td
+(We encounter many different kinds of "chairs" every day.) Tj
+0 -18 Td
+(What makes something a chair?) Tj
+0 -18 Td
+(Draw your idea and tell us why.) Tj
 ET
-1 0 0 1 60 250 cm
-0 0 475 170 re
-S
-1 0 0 1 -60 -250 cm
 BT
-/F1 10 Tf
-60 80 Td
-(Placeholder form - replace public/the-chair-theory-survey.pdf with the real survey.) Tj
+/F2 20 Tf
+60 420 Td
+(1. Draw the chair you have in mind!) Tj
+ET
+BT
+/F2 20 Tf
+470 420 Td
+(2. What's the reason?) Tj
+ET
+BT
+/F1 11 Tf
+60 62 Td
+(Thank you for participating.) Tj
+0 -16 Td
+(Your idea becomes an important connection in this project.) Tj
 ET
 `;
 
@@ -38,10 +60,11 @@ const objects = [];
 objects.push(`<< /Type /Catalog /Pages 2 0 R >>`);
 objects.push(`<< /Type /Pages /Kids [3 0 R] /Count 1 >>`);
 objects.push(
-  `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>`
+  `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 842 595] /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> /Contents 4 0 R >>`
 );
 objects.push(`<< /Length ${Buffer.byteLength(content, 'latin1')} >>\nstream\n${content}endstream`);
 objects.push(`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>`);
+objects.push(`<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>`);
 
 let pdf = `%PDF-1.4\n`;
 const offsets = [];
