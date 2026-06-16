@@ -10,9 +10,20 @@ export type Project = {
   description?: string;
   type?: 'image' | 'video' | 'canvas' | 'embed';
   src?: string;
+  /** 지정 시 클릭하면 해당 경로로 이동 */
+  route?: string;
 };
 
 export const SAMPLE_PROJECTS: Project[] = [
+  {
+    id: 'proj-chair',
+    title: '의자 이론',
+    englishTitle: 'the chair theory',
+    date: '26/06',
+    description: '사람들이 상상한 의자 그림과 그 이유가 거미줄처럼 연결되는 참여형 보드',
+    type: 'embed',
+    route: '/thechair'
+  },
   {
     id: 'proj-1',
     title: '타이포 이끼',
@@ -48,9 +59,17 @@ const ProjectList: React.FC = () => {
 
       <ul className="project-items">
         {SAMPLE_PROJECTS.map((p) => {
-          // 특정 프로젝트는 페이지 이동
-          const hasRoute = p.id === 'proj-1' || p.id === 'proj-2' || p.id === 'proj-3';
-          const route = p.id === 'proj-1' ? '/typomoss' : p.id === 'proj-3' ? '/typomoss_archive' : '/breath-hidden-city';
+          // 특정 프로젝트는 페이지 이동 (p.route 우선, 그 외는 기존 매핑)
+          const legacyRoute =
+            p.id === 'proj-1'
+              ? '/typomoss'
+              : p.id === 'proj-3'
+              ? '/typomoss_archive'
+              : p.id === 'proj-2'
+              ? '/breath-hidden-city'
+              : undefined;
+          const route = p.route ?? legacyRoute;
+          const hasRoute = !!route;
           
           return (
             <li
