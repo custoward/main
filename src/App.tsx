@@ -7,6 +7,7 @@ import PortfolioMain from './pages/PortfolioMain';
 import Product from './pages/Product';
 import Graphic from './pages/Graphic';
 import TheChairTheory from './pages/TheChairTheory';
+import TheChairCatalog from './pages/TheChairCatalog';
 import BreathHiddenCity from './portfolios/breath-hidden-city/BreathHiddenCity';
 import TypoMoss from './portfolios/typomoss/TypoMoss';
 import OriginalityWorkbook from './portfolios/originality-workbook/OriginalityWorkbook';
@@ -26,6 +27,7 @@ const App: React.FC = () => {
         <Route path="/designer" component={Designer} />
         <Route path="/contact" component={Contact} />
         <Route path="/thechair" component={TheChairTheory} />
+        <Route path="/catalog" component={TheChairCatalog} />
         <Route path="/portfolio" component={PortfolioMain} />
         <Route path="/breath-hidden-city" component={BreathHiddenCity} />
         <Route path="/typomoss" component={TypoMoss} />

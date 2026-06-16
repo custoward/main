@@ -1,0 +1,88 @@
+.catalog-page {
+  min-height: 100vh;
+  background: #ffffff;
+  color: #000;
+}
+
+.catalog-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.catalog-back {
+  text-decoration: none;
+  color: #000;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.catalog-back:hover {
+  text-decoration: underline;
+}
+
+.catalog-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.catalog-spacer {
+  /* back 링크와 균형 맞춰 제목을 가운데로 */
+  width: 120px;
+}
+
+.catalog-msg {
+  text-align: center;
+  color: #888;
+  padding: 60px 20px;
+}
+
+.catalog-msg code {
+  background: #f0f0f0;
+  padding: 2px 6px;
+  font-size: 0.85em;
+}
+
+.catalog-pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  padding: 32px 16px 80px;
+}
+
+.catalog-img {
+  display: block;
+  width: 100%;
+  max-width: 1000px;
+  height: auto;
+  box-shadow: 0 2px 18px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 600px) {
+  .catalog-header {
+    padding: 12px 16px;
+  }
+  .catalog-title {
+    font-size: 0.95rem;
+  }
+  .catalog-back {
+    font-size: 0.82rem;
+  }
+  .catalog-spacer {
+    width: 60px;
+  }
+  .catalog-pages {
+    gap: 16px;
+    padding: 16px 8px 60px;
+  }
+}

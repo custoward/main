@@ -88,7 +88,7 @@ const TheChairTheory: React.FC = () => {
           {isShared && <span className="shared-badge" title="모든 기기가 같은 보드를 공유 중">공동 보드</span>}
         </h1>
 
-        <a href="/portfolio" className="catalog-link">
+        <a href="/catalog" className="catalog-link">
           The Chair Catalog →
         </a>
       </header>
