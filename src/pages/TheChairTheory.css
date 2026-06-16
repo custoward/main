@@ -33,39 +33,48 @@
   flex-shrink: 0;
 }
 
-.survey-btn {
-  padding: 8px 16px;
+/* 헤더 버튼 통일: ? / 설문지 양식 / The Chair Catalog */
+.instructions-btn,
+.survey-btn,
+.catalog-link {
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
   border: 1px solid #000;
+  border-radius: 0;
   background: #ffffff;
   color: #000;
   font-size: 0.9rem;
+  line-height: 1;
   cursor: pointer;
-  transition: all 0.2s ease;
   white-space: nowrap;
+  text-decoration: none;
+  box-sizing: border-box;
+  transition: background 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
 }
 
-.survey-btn:hover {
+/* "?"는 정사각형 */
+.instructions-btn {
+  width: 40px;
+  padding: 0;
+  font-size: 1.15rem;
+}
+
+.instructions-btn:hover,
+.survey-btn:hover,
+.catalog-link:hover {
   background: #000;
   color: #ffffff;
 }
 
-.instructions-btn {
-  width: 40px;
-  height: 40px;
-  border: 1px solid #000;
-  background: #ffffff;
-  border-radius: 50%;
-  font-size: 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-}
-
-.instructions-btn:hover {
-  background: #f5f5f5;
+.instructions-btn:focus-visible,
+.survey-btn:focus-visible,
+.catalog-link:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
 }
 
 .chair-theory-title {
@@ -76,38 +85,6 @@
   text-align: center;
   letter-spacing: 1px;
   position: relative;
-}
-
-.shared-badge {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 3px 8px;
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0;
-  color: #fff;
-  background: #1a8917;
-  border-radius: 10px;
-  white-space: nowrap;
-  vertical-align: middle;
-}
-
-.catalog-link {
-  padding: 10px 20px;
-  border: 1px solid #000;
-  background: #ffffff;
-  text-decoration: none;
-  color: #000;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.catalog-link:hover {
-  background: #000;
-  color: #ffffff;
 }
 
 /* ========== MAIN BOARD ========== */
@@ -402,20 +379,18 @@
     white-space: nowrap;
   }
 
-  .survey-btn {
-    padding: 6px 10px;
+  .instructions-btn,
+  .survey-btn,
+  .catalog-link {
+    height: 34px;
     font-size: 0.78rem;
+    padding: 0 10px;
   }
 
   .instructions-btn {
     width: 34px;
-    height: 34px;
-    font-size: 17px;
-  }
-
-  .catalog-link {
-    font-size: 0.78rem;
-    padding: 7px 10px;
+    padding: 0;
+    font-size: 1rem;
   }
 
   .capture-btn {
@@ -429,12 +404,6 @@
     padding: 28px 18px;
     width: 95%;
     max-height: 88vh;
-  }
-
-  .shared-badge {
-    font-size: 0.55rem;
-    padding: 2px 6px;
-    margin-left: 6px;
   }
 }
 
@@ -458,10 +427,21 @@
     flex: 0 0 auto;
   }
 
+  .instructions-btn,
+  .survey-btn,
+  .catalog-link {
+    height: 32px;
+    font-size: 0.72rem;
+    padding: 0 9px;
+  }
+
+  .instructions-btn {
+    width: 32px;
+    padding: 0;
+  }
+
   .catalog-link {
     flex: 0 0 auto;
-    font-size: 0.72rem;
-    padding: 6px 9px;
   }
 
   .capture-btn {
