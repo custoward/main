@@ -53,6 +53,7 @@
     ]
   },
   "devDependencies": {
-    "@types/react-helmet": "^6.1.11"
+    "@types/react-helmet": "^6.1.11",
+    "qrcode": "^1.5.4"
   }
 }

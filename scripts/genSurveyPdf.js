@@ -1,18 +1,41 @@
-// The Chair Theory - "What is chair?" 설문지 PDF 생성기 (가로 A4, 벡터)
-// 외부 의존성 없이 xref 오프셋을 계산해 유효한 PDF를 만든다.
-// 디자인을 바꾸려면 content 문자열을 수정하고 다시 실행:  node scripts/genSurveyPdf.js
+// The Chair Theory - "What is chair?" 설문지 PDF 생성기 (가로 A4, 벡터 + QR)
+// 외부 의존성: qrcode(devDependency). xref 오프셋을 계산해 유효한 PDF를 만든다.
+//   node scripts/genSurveyPdf.js
 const fs = require('fs');
 const path = require('path');
+const QRCode = require('qrcode');
 
-// 가로 A4: 842 x 595 (pt). PDF 좌표 원점은 좌하단.
-const content = `q
+const URL_TEXT = 'https://studiodavidavi.com/thechair';
+
+// ---- QR 코드를 PDF 벡터(검은 사각형)로 그리기 ----
+const qr = QRCode.create(URL_TEXT, { errorCorrectionLevel: 'M' });
+const qrN = qr.modules.size;
+const qrData = qr.modules.data; // 1 = dark
+const QR_DIM = 110; // pt
+const QR_LEFT = 672;
+const QR_TOP = 582; // PDF y(아래가 0)에서 QR 상단
+const mod = QR_DIM / qrN;
+let qrRects = '';
+for (let r = 0; r < qrN; r++) {
+  for (let c = 0; c < qrN; c++) {
+    if (qrData[r * qrN + c]) {
+      const x = QR_LEFT + c * mod;
+      const y = QR_TOP - (r + 1) * mod;
+      qrRects += `${x.toFixed(2)} ${y.toFixed(2)} ${mod.toFixed(2)} ${mod.toFixed(2)} re\n`;
+    }
+  }
+}
+const qrFill = `q 0 0 0 rg\n${qrRects}f Q\n`;
+
+// ---- 페이지 내용 (가로 A4: 842 x 595, 원점 좌하단) ----
+const content = `${qrFill}q
 2 w
-60 478 m 782 478 l S
+60 415 m 782 415 l S
 60 90 m 782 90 l S
 Q
 q
 3 w
-60 110 360 255 re S
+60 110 360 250 re S
 Q
 q
 1 w
@@ -25,17 +48,22 @@ q
 Q
 BT
 /F2 46 Tf
-60 515 Td
+60 518 Td
 (What is chair?) Tj
 ET
 BT
 /F1 13 Tf
-60 452 Td
+60 478 Td
 (We encounter many different kinds of "chairs" every day.) Tj
 0 -18 Td
 (What makes something a chair?) Tj
 0 -18 Td
 (Draw your idea and tell us why.) Tj
+ET
+BT
+/F1 12 Tf
+561 452 Td
+(${URL_TEXT}) Tj
 ET
 BT
 /F2 20 Tf
@@ -84,4 +112,4 @@ pdf += `trailer\n<< /Size ${count} /Root 1 0 R >>\nstartxref\n${xrefStart}\n%%EO
 
 const outPath = path.join(__dirname, '..', 'public', 'the-chair-theory-survey.pdf');
 fs.writeFileSync(outPath, Buffer.from(pdf, 'latin1'));
-console.log('생성 완료:', outPath, `(${Buffer.byteLength(pdf, 'latin1')} bytes)`);
+console.log('생성 완료:', outPath, `(${Buffer.byteLength(pdf, 'latin1')} bytes, QR ${qrN}x${qrN})`);

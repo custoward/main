@@ -224,15 +224,35 @@
 
 .modal-close {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 40px;
-  height: 40px;
+  top: 12px;
+  right: 12px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: none;
-  background: none;
-  font-size: 28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.88);
+  color: #333;
+  font-size: 22px;
+  line-height: 1;
   cursor: pointer;
   padding: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  z-index: 5;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.modal-close:hover {
+  background: #eaeaea;
+  color: #000;
+}
+
+.modal-close:focus-visible {
+  outline: 2px solid #333;
+  outline-offset: 2px;
 }
 
 .modal-content h2 {
