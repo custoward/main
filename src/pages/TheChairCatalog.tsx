@@ -6,7 +6,7 @@ interface Manifest {
   pages: string[];
 }
 
-const BASE = `${process.env.PUBLIC_URL}/catalog`;
+const BASE = `${process.env.PUBLIC_URL}/catalog_pages`;
 
 const TheChairCatalog: React.FC = () => {
   const [pages, setPages] = useState<string[]>([]);

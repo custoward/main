@@ -223,4 +223,12 @@
 .doc-correction-actions {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* 전역 버튼 min-width(200px)를 무시하고 모달 폭 안에서 줄어들게 */
+.doc-correction-actions .btn-primary,
+.doc-correction-actions .btn-secondary {
+  flex: 1 1 0;
+  min-width: 0;
 }

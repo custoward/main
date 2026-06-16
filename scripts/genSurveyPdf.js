@@ -7,30 +7,30 @@ const path = require('path');
 // 가로 A4: 842 x 595 (pt). PDF 좌표 원점은 좌하단.
 const content = `q
 2 w
-60 470 m 782 470 l S
-60 88 m 782 88 l S
+60 478 m 782 478 l S
+60 90 m 782 90 l S
 Q
 q
 3 w
-60 150 360 250 re S
+60 110 360 255 re S
 Q
 q
 1 w
-470 360 m 782 360 l S
-470 318 m 782 318 l S
-470 276 m 782 276 l S
-470 234 m 782 234 l S
-470 192 m 782 192 l S
-470 150 m 782 150 l S
+470 345 m 782 345 l S
+470 303 m 782 303 l S
+470 261 m 782 261 l S
+470 219 m 782 219 l S
+470 177 m 782 177 l S
+470 135 m 782 135 l S
 Q
 BT
 /F2 46 Tf
-60 512 Td
+60 515 Td
 (What is chair?) Tj
 ET
 BT
 /F1 13 Tf
-60 442 Td
+60 452 Td
 (We encounter many different kinds of "chairs" every day.) Tj
 0 -18 Td
 (What makes something a chair?) Tj
@@ -39,17 +39,17 @@ BT
 ET
 BT
 /F2 20 Tf
-60 420 Td
+60 384 Td
 (1. Draw the chair you have in mind!) Tj
 ET
 BT
 /F2 20 Tf
-470 420 Td
+470 384 Td
 (2. What's the reason?) Tj
 ET
 BT
 /F1 11 Tf
-60 62 Td
+60 64 Td
 (Thank you for participating.) Tj
 0 -16 Td
 (Your idea becomes an important connection in this project.) Tj

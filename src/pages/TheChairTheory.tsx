@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import './TheChairTheory.css';
 import WebcamCapture from '../components/ChairTheory/WebcamCapture';
-import DocumentCorrection from '../components/ChairTheory/DocumentCorrection';
 import PDFViewer from '../components/ChairTheory/PDFViewer';
 import '../components/ChairTheory/styles.css';
 import { generateRandomCenter, buildWebPaths } from '../utils/geometryUtils';
@@ -14,30 +13,18 @@ const SURVEY_PDF_URL = `${process.env.PUBLIC_URL}/the-chair-theory-survey.pdf`;
 const toUnit = (v: number): number => (v > 1 ? 0.5 : v);
 
 const TheChairTheory: React.FC = () => {
-  const { images, isLoading, error, isShared, addImage, removeImage } = useChairImages();
+  const { images, isLoading, error, addImage, removeImage } = useChairImages();
 
   const [showCaptureModal, setShowCaptureModal] = useState(false);
   const [showInstructions, setShowInstructions] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
   const [selectedImage, setSelectedImage] = useState<CapturedImage | null>(null);
-  // 촬영 직후 원근 보정 단계에 넘길 원본 이미지
-  const [pendingRaw, setPendingRaw] = useState<string | null>(null);
 
   // 거미줄 경로 (정규화 좌표 → 0~100 SVG 공간). 컨테이너 픽셀과 무관.
   const webPaths = useMemo(
     () => buildWebPaths(images.map((img) => ({ x: toUnit(img.x), y: toUnit(img.y) }))),
     [images]
   );
-
-  // 촬영 완료 → 원근 보정 단계로
-  const handleCaptured = (rawDataUrl: string) => {
-    setPendingRaw(rawDataUrl);
-  };
-
-  const handleCloseCapture = () => {
-    setShowCaptureModal(false);
-    setPendingRaw(null);
-  };
 
   const handleAddImage = (imageData: string) => {
     const center = generateRandomCenter(
@@ -54,7 +41,6 @@ const TheChairTheory: React.FC = () => {
     };
 
     addImage(newImage);
-    setPendingRaw(null);
     setShowCaptureModal(false);
   };
 
@@ -83,10 +69,7 @@ const TheChairTheory: React.FC = () => {
           </button>
         </div>
 
-        <h1 className="chair-theory-title">
-          The Chair Theory
-          {isShared && <span className="shared-badge" title="모든 기기가 같은 보드를 공유 중">공동 보드</span>}
-        </h1>
+        <h1 className="chair-theory-title">The Chair Theory</h1>
 
         <a href="/catalog" className="catalog-link">
           The Chair Catalog →
@@ -146,22 +129,18 @@ const TheChairTheory: React.FC = () => {
         </button>
       </main>
 
-      {/* Capture Modal: 촬영 → 원근 보정 2단계 */}
+      {/* Capture Modal: 촬영/업로드 → 바로 보드에 */}
       {showCaptureModal && (
-        <div className="modal-overlay" onClick={handleCloseCapture}>
+        <div className="modal-overlay" onClick={() => setShowCaptureModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={handleCloseCapture} aria-label="닫기">
+            <button
+              className="modal-close"
+              onClick={() => setShowCaptureModal(false)}
+              aria-label="닫기"
+            >
               ×
             </button>
-            {pendingRaw ? (
-              <DocumentCorrection
-                rawDataUrl={pendingRaw}
-                onConfirm={handleAddImage}
-                onRetake={() => setPendingRaw(null)}
-              />
-            ) : (
-              <WebcamCapture onCapture={handleCaptured} />
-            )}
+            <WebcamCapture onCapture={handleAddImage} />
           </div>
         </div>
       )}
