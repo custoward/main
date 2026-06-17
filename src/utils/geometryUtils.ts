@@ -51,15 +51,15 @@ export function generateRandomCenter(
  *  3/4 뷰 의자: 등받이 → 지지 기둥 → 좌판 → 다리. bbox가 영역을 꽉 채우도록
  *  잡아 주변 빈 공간을 최소화한다. */
 const CHAIR_PARTS: Array<{ x0: number; y0: number; x1: number; y1: number }> = [
-  { x0: 0.47, y0: 0.04, x1: 0.71, y1: 0.40 }, // 등받이
-  { x0: 0.51, y0: 0.38, x1: 0.58, y1: 0.47 }, // 등받이-좌판 지지 기둥
-  { x0: 0.25, y0: 0.44, x1: 0.70, y1: 0.63 }, // 좌판
-  { x0: 0.28, y0: 0.60, x1: 0.33, y1: 0.97 }, // 왼쪽 앞다리
-  { x0: 0.45, y0: 0.62, x1: 0.51, y1: 0.98 }, // 가운데 앞다리
-  { x0: 0.64, y0: 0.44, x1: 0.70, y1: 0.97 }, // 오른쪽 뒷다리
+  { x0: 0.42, y0: 0.04, x1: 0.78, y1: 0.40 }, // 등받이
+  { x0: 0.49, y0: 0.38, x1: 0.60, y1: 0.47 }, // 등받이-좌판 지지 기둥
+  { x0: 0.10, y0: 0.44, x1: 0.78, y1: 0.63 }, // 좌판
+  { x0: 0.14, y0: 0.60, x1: 0.22, y1: 0.97 }, // 왼쪽 앞다리
+  { x0: 0.44, y0: 0.62, x1: 0.52, y1: 0.98 }, // 가운데 앞다리
+  { x0: 0.68, y0: 0.44, x1: 0.78, y1: 0.97 }, // 오른쪽 뒷다리
 ];
 
-/** Halton 저불일치 수열 — 점들이 한쪽에 몰리지 않고 골고루 채워지는 순서. */
+/** Halton 저불일치 수열 — 점들이 빈 곳 없이 골고루 채워지는 순서. */
 function halton(i: number, base: number): number {
   let f = 1;
   let r = 0;
@@ -72,18 +72,27 @@ function halton(i: number, base: number): number {
   return r;
 }
 
-/** 인덱스 기반 deterministic 의사난수 (격자처럼 딱딱하지 않게 흩뿌리는 jitter용). */
+/** 인덱스 기반 deterministic 의사난수 (인덱스 고정 → 추가해도 위치가 안 움직임). */
 function hashRand(i: number, salt: number): number {
   const s = Math.sin((i + 1) * 12.9898 + salt * 78.233) * 43758.5453;
   return s - Math.floor(s);
 }
 
+// 의자 실루엣 전체를 감싸는 bounding box (캔버스를 의자 비율로 맞추는 데 사용).
+const BX0 = Math.min(...CHAIR_PARTS.map((p) => p.x0));
+const BX1 = Math.max(...CHAIR_PARTS.map((p) => p.x1));
+const BY0 = Math.min(...CHAIR_PARTS.map((p) => p.y0));
+const BY1 = Math.max(...CHAIR_PARTS.map((p) => p.y1));
+
+/** 의자 실루엣의 가로:세로 비율. 캔버스 aspect-ratio로 써서 좌우 여백을 없앤다. */
+export const CHAIR_ASPECT = (BX1 - BX0) / (BY1 - BY0);
+
 /**
  * count개의 이미지를 의자 실루엣 모양으로 배치한 정규화 좌표를 만든다.
  * - 부위 면적에 비례해 점이 분포 → 좌판·등받이부터 채워지고 많아질수록 다리까지.
- * - Halton 수열로 골고루 채워, 적을 땐 흩어져 보이다 많아질수록 의자 실루엣이 드러난다.
- * - 약간의 jitter로 정위치 격자처럼 보이지 않게 살짝 흐트러뜨린다.
- * - 인덱스 고정이라 새 이미지를 추가해도 기존 이미지는 제자리를 유지한다.
+ * - deterministic 랜덤이라 분포가 균일하지 않아, 적을 땐 듬성/뭉쳐 보이다
+ *   많아질수록 의자 실루엣이 또렷해진다. (인덱스 고정 → 추가해도 안 움직임)
+ * - 의자 bbox를 캔버스(0~1)에 꽉 채우게 정규화해 좌우/상하 여백을 최소화한다.
  */
 export function chairLayout(count: number): Center[] {
   const areas = CHAIR_PARTS.map((p) => (p.x1 - p.x0) * (p.y1 - p.y0));
@@ -91,22 +100,27 @@ export function chairLayout(count: number): Center[] {
   const cum: number[] = [];
   areas.reduce((acc, a, idx) => (cum[idx] = acc + a), 0);
 
+  const PAD = 0.06; // 가장자리 이미지가 캔버스를 벗어나지 않도록 여유
+  const span = 1 - 2 * PAD;
   const out: Center[] = [];
   for (let i = 0; i < count; i++) {
-    // 부위 선택: 면적 가중 (큰 부위일수록 점이 많이 들어감)
+    // 부위 선택: 면적 가중 + Halton(빈 곳 없이 골고루 채움)
     const r = halton(i, 2) * total;
     let pi = cum.findIndex((c) => r < c);
     if (pi < 0) pi = CHAIR_PARTS.length - 1;
     const p = CHAIR_PARTS[pi];
 
-    // 부위 내부 위치: Halton(균등) + 작은 jitter(흐트러짐)
-    const hx = halton(i, 3);
-    const hy = halton(i, 5);
-    const jx = (hashRand(i, 1) - 0.5) * 0.045;
-    const jy = (hashRand(i, 2) - 0.5) * 0.045;
+    // 부위 내부 위치: Halton(균일) + 작은 jitter(기계적이지 않게)
+    const jx = (hashRand(i, 1) - 0.5) * 0.04;
+    const jy = (hashRand(i, 2) - 0.5) * 0.04;
+    const rawx = p.x0 + halton(i, 3) * (p.x1 - p.x0) + jx;
+    const rawy = p.y0 + halton(i, 5) * (p.y1 - p.y0) + jy;
 
-    const x = Math.min(0.98, Math.max(0.02, p.x0 + hx * (p.x1 - p.x0) + jx));
-    const y = Math.min(0.98, Math.max(0.02, p.y0 + hy * (p.y1 - p.y0) + jy));
+    // 의자 bbox를 캔버스 0~1에 꽉 차게 정규화 (+ 가장자리 패딩)
+    const nx = (rawx - BX0) / (BX1 - BX0);
+    const ny = (rawy - BY0) / (BY1 - BY0);
+    const x = PAD + Math.min(1, Math.max(0, nx)) * span;
+    const y = PAD + Math.min(1, Math.max(0, ny)) * span;
     out.push({ x, y });
   }
   return out;

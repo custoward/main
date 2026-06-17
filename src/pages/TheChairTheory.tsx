@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useLayoutEffect } from 'react';
 import './TheChairTheory.css';
 import WebcamCapture from '../components/ChairTheory/WebcamCapture';
 import PDFViewer from '../components/ChairTheory/PDFViewer';
 import '../components/ChairTheory/styles.css';
-import { chairLayout, buildWebPaths } from '../utils/geometryUtils';
+import { chairLayout, buildWebPaths, CHAIR_ASPECT } from '../utils/geometryUtils';
 import { CapturedImage } from '../components/ChairTheory/types';
 import { useChairImages } from '../hooks/useChairImages';
 import { LanguageProvider, useLang } from '../i18n';
@@ -45,6 +45,28 @@ const ChairTheoryInner: React.FC = () => {
   // 이미지 위치와 거미줄이 같은 좌표를 공유하므로 둘 사이 오차가 없다.
   const positions = useMemo(() => chairLayout(images.length), [images.length]);
   const webPaths = useMemo(() => buildWebPaths(positions), [positions]);
+
+  // 캔버스 크기를 JS로 contain 계산 → 화면/창 크기와 무관하게 의자 종횡비 고정.
+  // (CSS aspect-ratio + max-* 조합은 한쪽이 잘릴 때 비율이 깨져 직접 계산한다.)
+  const stageRef = useRef<HTMLDivElement>(null);
+  const [canvasSize, setCanvasSize] = useState<{ w: number; h: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const update = () => {
+      const W = el.clientWidth;
+      const H = el.clientHeight;
+      if (!W || !H) return;
+      // contain: 의자 종횡비를 유지하며 stage 안에 최대로 채운다.
+      const w = W / H > CHAIR_ASPECT ? H * CHAIR_ASPECT : W;
+      const h = W / H > CHAIR_ASPECT ? H : W / CHAIR_ASPECT;
+      setCanvasSize({ w, h });
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   const handleAddImage = (imageData: string) => {
     const newImage: CapturedImage = {
@@ -101,9 +123,17 @@ const ChairTheoryInner: React.FC = () => {
       <main className="chair-theory-board">
         {/* 이미지와 거미줄이 정확히 같은 좌표 박스를 공유하도록 stage로 묶는다.
             (SVG는 replaced element라 inset만으로는 크기가 어긋날 수 있어 wrapper 사용) */}
-        <div className="board-stage">
-          {/* 정사각 캔버스에 의자 좌표를 그려, 화면 비율과 무관하게 의자 비율을 유지 */}
-          <div className="chair-canvas">
+        <div className="board-stage" ref={stageRef}>
+          {/* 의자 비율 캔버스: 크기를 JS로 contain 계산해 화면/창 크기와 무관하게
+              의자 종횡비를 고정한다. */}
+          <div
+            className="chair-canvas"
+            style={
+              canvasSize
+                ? { width: `${canvasSize.w}px`, height: `${canvasSize.h}px` }
+                : { aspectRatio: String(CHAIR_ASPECT) }
+            }
+          >
           <svg
             className="web-canvas"
             viewBox="0 0 100 100"

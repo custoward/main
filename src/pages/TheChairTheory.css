@@ -113,7 +113,7 @@
   overflow: hidden;
   background: #ffffff;
   /* 이미지 크기와 프레임 여백을 한 곳에서 관리 */
-  --img-size: clamp(36px, 6vw, 76px);
+  --img-size: clamp(32px, 5vw, 60px);
   --img-half: calc(var(--img-size) / 2);
   --frame-gap: 20px;
 }
@@ -142,8 +142,9 @@
   bottom: calc(var(--frame-gap) + var(--img-half));
 }
 
-/* 정사각 캔버스: stage 안에 contain되어 중앙 정렬 → 화면 비율과 무관하게
-   의자 좌표(0~1)가 늘어나지 않고 항상 같은 비율로 그려진다. */
+/* 의자 비율 캔버스: stage 안에 contain되어 중앙 정렬 → 화면 비율과 무관하게
+   의자 좌표(0~1)가 늘어나지 않고 항상 같은 비율로 그려진다.
+   aspect-ratio는 JS(CHAIR_ASPECT)에서 의자 종횡비로 인라인 지정. */
 .chair-canvas {
   position: absolute;
   inset: 0;
@@ -151,7 +152,6 @@
   width: 100%;
   max-width: 100%;
   max-height: 100%;
-  aspect-ratio: 1 / 1;
 }
 
 .web-canvas,
