@@ -113,9 +113,9 @@
   overflow: hidden;
   background: #ffffff;
   /* 이미지 크기와 프레임 여백을 한 곳에서 관리 */
-  --img-size: clamp(64px, 9vw, 120px);
+  --img-size: clamp(48px, 7vw, 96px);
   --img-half: calc(var(--img-size) / 2);
-  --frame-gap: 24px;
+  --frame-gap: 20px;
 }
 
 /* 화면보다 살짝 작은 검정 라인 프레임 */
@@ -132,16 +132,22 @@
 }
 
 /* 이미지/거미줄이 그려지는 영역을 프레임 안쪽 + 이미지 절반만큼 들여
-   가장자리 이미지도 중심 정렬 상태에서 프레임을 벗어나지 않도록 함 */
-.web-canvas,
-.images-board {
+   가장자리 이미지도 중심 정렬 상태에서 프레임을 벗어나지 않도록 함.
+   stage가 좌표 기준 박스가 되고, 그 안의 svg/이미지는 동일하게 채워 오차를 없앤다. */
+.board-stage {
   position: absolute;
   top: var(--img-half);
   left: calc(var(--frame-gap) + var(--img-half));
   right: calc(var(--frame-gap) + var(--img-half));
   bottom: calc(var(--frame-gap) + var(--img-half));
-  width: auto;
-  height: auto;
+}
+
+.web-canvas,
+.images-board {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .web-canvas {
@@ -424,8 +430,8 @@
 /* ========== 반응형 ========== */
 @media (max-width: 768px) {
   .chair-theory-board {
-    --img-size: clamp(52px, 14vw, 84px);
-    --frame-gap: 16px;
+    --img-size: clamp(36px, 10vw, 60px);
+    --frame-gap: 12px;
   }
 
   .chair-theory-header {
@@ -480,8 +486,8 @@
 /* 좁은 폰: 헤더를 두 줄로 (위 제목 / 아래 좌·우 컨트롤) */
 @media (max-width: 480px) {
   .chair-theory-board {
-    --img-size: clamp(46px, 16vw, 68px);
-    --frame-gap: 12px;
+    --img-size: clamp(30px, 11vw, 48px);
+    --frame-gap: 10px;
   }
 
   .chair-theory-header {
