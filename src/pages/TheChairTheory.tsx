@@ -102,6 +102,8 @@ const ChairTheoryInner: React.FC = () => {
         {/* 이미지와 거미줄이 정확히 같은 좌표 박스를 공유하도록 stage로 묶는다.
             (SVG는 replaced element라 inset만으로는 크기가 어긋날 수 있어 wrapper 사용) */}
         <div className="board-stage">
+          {/* 정사각 캔버스에 의자 좌표를 그려, 화면 비율과 무관하게 의자 비율을 유지 */}
+          <div className="chair-canvas">
           <svg
             className="web-canvas"
             viewBox="0 0 100 100"
@@ -136,6 +138,7 @@ const ChairTheoryInner: React.FC = () => {
                 <img src={image.dataUrl} alt={t('capturedAlt')} />
               </div>
             ))}
+          </div>
           </div>
         </div>
 
