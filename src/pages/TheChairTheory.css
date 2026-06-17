@@ -112,7 +112,20 @@
   flex: 1;
   position: relative;
   overflow: hidden;
-  background: #fafafa;
+  background: #ffffff;
+}
+
+/* 화면보다 살짝 작은 검정 라인 프레임 */
+.chair-theory-board::after {
+  content: "";
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  border: 1px solid #000;
+  pointer-events: none;
+  z-index: 5;
 }
 
 .web-canvas {
