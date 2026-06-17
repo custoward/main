@@ -113,7 +113,7 @@
   overflow: hidden;
   background: #ffffff;
   /* 이미지 크기와 프레임 여백을 한 곳에서 관리 */
-  --img-size: clamp(48px, 7vw, 96px);
+  --img-size: clamp(36px, 6vw, 76px);
   --img-half: calc(var(--img-size) / 2);
   --frame-gap: 20px;
 }
