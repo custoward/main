@@ -112,6 +112,10 @@
   position: relative;
   overflow: hidden;
   background: #ffffff;
+  /* 이미지 크기와 프레임 여백을 한 곳에서 관리 */
+  --img-size: clamp(84px, 12vw, 150px);
+  --img-half: calc(var(--img-size) / 2);
+  --frame-gap: 24px;
 }
 
 /* 화면보다 살짝 작은 검정 라인 프레임 */
@@ -119,36 +123,41 @@
   content: "";
   position: absolute;
   top: 0;
-  left: 24px;
-  right: 24px;
-  bottom: 24px;
+  left: var(--frame-gap);
+  right: var(--frame-gap);
+  bottom: var(--frame-gap);
   border: 1px solid #000;
   pointer-events: none;
   z-index: 5;
 }
 
-.web-canvas {
+/* 이미지/거미줄이 그려지는 영역을 프레임 안쪽 + 이미지 절반만큼 들여
+   가장자리 이미지도 중심 정렬 상태에서 프레임을 벗어나지 않도록 함 */
+.web-canvas,
+.images-board {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: var(--img-half);
+  left: calc(var(--frame-gap) + var(--img-half));
+  right: calc(var(--frame-gap) + var(--img-half));
+  bottom: calc(var(--frame-gap) + var(--img-half));
+  width: auto;
+  height: auto;
+}
+
+.web-canvas {
   z-index: 1;
   pointer-events: none;
 }
 
 .images-board {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .board-image {
   position: absolute;
   /* 크기는 CSS가 반응형 처리, 위치는 left/top % + 중심 정렬 */
-  width: clamp(84px, 12vw, 150px);
-  height: clamp(84px, 12vw, 150px);
+  width: var(--img-size);
+  height: var(--img-size);
   transform: translate(-50%, -50%);
   cursor: pointer;
   background: #ffffff;
