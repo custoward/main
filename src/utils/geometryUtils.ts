@@ -49,20 +49,56 @@ export function generateRandomCenter(
 
 /**
  * 정규화 중심점들을 연결하는 거미줄 SVG 경로를 만든다.
+ * 가까운 점끼리 잇는 최소 신장 트리(MST, Prim) 기준 — 선 개수는 N-1개로
+ * 최소이며, 이미지가 많아져도 화면이 빽빽해지지 않고 거미줄 형태가 유지된다.
  * 좌표계는 0~100 (viewBox="0 0 100 100", preserveAspectRatio="none" 기준).
  */
 export function buildWebPaths(centers: Center[]): string[] {
   if (centers.length < 2) return [];
 
   const pts = centers.map((c) => ({ x: c.x * 100, y: c.y * 100 }));
+  const n = pts.length;
+
+  // Prim 알고리즘: 트리에 포함된 집합에서 가장 가까운 미포함 점을 하나씩 흡수
+  const inTree = new Array<boolean>(n).fill(false);
+  const dist = new Array<number>(n).fill(Infinity);
+  const parent = new Array<number>(n).fill(-1);
+  dist[0] = 0;
+
   const paths: string[] = [];
 
-  for (let i = 0; i < pts.length; i++) {
-    const a = pts[i];
-    const b = pts[(i + 1) % pts.length];
-    const mx = (a.x + b.x) / 2;
-    const my = (a.y + b.y) / 2 + 4; // 살짝 늘어지는 곡선
-    paths.push(`M${a.x},${a.y} Q${mx},${my} ${b.x},${b.y}`);
+  for (let k = 0; k < n; k++) {
+    // 아직 트리에 없는 점 중 가장 가까운 것
+    let u = -1;
+    let best = Infinity;
+    for (let i = 0; i < n; i++) {
+      if (!inTree[i] && dist[i] < best) {
+        best = dist[i];
+        u = i;
+      }
+    }
+    if (u === -1) break;
+    inTree[u] = true;
+
+    if (parent[u] !== -1) {
+      const a = pts[parent[u]];
+      const b = pts[u];
+      const mx = (a.x + b.x) / 2;
+      const my = (a.y + b.y) / 2 + 4; // 살짝 늘어지는 곡선
+      paths.push(`M${a.x},${a.y} Q${mx},${my} ${b.x},${b.y}`);
+    }
+
+    // 새로 들어온 u 기준으로 남은 점들의 최단 거리 갱신
+    for (let v = 0; v < n; v++) {
+      if (!inTree[v]) {
+        const d = Math.hypot(pts[u].x - pts[v].x, pts[u].y - pts[v].y);
+        if (d < dist[v]) {
+          dist[v] = d;
+          parent[v] = u;
+        }
+      }
+    }
   }
+
   return paths;
 }

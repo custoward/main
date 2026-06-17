@@ -113,7 +113,7 @@
   overflow: hidden;
   background: #ffffff;
   /* 이미지 크기와 프레임 여백을 한 곳에서 관리 */
-  --img-size: clamp(84px, 12vw, 150px);
+  --img-size: clamp(64px, 9vw, 120px);
   --img-half: calc(var(--img-size) / 2);
   --frame-gap: 24px;
 }
@@ -423,6 +423,11 @@
 
 /* ========== 반응형 ========== */
 @media (max-width: 768px) {
+  .chair-theory-board {
+    --img-size: clamp(52px, 14vw, 84px);
+    --frame-gap: 16px;
+  }
+
   .chair-theory-header {
     padding: 12px 16px;
     height: auto;
@@ -474,6 +479,11 @@
 
 /* 좁은 폰: 헤더를 두 줄로 (위 제목 / 아래 좌·우 컨트롤) */
 @media (max-width: 480px) {
+  .chair-theory-board {
+    --img-size: clamp(46px, 16vw, 68px);
+    --frame-gap: 12px;
+  }
+
   .chair-theory-header {
     flex-wrap: wrap;
     justify-content: space-between;
