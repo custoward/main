@@ -148,6 +148,23 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,min
 fbLayer.addTo(map);
 map.pm.setGlobalOptions({tooltips:false});
 map.on('move',refreshReadout);
+map.on('zoomend moveend',()=>requestAnimationFrame(declutterLabels));
+
+// 라벨 충돌 정리: 겹치면 priority 높은 권역 이름만 남기고 나머지 숨김(확대하면 복원).
+function declutterLabels(){
+  const bounds=map.getBounds();const placed=[];
+  const arr=[...zoneLayers.entries()].sort((a,b)=>(b[1].data.priority||0)-(a[1].data.priority||0));
+  for(const[id,zl]of arr){
+    const tt=zl.layer.getTooltip();if(!tt)continue;const el=tt.getElement();if(!el)continue;
+    const c=zl.kind==='polygon'?centroid(ringOf(zl)):[zl.data.centerLat,zl.data.centerLng];
+    if(!bounds.contains(L.latLng(c[0],c[1]))){el.style.display='none';continue;}
+    const pt=map.latLngToContainerPoint(L.latLng(c[0],c[1]));
+    const w=Math.max(24,(zl.data.name||'').length*13),h=15;
+    const box={x:pt.x-w/2,y:pt.y-h/2,w,h};
+    const hit=placed.some(p=>!(box.x+box.w<p.x||p.x+p.w<box.x||box.y+box.h<p.y||p.y+p.h<box.y));
+    if(hit){el.style.display='none';}else{el.style.display='';placed.push(box);}
+  }
+}
 
 function lockState(id){const l=locks[id];if(!l)return null;if(Date.now()-l.at>LOCK_STALE_MS)return null;return l;}
 function isLockedByOther(id){const l=lockState(id);return l&&l.sid!==me.sid;}
@@ -302,7 +319,7 @@ function refreshReadout(){const c=map.getCenter();const m=judge(c.lat,c.lng);let
 // ---- 실시간 구독 ----
 function startListeners(){
   db.collection('zoneEditorUsers').onSnapshot(s=>{users={};s.forEach(d=>{users[d.id]=(d.data().color)||DEFAULT_COLOR;});recolorAll();if(me.name&&users[me.name]){me.color=users[me.name];const mc=document.getElementById('myColor');mc.value=me.color;}},e=>console.error('users',e));
-  db.collection('zones').onSnapshot(s=>{s.docChanges().forEach(ch=>{if(ch.type==='removed')removeLayer(ch.doc.id);else applyDoc(ch.doc.id,ch.doc.data());});document.getElementById('btnSeed').style.display=(me.mode==='admin'&&zoneLayers.size===0)?'':'none';refreshReadout();},e=>console.error('zones',e));
+  db.collection('zones').onSnapshot(s=>{s.docChanges().forEach(ch=>{if(ch.type==='removed')removeLayer(ch.doc.id);else applyDoc(ch.doc.id,ch.doc.data());});document.getElementById('btnSeed').style.display=(me.mode==='admin'&&zoneLayers.size===0)?'':'none';refreshReadout();setTimeout(declutterLabels,60);},e=>console.error('zones',e));
   db.collection('zoneLocks').onSnapshot(s=>{locks={};s.forEach(d=>{const l=d.data();locks[d.id]={name:l.name,sid:l.sid,at:l.at&&l.at.toMillis?l.at.toMillis():Date.now()};});for(const[id,zl]of zoneLayers)styleLayer(id,zl);},e=>console.error('locks',e));
   db.collection('zoneFeedback').onSnapshot(s=>{const docs=[];s.forEach(d=>docs.push(d.data()));renderFeedback(docs);},e=>console.error('fb',e));
   db.collection('zoneEditorPresence').onSnapshot(s=>{const now=Date.now();const u=[];s.forEach(d=>{const p=d.data();const at=p.at&&p.at.toMillis?p.at.toMillis():now;if(now-at<PRESENCE_STALE_MS)u.push(p);});document.getElementById('online').innerHTML='접속 '+u.length+'명: '+u.map(x=>`<b style="color:${userColor(x.name)}">${x.name||'익명'}</b>`).join(', ');},e=>console.error('pres',e));
