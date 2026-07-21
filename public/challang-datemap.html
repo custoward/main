@@ -42,7 +42,10 @@
   @keyframes sp{to{transform:rotate(360deg)}}
   .zoneLbl{background:transparent;border:0;box-shadow:none;font-weight:700;font-size:12px;color:#333;text-shadow:0 0 3px #fff,0 0 3px #fff}
   .leaflet-pm-tooltip{display:none!important}
-  .fbBadge{font-size:16px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4))}
+  .eblab{font-size:11px;color:var(--muted);margin-left:4px}
+  .fbZone{background:#fff;border:2px solid #ff2d55;border-radius:12px;padding:1px 7px;font-size:12px;font-weight:800;color:#ff2d55;box-shadow:0 2px 6px rgba(0,0,0,.35);white-space:nowrap}
+  .fbPin{width:24px;height:24px;background:#ff2d55;border:2px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center}
+  .fbPin span{transform:rotate(45deg);font-size:11px}
   @media (prefers-color-scheme:dark){:root{--bg:rgba(28,28,30,.96);--fg:#f2f2f7;--muted:#9a9aa2}.readout{background:#2c2c2e}button{background:#3a3a3c;color:#f2f2f7}button.ghost{border-color:#48484a}.field input,#editbar input{background:#2c2c2e;border-color:#48484a;color:#f2f2f7}.modal{background:#1c1c1e}.modal p{color:#9a9aa2}.zoneLbl{color:#eee;text-shadow:0 0 3px #000,0 0 3px #000}}
 </style>
 </head>
@@ -73,10 +76,10 @@
 <div id="editbar">
   <div class="er">
     <b>편집 중</b>
-    <input id="eb_id" placeholder="id" style="width:100px">
-    <input id="eb_name" placeholder="이름">
-    <input id="eb_region" placeholder="지역" style="width:120px">
-    <input id="eb_priority" type="number" placeholder="priority" style="width:88px">
+    <span class="eblab">아이디</span><input id="eb_id" placeholder="영문 id" style="width:100px">
+    <span class="eblab">이름</span><input id="eb_name" placeholder="권역 이름">
+    <span class="eblab">지역</span><input id="eb_region" placeholder="지역" style="width:110px">
+    <span class="eblab">priority</span><input id="eb_priority" type="number" style="width:70px">
     <label style="font-size:12px;display:flex;align-items:center;gap:4px"><input id="eb_enabled" type="checkbox" style="width:auto">활성</label>
     <button class="primary" id="eb_save">저장</button>
     <button class="ghost" id="eb_cancel">취소</button>
@@ -121,7 +124,8 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 const FV = firebase.firestore.FieldValue;
 
-let me = { name:"", mode:"viewer", sid: Math.random().toString(36).slice(2,10), color:null };
+let me = { name:"", mode:"viewer", sid: Math.random().toString(36).slice(2,10), color:null, loggedIn:false };
+let presenceRef=null;
 let users = {};                 // name -> color
 let zoneLayers = new Map();     // id -> {data, layer, kind}
 let locks = {};                 // id -> {name, sid, at}
@@ -219,11 +223,11 @@ function renderFeedback(docs){
   docs.forEach(d=>{if(d.zoneId){(fbByZone[d.zoneId]=fbByZone[d.zoneId]||[]).push(d);}else if(typeof d.lat==='number'){locs.push(d);}});
   // 권역 피드백 뱃지
   for(const zid in fbByZone){const zl=zoneLayers.get(zid);if(!zl)continue;const c=zl.kind==='polygon'?centroid(ringOf(zl)):[zl.data.centerLat,zl.data.centerLng];
-    const icon=L.divIcon({className:'',html:`<span class="fbBadge">💬${fbByZone[zid].length}</span>`,iconSize:[30,20]});
-    L.marker(c,{icon}).on('click',()=>openZonePopup(zid,zl)).addTo(fbLayer);}
+    const icon=L.divIcon({className:'',html:`<div class="fbZone">💬 ${fbByZone[zid].length}</div>`,iconSize:[44,22],iconAnchor:[22,52]});
+    L.marker(c,{icon,zIndexOffset:1000}).on('click',()=>openZonePopup(zid,zl)).addTo(fbLayer);}
   // 위치 피드백 핀
-  locs.forEach(d=>{const icon=L.divIcon({className:'',html:'<span class="fbBadge">📍</span>',iconSize:[20,20]});
-    L.marker([d.lat,d.lng],{icon}).bindPopup(`📍 ${d.note}<br><span style="color:#888">${d.by||'익명'}</span>`).addTo(fbLayer);});
+  locs.forEach(d=>{const icon=L.divIcon({className:'',html:'<div class="fbPin"><span>💬</span></div>',iconSize:[24,24],iconAnchor:[12,24]});
+    L.marker([d.lat,d.lng],{icon,zIndexOffset:1000}).bindPopup(`📍 <b>${d.note}</b><br><span style="color:#888">${d.by||'익명'}</span>`).addTo(fbLayer);});
 }
 
 // ---- 편집 잠금 ----
@@ -324,18 +328,21 @@ function startListeners(){
   db.collection('zoneFeedback').onSnapshot(s=>{const docs=[];s.forEach(d=>docs.push(d.data()));renderFeedback(docs);},e=>console.error('fb',e));
   db.collection('zoneEditorPresence').onSnapshot(s=>{const now=Date.now();const u=[];s.forEach(d=>{const p=d.data();const at=p.at&&p.at.toMillis?p.at.toMillis():now;if(now-at<PRESENCE_STALE_MS)u.push(p);});document.getElementById('online').innerHTML='접속 '+u.length+'명: '+u.map(x=>`<b style="color:${userColor(x.name)}">${x.name||'익명'}</b>`).join(', ');},e=>console.error('pres',e));
 }
-function startPresence(){const ref=db.collection('zoneEditorPresence').doc(me.sid);const beat=()=>ref.set({name:me.name,mode:me.mode,at:FV.serverTimestamp()}).catch(()=>{});beat();presenceHb=setInterval(beat,10000);window.addEventListener('beforeunload',()=>{ref.delete();if(editing)db.collection('zoneLocks').doc(editing).delete();});}
+function sendPresence(){if(presenceRef)presenceRef.set({name:me.name,mode:me.mode,at:FV.serverTimestamp()}).catch(()=>{});}
+function startPresence(){presenceRef=db.collection('zoneEditorPresence').doc(me.sid);sendPresence();presenceHb=setInterval(sendPresence,10000);window.addEventListener('beforeunload',()=>{presenceRef.delete();if(editing)db.collection('zoneLocks').doc(editing).delete();});}
 
 // ---- 로그인/모드 ----
-function updateWho(){document.getElementById('whoName').textContent=me.name?`${me.name}`:'둘러보는 중';const badge=document.getElementById('mode');badge.textContent=me.mode==='admin'?'관리자':me.mode==='friend'?'친구':'뷰어';badge.className='modeBadge '+me.mode;document.getElementById('writeRow').style.display=me.mode==='viewer'?'none':'';document.getElementById('myColor').style.display=me.mode==='viewer'?'none':'';document.getElementById('hint').textContent=me.mode==='viewer'?'둘러보기: 권역 밖을 클릭해 피드백을 남길 수 있어요. 편집하려면 로그인하세요.':'권역 클릭 → 편집(잠금) → 꼭짓점 드래그 후 저장. 새 권역은 "다각형 그리기".';}
-document.getElementById('btnLogin').onclick=()=>document.getElementById('login').style.display='flex';
+function updateWho(){document.getElementById('whoName').textContent=me.name?`${me.name}`:'둘러보는 중';const badge=document.getElementById('mode');badge.textContent=me.mode==='admin'?'관리자':me.mode==='friend'?'친구':'뷰어';badge.className='modeBadge '+me.mode;document.getElementById('writeRow').style.display=me.mode==='viewer'?'none':'';document.getElementById('myColor').style.display=me.mode==='viewer'?'none':'';document.getElementById('btnLogin').textContent=me.loggedIn?'로그아웃':'로그인';document.getElementById('hint').textContent=me.mode==='viewer'?'둘러보기: 권역 밖을 클릭해 피드백을 남길 수 있어요. 편집하려면 로그인하세요.':'권역 클릭 → 편집(잠금) → 꼭짓점 드래그 후 저장. 새 권역은 "다각형 그리기".';}
+function logout(){if(editing){stopLockHb();stopEditingUI(editing);db.collection('zoneLocks').doc(editing).delete().catch(()=>{});editing=null;}me.mode='viewer';me.name='';me.loggedIn=false;me.color=null;document.getElementById('myColor').style.display='none';updateWho();sendPresence();}
+document.getElementById('btnLogin').onclick=()=>{if(me.loggedIn)logout();else document.getElementById('login').style.display='flex';};
 document.getElementById('in_skip').onclick=()=>{document.getElementById('login').style.display='none';};
 document.getElementById('in_go').onclick=async()=>{
   const name=document.getElementById('in_name').value.trim();const pw=document.getElementById('in_pw').value;
   me.mode=pw===ADMIN_PW?'admin':pw===FRIEND_PW?'friend':'viewer';
   if(me.mode!=='viewer'&&!name){alert('편집하려면 이름이 필요해요.');return;}
   if(name)me.name=name;
-  document.getElementById('login').style.display='none';updateWho();
+  me.loggedIn=(me.mode!=='viewer'||me.name!=='');
+  document.getElementById('login').style.display='none';updateWho();sendPresence();
   if(me.mode!=='viewer'){
     // 사용자 색상 준비(없으면 팔레트에서 배정)
     if(!users[me.name]){const color=PALETTE[Object.keys(users).length%PALETTE.length];try{await db.collection('zoneEditorUsers').doc(me.name).set({color,role:me.mode},{merge:true});}catch(e){}me.color=color;}
