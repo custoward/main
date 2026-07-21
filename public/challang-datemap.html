@@ -57,7 +57,7 @@
 <div id="busy"><span class="spin"></span><span id="busyText">처리 중…</span></div>
 <div id="drawBanner">🖊️ 지도를 클릭해 꼭짓점을 찍으세요 · 되돌리기 <b>Backspace</b> · 나가기 <b>Esc</b> · 완료: 첫 점 다시 클릭</div>
 
-<div id="panel">
+<div id="panel" style="display:none">
   <h1>찰랑 데이트맵 <span id="mode" class="modeBadge viewer">뷰어</span></h1>
   <div class="who" id="who">
     <span id="whoName">둘러보는 중</span>
@@ -349,8 +349,10 @@ function startPresence(){presenceRef=db.collection('zoneEditorPresence').doc(me.
 // ---- 로그인/모드 ----
 function updateWho(){document.getElementById('whoName').textContent=me.name?`${me.name}`:'둘러보는 중';const badge=document.getElementById('mode');badge.textContent=me.mode==='admin'?'관리자':me.mode==='friend'?'친구':'뷰어';badge.className='modeBadge '+me.mode;document.getElementById('writeRow').style.display=me.mode==='viewer'?'none':'';document.getElementById('myColor').style.display=me.mode==='viewer'?'none':'';document.getElementById('btnLogin').textContent=me.loggedIn?'로그아웃':'로그인';document.getElementById('hint').textContent=me.mode==='viewer'?'둘러보기: 권역 밖을 클릭해 피드백을 남길 수 있어요. 편집하려면 로그인하세요.':'권역 클릭 → 편집(잠금) → 꼭짓점 드래그 후 저장. 새 권역은 "다각형 그리기".';}
 function logout(){if(editing){stopLockHb();stopEditingUI(editing);db.collection('zoneLocks').doc(editing).delete().catch(()=>{});editing=null;}me.mode='viewer';me.name='';me.loggedIn=false;me.color=null;document.getElementById('myColor').style.display='none';updateWho();sendPresence();}
-document.getElementById('btnLogin').onclick=()=>{if(me.loggedIn)logout();else document.getElementById('login').style.display='flex';};
-document.getElementById('in_skip').onclick=()=>{document.getElementById('login').style.display='none';};
+function showLogin(){document.getElementById('login').style.display='flex';document.getElementById('panel').style.display='none';}
+function hideLogin(){document.getElementById('login').style.display='none';document.getElementById('panel').style.display='';}
+document.getElementById('btnLogin').onclick=()=>{if(me.loggedIn)logout();else showLogin();};
+document.getElementById('in_skip').onclick=()=>{hideLogin();};
 document.getElementById('in_go').onclick=async()=>{
   const name=document.getElementById('in_name').value.trim();const pw=document.getElementById('in_pw').value;
   me.mode=pw===ADMIN_PW?'admin':pw===FRIEND_PW?'friend':'viewer';
@@ -358,7 +360,7 @@ document.getElementById('in_go').onclick=async()=>{
   if(me.mode!=='viewer'&&!name){alert('편집하려면 이름이 필요해요.');return;}
   if(name)me.name=name;
   me.loggedIn=(me.mode!=='viewer'||me.name!=='');
-  document.getElementById('login').style.display='none';updateWho();sendPresence();
+  hideLogin();updateWho();sendPresence();
   if(me.mode!=='viewer'){
     // 사용자 색상 준비(없으면 팔레트에서 배정)
     if(!users[me.name]){const color=PALETTE[Object.keys(users).length%PALETTE.length];try{await db.collection('zoneEditorUsers').doc(me.name).set({color,role:me.mode},{merge:true});}catch(e){}me.color=color;}
@@ -373,7 +375,7 @@ document.getElementById('in_pw').addEventListener('keydown',e=>{if(e.key==='Ente
 // ---- 시작: 익명 로그인 후 바로 뷰어로 열림 ----
 (async()=>{
   try{await auth.setPersistence(firebase.auth.Auth.Persistence.NONE);await auth.signInAnonymously();}catch(e){alert('접속 실패: '+e.message);return;}
-  document.getElementById('login').style.display='none'; // 기본 뷰어
+  // 로그인 창은 사용자가 '시작' 또는 '그냥 둘러보기'를 누를 때까지 유지(자동으로 닫지 않음).
   updateWho();startListeners();startPresence();refreshReadout();
 })();
 </script>
