@@ -82,8 +82,7 @@
     <b>편집 중</b>
     <span class="eblab">아이디</span><input id="eb_id" placeholder="영문 id" style="width:100px">
     <span class="eblab">이름</span><input id="eb_name" placeholder="권역 이름">
-    <span class="eblab">지역</span><input id="eb_region" placeholder="지역" style="width:110px">
-    <span class="eblab">priority</span><input id="eb_priority" type="number" style="width:70px">
+    <span class="eblab">지역</span><input id="eb_region" placeholder="지역" style="width:120px">
     <label style="font-size:12px;display:flex;align-items:center;gap:4px"><input id="eb_enabled" type="checkbox" style="width:auto">활성</label>
     <button class="primary" id="eb_save">저장</button>
     <button class="ghost" id="eb_cancel">취소</button>
@@ -163,7 +162,7 @@ map.on('zoomend moveend',()=>requestAnimationFrame(declutterLabels));
 // 라벨 충돌 정리: 겹치면 priority 높은 권역 이름만 남기고 나머지 숨김(확대하면 복원).
 function declutterLabels(){
   const bounds=map.getBounds();const placed=[];
-  const arr=[...zoneLayers.entries()].sort((a,b)=>(b[1].data.priority||0)-(a[1].data.priority||0));
+  const arr=[...zoneLayers.entries()].sort((a,b)=>(b[1].data.radiusMeters||0)-(a[1].data.radiusMeters||0));
   for(const[id,zl]of arr){
     const tt=zl.layer.getTooltip();if(!tt)continue;const el=tt.getElement();if(!el)continue;
     const c=zl.kind==='polygon'?centroid(ringOf(zl)):[zl.data.centerLat,zl.data.centerLng];
@@ -203,7 +202,7 @@ let popup=L.popup();
 function fbListHtml(id){const arr=fbByZone[id]||[];if(!arr.length)return '';return '<hr style="margin:6px 0"><b>피드백 '+arr.length+'</b><br>'+arr.map(f=>`· ${f.note} <span style="color:#888">(${f.by||'익명'})</span>`).join('<br>');}
 function openZonePopup(id,zl){
   const z=zl.data;const l=lockState(id);
-  let html=`<b>${z.name}</b> <span style="color:#888">${z.region||''}</span><br><code>${id}</code> · p=${z.priority} · ${z.enabled===false?'off':'on'} · ${zl.kind}`;
+  let html=`<b>${z.name}</b> <span style="color:#888">${z.region||''}</span><br><code>${id}</code> · ${z.enabled===false?'off':'on'} · ${zl.kind}`;
   if(z.createdBy)html+=` · <span style="color:${userColor(z.createdBy)}">●</span>${z.createdBy}`;
   html+='<br>';
   if(l&&l.sid!==me.sid)html+=`🔒 <b>${l.name}</b> 편집 중 `;
@@ -262,13 +261,13 @@ function convertToPolygon(id,zl){const z=zl.data;if(zl.kind==='polygon')return;c
 
 function openEditBar(id,zl){const z=zl.data;
   const idIn=document.getElementById('eb_id');idIn.value=id;idIn.oninput=()=>{const p=idIn.selectionStart;idIn.value=sanitizeId(idIn.value);idIn.setSelectionRange(p,p);};
-  document.getElementById('eb_name').value=z.name||'';document.getElementById('eb_region').value=z.region||'';document.getElementById('eb_priority').value=z.priority||60;document.getElementById('eb_enabled').checked=z.enabled!==false;
+  document.getElementById('eb_name').value=z.name||'';document.getElementById('eb_region').value=z.region||'';document.getElementById('eb_enabled').checked=z.enabled!==false;
   document.getElementById('eb_delete').style.display=(me.mode==='admin')?'':'none';
   document.getElementById('editbar').classList.add('on');
   document.getElementById('eb_save').onclick=()=>saveEdit(id);document.getElementById('eb_cancel').onclick=()=>cancelEdit(id);document.getElementById('eb_delete').onclick=()=>deleteZone(id);
 }
 function serialize(id){const zl=zoneLayers.get(id);
-  const base={name:document.getElementById('eb_name').value.trim()||zl.data.name,region:document.getElementById('eb_region').value.trim(),priority:parseInt(document.getElementById('eb_priority').value)||60,enabled:document.getElementById('eb_enabled').checked,adjacentZoneIds:zl.data.adjacentZoneIds||[],createdBy:zl.data.createdBy||me.name};
+  const base={name:document.getElementById('eb_name').value.trim()||zl.data.name,region:document.getElementById('eb_region').value.trim(),enabled:document.getElementById('eb_enabled').checked,adjacentZoneIds:zl.data.adjacentZoneIds||[],createdBy:zl.data.createdBy||me.name};
   if(zl.kind==='polygon'){const ring=ringOf(zl);const c=centroid(ring);base.polygon=ring.map(p=>({lat:round6(p[0]),lng:round6(p[1])}));base.centerLat=round6(c[0]);base.centerLng=round6(c[1]);base.radiusMeters=Math.round(Math.max(...ring.map(p=>haversine(c[0],c[1],p[0],p[1]))));}
   else{base.centerLat=zl.data.centerLat;base.centerLng=zl.data.centerLng;base.radiusMeters=zl.data.radiusMeters;}
   return base;
@@ -311,29 +310,29 @@ function openZoneForm(prefill,onOk){const bg=document.createElement('div');bg.cl
     <div class="field">id (영문/숫자/-/_)<input id="zf_id" placeholder="e.g. mangwon2" value="${prefill.id||''}"></div>
     <div class="field">이름<input id="zf_name" placeholder="예: 망원2" value="${prefill.name||''}"></div>
     <div class="field">지역(자동 추정, 수정 가능)<input id="zf_region" value="${prefill.region||''}"></div>
-    <div class="field">priority<input id="zf_priority" type="number" value="${prefill.priority||60}"></div>
     <div class="row" style="margin-top:6px"><button class="primary" id="zf_ok">추가</button><button class="ghost" id="zf_cancel">취소</button></div></div>`;
   document.body.appendChild(bg);const idIn=bg.querySelector('#zf_id');idIn.addEventListener('input',()=>{const p=idIn.selectionStart;idIn.value=sanitizeId(idIn.value);idIn.setSelectionRange(p,p);});
   const close=()=>bg.remove();bg.querySelector('#zf_cancel').onclick=()=>{close();onOk(null);};bg.onclick=e=>{if(e.target===bg){close();onOk(null);}};
-  bg.querySelector('#zf_ok').onclick=()=>{const id=idIn.value.trim(),name=bg.querySelector('#zf_name').value.trim();if(!validId(id)){alert('id 는 영문/숫자/-/_ 만.');return;}if(!name){alert('이름을 입력하세요.');return;}if(zoneLayers.has(id)){alert('이미 있는 id 예요.');return;}onOk({id,name,region:bg.querySelector('#zf_region').value.trim(),priority:parseInt(bg.querySelector('#zf_priority').value)||60});close();};
+  bg.querySelector('#zf_ok').onclick=()=>{const id=idIn.value.trim(),name=bg.querySelector('#zf_name').value.trim();if(!validId(id)){alert('id 는 영문/숫자/-/_ 만.');return;}if(!name){alert('이름을 입력하세요.');return;}if(zoneLayers.has(id)){alert('이미 있는 id 예요.');return;}onOk({id,name,region:bg.querySelector('#zf_region').value.trim()});close();};
 }
 map.on('pm:create',async e=>{
   if(e.shape!=='Polygon'||me.mode==='viewer'){e.layer.remove();return;}
+  map.pm.disableDraw();   // 완성 후 그리기 모드 종료(버튼/배너 원복, 클릭 정상화)
   const layer=e.layer;const ring=layer.getLatLngs()[0].map(ll=>[ll.lat,ll.lng]);layer.remove();
   const c=centroid(ring);setBusy('지역 확인 중…');const region=await reverseRegion(c[0],c[1]);clearBusy();
-  openZoneForm({id:'',name:'',region,priority:60},(f)=>{if(!f)return;setBusy('생성 중…');
-    const data={name:f.name,region:f.region,priority:f.priority,enabled:true,adjacentZoneIds:[],createdBy:me.name,polygon:ring.map(p=>({lat:round6(p[0]),lng:round6(p[1])})),centerLat:round6(c[0]),centerLng:round6(c[1]),radiusMeters:Math.round(Math.max(...ring.map(p=>haversine(c[0],c[1],p[0],p[1]))))};
+  openZoneForm({id:'',name:'',region},(f)=>{if(!f)return;setBusy('생성 중…');
+    const data={name:f.name,region:f.region,enabled:true,adjacentZoneIds:[],createdBy:me.name,polygon:ring.map(p=>({lat:round6(p[0]),lng:round6(p[1])})),centerLat:round6(c[0]),centerLng:round6(c[1]),radiusMeters:Math.round(Math.max(...ring.map(p=>haversine(c[0],c[1],p[0],p[1]))))};
     db.collection('zones').doc(f.id).set(data).then(()=>clearBusy()).catch(err=>{clearBusy();alert('생성 실패: '+err.message);});});
 });
 
 // ---- 이동 / 내보내기 / seed ----
 document.getElementById('btnFly').onclick=async()=>{const q=prompt('이동할 장소/주소:');if(!q)return;try{const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`,{headers:{'Accept-Language':'ko'}});const j=await r.json();if(j[0])map.setView([+j[0].lat,+j[0].lon],15);else alert('결과 없음');}catch(e){alert('검색 실패: '+e.message);}};
-document.getElementById('btnExport').onclick=()=>{const out=[...zoneLayers.entries()].map(([id,zl])=>{const z=zl.data;const o={id,name:z.name,region:z.region||'',centerLat:z.centerLat,centerLng:z.centerLng,radiusMeters:z.radiusMeters,adjacentZoneIds:z.adjacentZoneIds||[],priority:z.priority,enabled:z.enabled!==false};if(z.polygon)o.polygon=z.polygon.map(p=>[p.lat,p.lng]);return o;});const b=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='location_zones.seed.json';a.click();};
+document.getElementById('btnExport').onclick=()=>{const out=[...zoneLayers.entries()].map(([id,zl])=>{const z=zl.data;const o={id,name:z.name,region:z.region||'',centerLat:z.centerLat,centerLng:z.centerLng,radiusMeters:z.radiusMeters,adjacentZoneIds:z.adjacentZoneIds||[],priority:z.priority||60,enabled:z.enabled!==false};if(z.polygon)o.polygon=z.polygon.map(p=>[p.lat,p.lng]);return o;});const b=new Blob([JSON.stringify(out,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='location_zones.seed.json';a.click();};
 document.getElementById('btnSeed').onclick=async()=>{if(!confirm('기본 권역 '+SEED_ZONES.length+'개를 올릴까요?'))return;setBusy('업로드 중…');const batch=db.batch();SEED_ZONES.forEach(z=>{const{id,...rest}=z;batch.set(db.collection('zones').doc(id),rest);});try{await batch.commit();}catch(e){alert('실패: '+e.message);}clearBusy();};
 
 // ---- 판정/읽기 ----
-function judge(lat,lng){const m=[];for(const[id,zl]of zoneLayers){if(zl.data.enabled===false)continue;if(zl.kind==='polygon'){const ring=ringOf(zl);if(ring.length>=3&&pip(lat,lng,ring))m.push({id,zl,dist:haversine(lat,lng,...centroid(ring))});}else{const d=haversine(lat,lng,zl.data.centerLat,zl.data.centerLng);if(d<=zl.data.radiusMeters)m.push({id,zl,dist:d});}}m.sort((a,b)=>a.zl.data.priority!==b.zl.data.priority?b.zl.data.priority-a.zl.data.priority:a.dist-b.dist);return m;}
-function refreshReadout(){const c=map.getCenter();const m=judge(c.lat,c.lng);let h=`<div><span class="muted">화면 중앙</span> <code>${c.lat.toFixed(5)}, ${c.lng.toFixed(5)}</code></div>`;if(m.length){h+=`<div class="zone">📍 ${m[0].zl.data.name} <span class="muted">${m[0].zl.data.region||''}</span></div>`;if(m.length>1)h+=`<div class="muted">겹침 ${m.length}: ${m.map(x=>x.zl.data.name).join(', ')}</div>`;}else h+=`<div class="zone">권역 밖</div>`;document.getElementById('readout').innerHTML=h;}
+function judge(lat,lng){const m=[];for(const[id,zl]of zoneLayers){if(zl.data.enabled===false)continue;if(zl.kind==='polygon'){const ring=ringOf(zl);if(ring.length>=3&&pip(lat,lng,ring))m.push({id,zl,dist:haversine(lat,lng,...centroid(ring))});}else{const d=haversine(lat,lng,zl.data.centerLat,zl.data.centerLng);if(d<=zl.data.radiusMeters)m.push({id,zl,dist:d});}}m.sort((a,b)=>a.dist-b.dist);return m;}
+function refreshReadout(){const c=map.getCenter();const m=judge(c.lat,c.lng);let h=`<div><span class="muted">화면 중앙</span> <code>${c.lat.toFixed(5)}, ${c.lng.toFixed(5)}</code></div>`;if(m.length){h+=`<div class="zone">📍 ${m[0].zl.data.name} <span class="muted">${m[0].zl.data.region||''}</span></div>`;}else h+=`<div class="zone">권역 밖</div>`;document.getElementById('readout').innerHTML=h;}
 
 // ---- 실시간 구독 ----
 function startListeners(){
