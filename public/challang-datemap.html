@@ -38,6 +38,9 @@
   #editbar input{font:inherit;font-size:13px;padding:6px 8px;border:1px solid #d0d0d5;border-radius:8px;width:110px}
   #busy{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:1000;background:rgba(0,0,0,.78);color:#fff;padding:14px 20px;border-radius:12px;font-size:14px;display:none;align-items:center;gap:10px}
   #busy.on{display:flex}
+  #drawBanner{position:fixed;left:50%;top:14px;transform:translateX(-50%);z-index:760;background:var(--accent);color:#fff;padding:9px 16px;border-radius:999px;font-size:13px;font-weight:600;box-shadow:0 3px 12px rgba(0,0,0,.3);display:none}
+  #drawBanner.on{display:block}
+  .leaflet-container.drawing{cursor:crosshair!important}
   .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
   @keyframes sp{to{transform:rotate(360deg)}}
   .zoneLbl{background:transparent;border:0;box-shadow:none;font-weight:700;font-size:12px;color:#333;text-shadow:0 0 3px #fff,0 0 3px #fff}
@@ -52,6 +55,7 @@
 <body>
 <div id="map"></div>
 <div id="busy"><span class="spin"></span><span id="busyText">처리 중…</span></div>
+<div id="drawBanner">🖊️ 지도를 클릭해 꼭짓점을 찍으세요 · 되돌리기 <b>Backspace</b> · 나가기 <b>Esc</b> · 완료: 첫 점 다시 클릭</div>
 
 <div id="panel">
   <h1>찰랑 데이트맵 <span id="mode" class="modeBadge viewer">뷰어</span></h1>
@@ -127,6 +131,7 @@ const FV = firebase.firestore.FieldValue;
 
 let me = { name:"", mode:"viewer", sid: Math.random().toString(36).slice(2,10), color:null, loggedIn:false };
 let presenceRef=null;
+let drawingActive=false;
 let users = {};                 // name -> color
 let zoneLayers = new Map();     // id -> {data, layer, kind}
 let locks = {};                 // id -> {name, sid, at}
@@ -214,7 +219,8 @@ function openZonePopup(id,zl){
 function ensureName(){if(!me.name){const n=prompt('이름(피드백에 표시):');if(!n)return false;me.name=n.trim();updateWho();}return !!me.name;}
 window._fb=(id)=>{if(!ensureName())return;const zl=zoneLayers.get(id);const n=prompt(`"${zl.data.name}" 피드백:`);if(n){const c=zl.kind==='polygon'?centroid(ringOf(zl)):[zl.data.centerLat,zl.data.centerLng];db.collection('zoneFeedback').add({zoneId:id,lat:c[0],lng:c[1],by:me.name,note:n,at:FV.serverTimestamp()});map.closePopup();}};
 function feedbackAt(latlng){if(!ensureName())return;const n=prompt('이 위치 피드백:');if(n)db.collection('zoneFeedback').add({zoneId:null,lat:latlng.lat,lng:latlng.lng,by:me.name,note:n,at:FV.serverTimestamp()});}
-map.on('click',(e)=>{const m=judge(e.latlng.lat,e.latlng.lng);if(m.length)return; // 권역 안이면 무시(권역 클릭이 처리)
+map.on('click',(e)=>{if(drawingActive||editing)return; // 그리기/편집 중엔 피드백 클릭 끔
+  const m=judge(e.latlng.lat,e.latlng.lng);if(m.length)return; // 권역 안이면 무시(권역 클릭이 처리)
   L.popup().setLatLng(e.latlng).setContent('<button onclick="window._fbHere()">여기에 피드백</button>').openOn(map);window.__fbLatLng=e.latlng;});
 window._fbHere=()=>{map.closePopup();if(window.__fbLatLng)feedbackAt(window.__fbLatLng);};
 
@@ -295,7 +301,11 @@ async function deleteZone(id){
 window._toPoly=(id)=>{const zl=zoneLayers.get(id);convertToPolygon(id,zl);map.closePopup();alert('다각형으로 바꿨어요. "편집"으로 다듬고 저장하세요.');};
 
 // ---- 새 다각형 ----
-document.getElementById('btnDraw').onclick=()=>{if(me.mode==='viewer')return;map.pm.enableDraw('Polygon');};
+const btnDraw=document.getElementById('btnDraw');
+btnDraw.onclick=()=>{if(me.mode==='viewer')return;if(drawingActive)map.pm.disableDraw();else map.pm.enableDraw('Polygon');};
+map.on('pm:drawstart',()=>{drawingActive=true;btnDraw.textContent='✕ 그리기 취소';document.getElementById('drawBanner').classList.add('on');map.getContainer().classList.add('drawing');});
+map.on('pm:drawend',()=>{drawingActive=false;btnDraw.textContent='＋ 다각형 그리기';document.getElementById('drawBanner').classList.remove('on');map.getContainer().classList.remove('drawing');});
+document.addEventListener('keydown',(e)=>{if(!drawingActive)return;if(e.key==='Escape'){map.pm.disableDraw();}else if(e.key==='Backspace'){e.preventDefault();try{const d=map.pm.Draw&&map.pm.Draw.Polygon;if(d&&d._removeLastVertex)d._removeLastVertex();}catch(err){}}});
 function openZoneForm(prefill,onOk){const bg=document.createElement('div');bg.className='modal-bg';
   bg.innerHTML=`<div class="modal"><h2>새 권역 정보</h2>
     <div class="field">id (영문/숫자/-/_)<input id="zf_id" placeholder="e.g. mangwon2" value="${prefill.id||''}"></div>
