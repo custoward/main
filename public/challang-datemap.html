@@ -40,6 +40,7 @@
   #editbar .er{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   #editbar input{font:inherit;font-size:13px;padding:6px 8px;border:1px solid #d0d0d5;border-radius:8px;width:110px}
   .zoneLbl{background:transparent;border:0;box-shadow:none;font-weight:700;font-size:12px;color:#333;text-shadow:0 0 3px #fff,0 0 3px #fff}
+  .leaflet-pm-tooltip{display:none!important}
   @media (prefers-color-scheme:dark){:root{--bg:rgba(28,28,30,.96);--fg:#f2f2f7;--muted:#9a9aa2}.readout{background:#2c2c2e}button{background:#3a3a3c;color:#f2f2f7}button.ghost{border-color:#48484a}.field input,#editbar input{background:#2c2c2e;border-color:#48484a;color:#f2f2f7}.modal{background:#1c1c1e}.modal p{color:#9a9aa2}.zoneLbl{color:#eee;text-shadow:0 0 3px #000,0 0 3px #000}}
 </style>
 </head>
@@ -68,6 +69,7 @@
 <div id="editbar">
   <div class="er">
     <b id="eb_title">편집 중</b>
+    <input id="eb_id" placeholder="id" style="width:100px">
     <input id="eb_name" placeholder="이름">
     <input id="eb_region" placeholder="지역" style="width:120px">
     <input id="eb_priority" type="number" placeholder="priority" style="width:90px">
@@ -129,7 +131,46 @@ function ringOf(zl){return zl.layer.getLatLngs()[0].map(ll=>[ll.lat,ll.lng]);}
 // ---- 지도 ----
 const map=L.map('map',{zoomControl:true}).setView([37.5563,126.9237],13);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(map);
+map.pm.setGlobalOptions({tooltips:false});   // 편집 중 안내/측정 숫자 끄기
 map.on('move',refreshReadout);
+
+// id 입력: 영문/숫자/-/_ 만
+function sanitizeId(s){return s.replace(/[^A-Za-z0-9_-]/g,'');}
+function validId(s){return /^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(s);}
+// 다각형 중심 좌표 → 지역명 자동 추정(Nominatim reverse)
+async function reverseRegion(lat,lng){
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&zoom=14&lat=${lat}&lon=${lng}`,{headers:{'Accept-Language':'ko'}});
+    const a=(await r.json()).address||{};
+    const city=a.city||a.town||a.county||a.province||a.state||'';
+    const dist=a.borough||a.city_district||a.suburb||a.quarter||a.neighbourhood||'';
+    return [city,dist].filter(Boolean).join(' ').trim();
+  }catch(e){return '';}
+}
+// 새 권역 정보 입력 모달(정보 한번에)
+function openZoneForm(prefill,onOk){
+  const bg=document.createElement('div');bg.className='modal-bg';
+  bg.innerHTML=`<div class="modal"><h2>새 권역 정보</h2>
+    <div class="field">id (영문/숫자/-/_)<input id="zf_id" placeholder="e.g. mangwon2" value="${prefill.id||''}"></div>
+    <div class="field">이름<input id="zf_name" placeholder="예: 망원2" value="${prefill.name||''}"></div>
+    <div class="field">지역(자동 추정, 수정 가능)<input id="zf_region" value="${prefill.region||''}"></div>
+    <div class="field">priority<input id="zf_priority" type="number" value="${prefill.priority||60}"></div>
+    <div class="row" style="margin-top:6px"><button class="primary" id="zf_ok">추가</button><button class="ghost" id="zf_cancel">취소</button></div></div>`;
+  document.body.appendChild(bg);
+  const idIn=bg.querySelector('#zf_id');
+  idIn.addEventListener('input',()=>{const p=idIn.selectionStart;idIn.value=sanitizeId(idIn.value);idIn.setSelectionRange(p,p);});
+  const close=()=>bg.remove();
+  bg.querySelector('#zf_cancel').onclick=()=>{close();onOk(null);};
+  bg.onclick=e=>{if(e.target===bg){close();onOk(null);}};
+  bg.querySelector('#zf_ok').onclick=()=>{
+    const id=idIn.value.trim(),name=bg.querySelector('#zf_name').value.trim();
+    if(!validId(id)){alert('id 는 영문/숫자/-/_ 만, 영문·숫자로 시작해야 해요.');return;}
+    if(!name){alert('이름을 입력하세요.');return;}
+    if(zoneLayers.has(id)){alert('이미 있는 id 예요.');return;}
+    onOk({id,name,region:bg.querySelector('#zf_region').value.trim(),priority:parseInt(bg.querySelector('#zf_priority').value)||60});
+    close();
+  };
+}
 
 function lockState(id){const l=locks[id];if(!l)return null;if(Date.now()-l.at>LOCK_STALE_MS)return null;return l;}
 function isLockedByOther(id){const l=lockState(id);return l&&l.sid!==me.sid;}
@@ -201,7 +242,9 @@ function convertToPolygon(id,zl){
 
 function openEditBar(id,zl){
   const z=zl.data;
-  document.getElementById('eb_title').textContent='편집 중: '+z.name;
+  document.getElementById('eb_title').textContent='편집 중';
+  const idIn=document.getElementById('eb_id');idIn.value=id;
+  idIn.oninput=()=>{const p=idIn.selectionStart;idIn.value=sanitizeId(idIn.value);idIn.setSelectionRange(p,p);};
   document.getElementById('eb_name').value=z.name||'';
   document.getElementById('eb_region').value=z.region||'';
   document.getElementById('eb_priority').value=z.priority||60;
@@ -226,12 +269,21 @@ function serialize(id){
   return base;
 }
 async function saveEdit(id){
+  const newId=document.getElementById('eb_id').value.trim();
+  if(!validId(newId)){alert('id 는 영문/숫자/-/_ 만, 영문·숫자로 시작해야 해요.');return;}
+  if(newId!==id&&zoneLayers.has(newId)){alert('이미 있는 id 예요.');return;}
   const data=serialize(id);
-  try{await db.collection('zones').doc(id).set(data);}catch(e){alert('저장 실패: '+e.message);return;}
-  stopEditingUI(id);await releaseLock(id);editing=null;
-  const doc=await db.collection('zones').doc(id).get();applyDoc(id,doc.data());
+  try{
+    await db.collection('zones').doc(newId).set(data);
+    if(newId!==id) await db.collection('zones').doc(id).delete();
+  }catch(e){alert('저장 실패: '+e.message);return;}
+  stopEditingUI(id);await releaseLock(id);
+  if(newId!==id) removeLayer(id);
+  editing=null;
+  const doc=await db.collection('zones').doc(newId).get();applyDoc(newId,doc.data());
 }
 async function cancelEdit(id){
+  if(!confirm('편집을 취소할까요? 저장하지 않은 변경 내용이 사라집니다.'))return;
   stopEditingUI(id);await releaseLock(id);editing=null;
   const doc=await db.collection('zones').doc(id).get();if(doc.exists)applyDoc(id,doc.data());else removeLayer(id);
 }
@@ -245,18 +297,19 @@ window._toPoly=(id)=>{const zl=zoneLayers.get(id);convertToPolygon(id,zl);map.cl
 
 // ---- 새 다각형 그리기 ----
 document.getElementById('btnDraw').onclick=()=>{if(me.mode!=='write')return;map.pm.enableDraw('Polygon');};
-map.on('pm:create',e=>{
+map.on('pm:create',async e=>{
   if(e.shape!=='Polygon'||me.mode!=='write'){e.layer.remove();return;}
   const layer=e.layer;const ring=layer.getLatLngs()[0].map(ll=>[ll.lat,ll.lng]);layer.remove();
-  const id=prompt('새 권역 id (영문, 고유):');if(!id){return;}
-  if(zoneLayers.has(id)){alert('이미 있는 id 예요.');return;}
-  const name=prompt('이름:')||id;
   const c=centroid(ring);
-  const data={name,region:'',priority:60,enabled:true,adjacentZoneIds:[],
-    polygon:ring.map(p=>({lat:round6(p[0]),lng:round6(p[1])})),
-    centerLat:round6(c[0]),centerLng:round6(c[1]),
-    radiusMeters:Math.round(Math.max(...ring.map(p=>haversine(c[0],c[1],p[0],p[1]))))};
-  db.collection('zones').doc(id).set(data).catch(err=>alert('생성 실패: '+err.message));
+  const region=await reverseRegion(c[0],c[1]);   // 중심 기준 지역 자동
+  openZoneForm({id:'',name:'',region,priority:60},(f)=>{
+    if(!f)return;
+    const data={name:f.name,region:f.region,priority:f.priority,enabled:true,adjacentZoneIds:[],
+      polygon:ring.map(p=>({lat:round6(p[0]),lng:round6(p[1])})),
+      centerLat:round6(c[0]),centerLng:round6(c[1]),
+      radiusMeters:Math.round(Math.max(...ring.map(p=>haversine(c[0],c[1],p[0],p[1]))))};
+    db.collection('zones').doc(f.id).set(data).catch(err=>alert('생성 실패: '+err.message));
+  });
 });
 
 // ---- 중심 피드백 / 이동 / 내보내기 / seed ----
