@@ -1,0 +1,154 @@
+/* 헤더 · 푸터 · 섹션 공통 */
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+/* ---- 헤더 ---------------------------------------------------------------- */
+
+.header {
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-6);
+  min-height: 68px;
+}
+
+.logo {
+  font-weight: 600;
+  letter-spacing: var(--tracking-tight);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(var(--sp-4), 2vw, var(--sp-8));
+  font-size: var(--fs-small);
+}
+
+.navLink {
+  padding-block: var(--sp-2);
+  color: var(--fg-muted);
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.navLink:hover {
+  color: var(--fg);
+}
+
+.navLink[aria-current="page"] {
+  color: var(--fg);
+}
+
+/* 언어 전환 — 글자 두 개짜리라 폭이 흔들리지 않게 최소폭을 준다 */
+.langSwitch {
+  min-width: 2.5rem;
+  text-align: center;
+  padding: var(--sp-1) var(--sp-2);
+  border: 1px solid var(--line);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--tracking-wide);
+  color: var(--fg-muted);
+  transition:
+    color var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+
+.langSwitch:hover {
+  color: var(--fg);
+  border-color: var(--line-strong);
+}
+
+/* ---- 푸터 ---------------------------------------------------------------- */
+
+.footer {
+  margin-top: auto;
+  border-top: 1px solid var(--line);
+  padding-block: var(--sp-12);
+  font-size: var(--fs-small);
+  color: var(--fg-muted);
+}
+
+.footerInner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-6);
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-6);
+}
+
+.footerLinks a {
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.footerLinks a:hover {
+  color: var(--fg);
+}
+
+.footerNote {
+  color: var(--fg-faint);
+  font-size: var(--fs-caption);
+}
+
+/* ---- 섹션 ---------------------------------------------------------------- */
+
+.section {
+  padding-block: var(--sp-section);
+  border-bottom: 1px solid var(--line);
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+.sectionHeading {
+  font-size: var(--fs-h2);
+  margin-bottom: var(--sp-8);
+}
+
+.lead {
+  max-width: var(--container-text);
+  display: grid;
+  gap: var(--sp-4);
+}
+
+.lead p {
+  font-size: var(--fs-body);
+}
+
+/* ---- 페이지 머리 --------------------------------------------------------- */
+
+.pageHead {
+  padding-block: var(--sp-16) var(--sp-12);
+  border-bottom: 1px solid var(--line);
+}
+
+.pageTitle {
+  font-size: var(--fs-h1);
+}
+
+/* 페이지 머리 아래 본문 영역 */
+.pageBody {
+  padding-block: var(--sp-12) var(--sp-section);
+}
+
+.empty {
+  color: var(--fg-muted);
+}
