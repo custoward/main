@@ -177,13 +177,25 @@
   width: var(--img-size);
   height: var(--img-size);
   transform: translate(-50%, -50%);
-  cursor: pointer;
+  cursor: grab;
   background: #ffffff;
   border: 1px solid #e0e0e0;
   overflow: hidden;
   /* hover 효과만 부드럽게 (위치 변화는 즉시) */
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   z-index: 2;
+  /* 터치 드래그 시 화면이 스크롤되지 않도록 */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* 드래그 중인 사진: 즉시 따라오고(위치 트랜지션 없음) 맨 위로 떠오른다. */
+.board-image.dragging {
+  cursor: grabbing;
+  z-index: 4;
+  transition: box-shadow 0.2s ease;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
 }
 
 .board-image img {

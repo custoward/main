@@ -3,9 +3,10 @@ import './TheChairTheory.css';
 import WebcamCapture from '../components/ChairTheory/WebcamCapture';
 import PDFViewer from '../components/ChairTheory/PDFViewer';
 import '../components/ChairTheory/styles.css';
-import { chairLayout, buildWebPaths, CHAIR_ASPECT } from '../utils/geometryUtils';
+import { chairLayout, buildWebEdges, edgesToPaths, CHAIR_ASPECT } from '../utils/geometryUtils';
 import { CapturedImage } from '../components/ChairTheory/types';
 import { useChairImages } from '../hooks/useChairImages';
+import { useScatter } from '../hooks/useScatter';
 import { LanguageProvider, useLang } from '../i18n';
 
 const SURVEY_PDF_URL = `${process.env.PUBLIC_URL}/the-chair-theory-survey.pdf`;
@@ -44,7 +45,9 @@ const ChairTheoryInner: React.FC = () => {
   // 추가된 순서(timestamp asc)대로 의자 실루엣 좌표를 배정.
   // 이미지 위치와 거미줄이 같은 좌표를 공유하므로 둘 사이 오차가 없다.
   const positions = useMemo(() => chairLayout(images.length), [images.length]);
-  const webPaths = useMemo(() => buildWebPaths(positions), [positions]);
+  // 거미줄 연결 관계(MST)는 원래 의자 좌표 기준으로 한 번만 정한다.
+  // 드래그로 좌표가 흔들려도 연결 관계는 그대로 유지하고 경로만 다시 그린다.
+  const webEdges = useMemo(() => buildWebEdges(positions), [positions]);
 
   // 캔버스 크기를 JS로 contain 계산 → 화면/창 크기와 무관하게 의자 종횡비 고정.
   // (CSS aspect-ratio + max-* 조합은 한쪽이 잘릴 때 비율이 깨져 직접 계산한다.)
@@ -67,6 +70,21 @@ const ChairTheoryInner: React.FC = () => {
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+
+  // 로컬 드래그: 사진을 잡아 흩뜨리고, 손을 떼면 천천히 제자리로 돌아온다.
+  const { offsets, bind, didDrag, draggingId } = useScatter({ canvasSize });
+
+  // 변위가 적용된 실제 표시 좌표. 사진과 거미줄이 같은 좌표를 공유한다.
+  const displaced = useMemo(
+    () =>
+      images.map((img, i) => {
+        const base = positions[i] ?? { x: 0.5, y: 0.5 };
+        const off = offsets[img.id];
+        return off ? { x: base.x + off.x, y: base.y + off.y } : base;
+      }),
+    [images, positions, offsets]
+  );
+  const webPaths = useMemo(() => edgesToPaths(webEdges, displaced), [webEdges, displaced]);
 
   const handleAddImage = (imageData: string) => {
     const newImage: CapturedImage = {
@@ -158,14 +176,19 @@ const ChairTheoryInner: React.FC = () => {
             {images.map((image, i) => (
               <div
                 key={image.id}
-                className="board-image"
+                className={`board-image${draggingId === image.id ? ' dragging' : ''}`}
                 style={{
-                  left: `${(positions[i]?.x ?? 0.5) * 100}%`,
-                  top: `${(positions[i]?.y ?? 0.5) * 100}%`,
+                  left: `${(displaced[i]?.x ?? 0.5) * 100}%`,
+                  top: `${(displaced[i]?.y ?? 0.5) * 100}%`,
                 }}
-                onClick={() => setSelectedImage(image)}
+                {...bind(image.id)}
+                onClick={() => {
+                  // 드래그로 끝난 포인터업이면 모달을 열지 않는다.
+                  if (didDrag()) return;
+                  setSelectedImage(image);
+                }}
               >
-                <img src={image.dataUrl} alt={t('capturedAlt')} />
+                <img src={image.dataUrl} alt={t('capturedAlt')} draggable={false} />
               </div>
             ))}
           </div>

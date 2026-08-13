@@ -127,16 +127,18 @@ export function chairLayout(count: number): Center[] {
 }
 
 /**
- * 정규화 중심점들을 연결하는 거미줄 SVG 경로를 만든다.
+ * 정규화 중심점들을 잇는 거미줄의 연결 관계(간선)를 만든다.
  * 가까운 점끼리 잇는 최소 신장 트리(MST, Prim) 기준 — 선 개수는 N-1개로
  * 최소이며, 이미지가 많아져도 화면이 빽빽해지지 않고 거미줄 형태가 유지된다.
- * 좌표계는 0~100 (viewBox="0 0 100 100", preserveAspectRatio="none" 기준).
+ *
+ * 연결 관계와 실제 경로 그리기를 분리해 두면, 사진을 드래그해 좌표가 바뀌어도
+ * (같은 연결 관계를 유지한 채) 거미줄만 늘어나게 다시 그릴 수 있다.
  */
-export function buildWebPaths(centers: Center[]): string[] {
-  if (centers.length < 2) return [];
+export function buildWebEdges(centers: Center[]): Array<[number, number]> {
+  const n = centers.length;
+  if (n < 2) return [];
 
   const pts = centers.map((c) => ({ x: c.x * 100, y: c.y * 100 }));
-  const n = pts.length;
 
   // Prim 알고리즘: 트리에 포함된 집합에서 가장 가까운 미포함 점을 하나씩 흡수
   const inTree = new Array<boolean>(n).fill(false);
@@ -144,7 +146,7 @@ export function buildWebPaths(centers: Center[]): string[] {
   const parent = new Array<number>(n).fill(-1);
   dist[0] = 0;
 
-  const paths: string[] = [];
+  const edges: Array<[number, number]> = [];
 
   for (let k = 0; k < n; k++) {
     // 아직 트리에 없는 점 중 가장 가까운 것
@@ -159,13 +161,7 @@ export function buildWebPaths(centers: Center[]): string[] {
     if (u === -1) break;
     inTree[u] = true;
 
-    if (parent[u] !== -1) {
-      const a = pts[parent[u]];
-      const b = pts[u];
-      const mx = (a.x + b.x) / 2;
-      const my = (a.y + b.y) / 2 + 4; // 살짝 늘어지는 곡선
-      paths.push(`M${a.x},${a.y} Q${mx},${my} ${b.x},${b.y}`);
-    }
+    if (parent[u] !== -1) edges.push([parent[u], u]);
 
     // 새로 들어온 u 기준으로 남은 점들의 최단 거리 갱신
     for (let v = 0; v < n; v++) {
@@ -179,5 +175,32 @@ export function buildWebPaths(centers: Center[]): string[] {
     }
   }
 
-  return paths;
+  return edges;
+}
+
+/**
+ * 간선(연결 관계)과 현재 좌표로 거미줄 SVG 경로를 만든다.
+ * 좌표계는 0~100 (viewBox="0 0 100 100", preserveAspectRatio="none" 기준).
+ */
+export function edgesToPaths(edges: Array<[number, number]>, centers: Center[]): string[] {
+  return edges.flatMap(([i, j]) => {
+    const a = centers[i];
+    const b = centers[j];
+    if (!a || !b) return [];
+    const ax = a.x * 100;
+    const ay = a.y * 100;
+    const bx = b.x * 100;
+    const by = b.y * 100;
+    const mx = (ax + bx) / 2;
+    const my = (ay + by) / 2 + 4; // 살짝 늘어지는 곡선
+    return [`M${ax},${ay} Q${mx},${my} ${bx},${by}`];
+  });
+}
+
+/**
+ * 정규화 중심점들을 연결하는 거미줄 SVG 경로를 만든다.
+ * (연결 관계 계산 + 경로 생성을 한 번에 수행하는 편의 함수)
+ */
+export function buildWebPaths(centers: Center[]): string[] {
+  return edgesToPaths(buildWebEdges(centers), centers);
 }
