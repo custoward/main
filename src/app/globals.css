@@ -1,0 +1,154 @@
+/* ---------------------------------------------------------------------------
+   다비다비 — 모노톤
+   회색 계단(gray-*)은 여기서만 쓰고, 컴포넌트는 아래 "역할" 이름만 참조한다.
+   나중에 색을 넣을 땐 --accent 한 줄만 바꾸면 된다.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --gray-0: #ffffff;
+  --gray-50: #fafafa;
+  --gray-100: #f4f4f4;
+  --gray-200: #e6e6e6;
+  --gray-300: #d0d0d0;
+  --gray-400: #a8a8a8;
+  --gray-500: #7a7a7a;
+  --gray-600: #545454;
+  --gray-700: #363636;
+  --gray-800: #1c1c1c;
+  --gray-900: #0b0b0b;
+
+  /* 역할 — 컴포넌트는 이것만 쓴다 */
+  --bg: var(--gray-0);
+  --bg-subtle: var(--gray-50);
+  --bg-inverse: var(--gray-900);
+  --fg: var(--gray-900);
+  --fg-muted: var(--gray-500); /* 흰 배경에서 4.9:1 — 본문에 써도 된다 */
+  --fg-faint: var(--gray-400); /* 2.6:1 — 장식·비활성 전용. 본문 금지 */
+  --fg-inverse: var(--gray-0);
+  --line: var(--gray-200);
+  --line-strong: var(--gray-900);
+
+  /* 지금은 글자색과 같다. 색을 얹을 자리 */
+  --accent: var(--gray-900);
+
+  --font-sans: var(--font-pretendard), -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+
+  --fs-display: clamp(2.4rem, 1.2rem + 5vw, 5.5rem);
+  --fs-h1: clamp(1.8rem, 1.1rem + 3vw, 3.2rem);
+  --fs-h2: clamp(1.3rem, 1rem + 1.5vw, 2rem);
+  --fs-h3: clamp(1.05rem, 0.95rem + 0.6vw, 1.3rem);
+  --fs-body: clamp(0.95rem, 0.9rem + 0.25vw, 1.05rem);
+  --fs-small: 0.85rem;
+  --fs-caption: 0.75rem;
+
+  --lh-tight: 1.15;
+  --lh-body: 1.75;
+  --tracking-tight: -0.02em;
+  --tracking-wide: 0.08em;
+
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  --sp-12: 3rem;
+  --sp-16: 4rem;
+  --sp-section: clamp(3.5rem, 2rem + 7vw, 8rem);
+
+  --container: 1240px;
+  --container-text: 62ch;
+  --gutter: clamp(1.25rem, 0.5rem + 3vw, 4rem);
+
+  --dur-fast: 120ms;
+  --dur-base: 220ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* 이게 없으면 모바일 브라우저가 다크모드에서 폼·스크롤바를 제멋대로 칠한다.
+     다크 팔레트는 아직 없다 — 로고가 배경 따라 반전되지 않아서 지금 켜면
+     검정 로고가 검정 배경에 얹힌다. */
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3 {
+  line-height: var(--lh-tight);
+  letter-spacing: var(--tracking-tight);
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* 화면에는 안 보이지만 스크린리더는 읽는다 */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

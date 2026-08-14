@@ -1,0 +1,32 @@
+.process {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--line);
+  counter-reset: step;
+}
+
+.process li {
+  display: flex;
+  gap: var(--sp-6);
+  padding-block: var(--sp-8);
+  border-bottom: 1px solid var(--line);
+  align-items: baseline;
+}
+
+.step {
+  font-size: var(--fs-caption);
+  letter-spacing: var(--tracking-wide);
+  color: var(--fg-faint);
+  min-width: 3ch;
+  font-variant-numeric: tabular-nums;
+}
+
+.process h3 {
+  font-size: var(--fs-h3);
+  margin-bottom: var(--sp-2);
+}
+
+.process p {
+  color: var(--fg-muted);
+  max-width: var(--container-text);
+}

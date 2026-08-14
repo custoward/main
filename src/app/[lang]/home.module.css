@@ -1,0 +1,89 @@
+.hero {
+  padding-block: clamp(4rem, 2rem + 10vw, 10rem);
+  border-bottom: 1px solid var(--line);
+}
+
+.headline {
+  font-size: var(--fs-display);
+  max-width: 18ch;
+}
+
+.heroLead {
+  margin-top: var(--sp-8);
+  max-width: var(--container-text);
+  display: grid;
+  gap: var(--sp-4);
+  color: var(--fg-muted);
+}
+
+.cta {
+  display: inline-block;
+  margin-top: var(--sp-12);
+  padding: var(--sp-3) var(--sp-6);
+  border: 1px solid var(--line-strong);
+  font-size: var(--fs-small);
+  letter-spacing: var(--tracking-wide);
+  transition:
+    background var(--dur-base) var(--ease),
+    color var(--dur-base) var(--ease);
+}
+
+.cta:hover {
+  background: var(--bg-inverse);
+  color: var(--fg-inverse);
+}
+
+/* 작업 목록 — 이미지가 아직 없어서 글자만으로 읽히게 짠다 */
+.workGrid {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+
+.workItem {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2) var(--sp-6);
+  padding-block: var(--sp-6);
+  border-bottom: 1px solid var(--line);
+}
+
+.workMeta {
+  font-size: var(--fs-caption);
+  letter-spacing: var(--tracking-wide);
+  color: var(--fg-muted);
+  min-width: 12ch;
+}
+
+.workTitle {
+  font-size: var(--fs-h3);
+  font-weight: 600;
+}
+
+.more {
+  display: inline-block;
+  margin-top: var(--sp-8);
+  font-size: var(--fs-small);
+  color: var(--fg-muted);
+  transition: color var(--dur-fast) var(--ease);
+}
+
+.more:hover {
+  color: var(--fg);
+}
+
+.serviceList {
+  display: grid;
+  gap: var(--sp-8);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+
+.serviceList h3 {
+  font-size: var(--fs-h3);
+  margin-bottom: var(--sp-3);
+}
+
+.serviceList p {
+  color: var(--fg-muted);
+}
