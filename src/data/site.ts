@@ -10,7 +10,7 @@
 
 /** 언어를 안 타는 값들 */
 export const brand = {
-  name: "Davi-Davi",
+  name: "Davi Davi Design house",
   nameKo: "다비다비",
   url: "https://studiodavidavi.com",
   logo: "/logo.webp",
@@ -91,12 +91,12 @@ const ko: Copy = {
 
   meta: {
     title: "",
-    description: "",
+    description: "디자인 스튜디오 다비다비. 지금은 사이트를 새로 만들고 있습니다.",
   },
 
   home: {
-    headline: "",
-    lead: [],
+    headline: "사이트를 새로 만들고 있습니다",
+    lead: ["곧 새 모습으로 찾아뵙겠습니다.", "그동안 문의는 메일로 주세요."],
     ctaLabel: "문의하기",
   },
 
@@ -117,14 +117,14 @@ const ko: Copy = {
 
   contact: {
     heading: "문의",
-    lead: [],
+    lead: ["프로젝트 문의는 메일로 주세요."],
     checklistHeading: "이런 내용을 주시면 빠릅니다",
     checklist: [],
     emailLabel: "메일 보내기",
     mailSubject: "프로젝트 문의",
   },
 
-  footer: { note: "" },
+  footer: { note: "사이트 개편 중" },
 
   notFound: {
     heading: "없는 쪽입니다",
@@ -141,12 +141,12 @@ const en: Copy = {
 
   meta: {
     title: "",
-    description: "",
+    description: "Davi Davi Design house. This site is being rebuilt.",
   },
 
   home: {
-    headline: "",
-    lead: [],
+    headline: "We are rebuilding this site",
+    lead: ["A new version is on the way.", "Until then, please reach us by email."],
     ctaLabel: "Get in touch",
   },
 
@@ -167,14 +167,14 @@ const en: Copy = {
 
   contact: {
     heading: "Contact",
-    lead: [],
+    lead: ["For project inquiries, please email us."],
     checklistHeading: "Helpful to include",
     checklist: [],
     emailLabel: "Send an email",
     mailSubject: "Project inquiry",
   },
 
-  footer: { note: "" },
+  footer: { note: "Site under renovation" },
 
   notFound: {
     heading: "Not found",
@@ -199,4 +199,19 @@ export function getCopy(lang: Lang): Copy {
 /** 지금 언어의 반대편 — 전환 버튼이 쓴다 */
 export function otherLang(lang: Lang): Lang {
   return lang === "ko" ? "en" : "ko";
+}
+
+/**
+ * 소개 페이지에 보여줄 게 하나라도 있는가.
+ *
+ * 셋 다 비어 있으면 그 페이지는 제목만 남아서 덩그러니 비어 보인다.
+ * 그럴 땐 헤더 내비에서도 빼서, 눌렀다가 빈 화면을 보는 일이 없게 한다.
+ * about 을 채우면 링크는 저절로 다시 나타난다.
+ */
+export function hasAboutContent(copy: Copy): boolean {
+  return (
+    copy.about.lead.length > 0 ||
+    copy.about.services.length > 0 ||
+    copy.about.process.length > 0
+  );
 }

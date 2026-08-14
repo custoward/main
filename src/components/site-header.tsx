@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { brand, getCopy, otherLang, type Lang } from "@/data/site";
+import { brand, getCopy, hasAboutContent, otherLang, type Lang } from "@/data/site";
 import s from "./layout.module.css";
 
 /**
@@ -12,11 +12,14 @@ export default function SiteHeader({ lang }: { lang: Lang }) {
   const copy = getCopy(lang);
   const other = otherLang(lang);
 
+  // 아직 아무것도 안 채운 페이지는 아예 안 보여준다. 눌렀더니 제목만 덩그러니
+  // 있는 화면이 나오는 것보다, 없는 편이 낫다.
+  // 작업(/work)은 "곧 채워집니다" 한 줄이라도 나오므로 그대로 둔다.
   const links = [
-    { href: `/${lang}/work`, label: copy.nav.work },
-    { href: `/${lang}/about`, label: copy.nav.about },
-    { href: `/${lang}/contact`, label: copy.nav.contact },
-  ];
+    { href: `/${lang}/work`, label: copy.nav.work, show: true },
+    { href: `/${lang}/about`, label: copy.nav.about, show: hasAboutContent(copy) },
+    { href: `/${lang}/contact`, label: copy.nav.contact, show: true },
+  ].filter((l) => l.show);
 
   return (
     <header className={s.header}>
