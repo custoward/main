@@ -95,6 +95,12 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+
+  /* 한글은 기본적으로 글자 단위로 줄이 바뀐다 — 그대로 두면 "만들고" 가
+     "만 / 들고" 로 잘린다. keep-all 은 띄어쓰기에서만 끊게 한다.
+     대신 긴 영문·URL 이 한 덩어리로 삐져나갈 수 있어서 그건 아래로 받는다. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 h1,
